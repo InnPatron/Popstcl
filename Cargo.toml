@@ -1,0 +1,14 @@
+[package]
+name = "posptcl"
+version = "0.1.0"
+authors = ["Random_Civvy <vomalexander@gmail.com>"]
+build = "build.rs"
+
+
+[dependencies]
+
+[dependencies.lalrpop-util]
+version = "0.12.4"
+
+[build-dependencies.lalrpop]
+version = "0.12.4"

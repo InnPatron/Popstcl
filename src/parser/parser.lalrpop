@@ -1,0 +1,59 @@
+use ast::*;
+
+grammar;
+
+pub program: Program = {
+	<seq: entry_seq> => {
+		Program {
+			data: seq
+		}
+	},
+};
+
+entry_seq: Vec<Entry> = {
+	<seq: entry_seq> <tail: entry> => {
+		let mut v = seq;
+		v.push(tail);
+		v
+	}
+};
+
+entry: Entry = {
+	<first: word> <seq: word_seq> ";" => {
+		Entry::Line(Line {
+					first: first,
+					next: seq,
+					})
+				
+	},
+};
+
+word_seq: Vec<Word> = {
+	<seq: word_seq> <tail: word> => {
+		let mut v = seq;
+		v.push(tail)
+		v
+	},
+
+	<w: word> => {
+		vec![w]
+	},
+};
+
+word: Word = {
+	<s:r"[-]?[0-9]*[\.?][0-9]*"> => {
+		Word::Number(s)
+	},
+
+	<s:r"@.*@"> => {
+		Word::String(s)
+	},
+
+	<s: r"[_a-z][A-Za-z\d]*"> => {
+		Word::Single(s)
+	},
+
+	"[" <c: word_seq> "]" => {
+		Word::Compound(c)
+	}
+};
