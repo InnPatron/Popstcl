@@ -1,0 +1,155 @@
+extern crate popstcl;
+
+use popstcl::vm::internal::*;
+use popstcl::parser::*;
+use popstcl::vm::user::basic_vm;
+
+#[test]
+fn if_parsing() {
+    let word = parser::parse_program(
+"
+if true {
+mset a true;
+mset b true;
+} else if true {
+
+} else {
+
+};
+").unwrap();
+    println!("Success");
+}
+
+#[test]
+fn if_executing_true() {
+    let mut vm = basic_vm();
+    let program = parser::parse_program("
+mset foo true;
+mset output 0;
+if @foo {
+    mset output 1;
+};
+    ").unwrap();
+    for entry in program.code.iter() {
+        vm.eval_some_cmd(&entry.all()).unwrap();
+    }
+    let inspecting = vec!["output"];
+    for element in inspecting.iter() {
+        match vm.inspect_value(element) {
+            Ok(val) => {
+                if let Value::Number(n) = val {
+                    assert_eq!(1_f64, n);
+                } else {
+                    panic!("output not a number");
+                }
+            }
+
+            Err(_) => panic!("Could not find {}", element),
+        }
+    }
+}
+
+#[test]
+fn if_executing_false() {
+    let mut vm = basic_vm();
+    let program = parser::parse_program("
+mset foo false;
+mset output 1337;
+if @foo {
+    mset output 1;
+};
+    ").unwrap();
+    for entry in program.code.iter() {
+        vm.eval_some_cmd(&entry.all()).unwrap();
+    }
+    let inspecting = vec!["output"];
+    for element in inspecting.iter() {
+        match vm.inspect_value(element) {
+            Ok(val) => {
+                if let Value::Number(n) = val {
+                    assert_eq!(1337_f64, n);
+                } else {
+                    panic!("output not a number");
+                }
+            }
+
+            Err(_) => panic!("Could not find {}", element),
+        }
+    }
+}
+
+#[test]
+fn if_executing_else() {
+    let mut vm = basic_vm();
+    let program = parser::parse_program("
+mset foo false;
+mset bar false;
+mset baz false;
+
+mset output 1337;
+if @foo {
+    mset output 1;
+} elif @bar {
+    mset output 2;
+} elif @baz {
+    mset output 3;
+} else {
+    mset output 9000;
+};
+    ").unwrap();
+    for entry in program.code.iter() {
+        vm.eval_some_cmd(&entry.all()).unwrap();
+    }
+    let inspecting = vec!["output"];
+    for element in inspecting.iter() {
+        match vm.inspect_value(element) {
+            Ok(val) => {
+                if let Value::Number(n) = val {
+                    assert_eq!(9000_f64, n);
+                } else {
+                    panic!("output not a number");
+                }
+            }
+
+            Err(_) => panic!("Could not find {}", element),
+        }
+    }
+}
+
+#[test]
+fn if_executing_elif() {
+    let mut vm = basic_vm();
+    let program = parser::parse_program("
+mset foo false;
+mset bar true;
+mset baz true;
+
+mset output 1337;
+if @foo {
+    mset output 1;
+} elif @bar {
+    mset output 2;
+} elif @baz {
+    mset output 3;
+} else {
+    mset output 9000;
+};
+    ").unwrap();
+    for entry in program.code.iter() {
+        vm.eval_some_cmd(&entry.all()).unwrap();
+    }
+    let inspecting = vec!["output"];
+    for element in inspecting.iter() {
+        match vm.inspect_value(element) {
+            Ok(val) => {
+                if let Value::Number(n) = val {
+                    assert_eq!(2_f64, n);
+                } else {
+                    panic!("output not a number");
+                }
+            }
+
+            Err(_) => panic!("Could not find {}", element),
+        }
+    }
+}

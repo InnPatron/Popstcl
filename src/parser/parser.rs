@@ -1,1497 +1,522 @@
 use ast::*;
-extern crate lalrpop_util as __lalrpop_util;
+use super::err::ParseErr;
+use super::lexer::{tokenize, Token};
+use std::iter::Peekable;
+use namespace::Namespace;
 
-mod __parse__program {
-    #![allow(non_snake_case, non_camel_case_types, unused_mut, unused_variables, unused_imports)]
+const TRUE_STR: &'static str = "true";
+const FALSE_STR: &'static str = "false";
 
-    use ast::*;
-    extern crate lalrpop_util as __lalrpop_util;
-    #[allow(dead_code)]
-    pub enum __Symbol<'input> {
-        Term_22_3b_22(&'input str),
-        Term_22_5b_22(&'input str),
-        Term_22_5d_22(&'input str),
-        Termr_23_22_40_2e_2a_40_22_23(&'input str),
-        Termr_23_22_5b_2d_5d_3f_5b0_2d9_5d_2a_5b_5c_5c_2e_3f_5d_5b0_2d9_5d_2a_22_23(&'input str),
-        Termr_23_22_5b__a_2dz_5d_5bA_2dZa_2dz_5c_5cd_5d_2a_22_23(&'input str),
-        Termerror(__lalrpop_util::ErrorRecovery<usize, (usize, &'input str), ()>),
-        Nt____program(Program),
-        Ntentry(Entry),
-        Ntentry__seq(Vec<Entry>),
-        Ntprogram(Program),
-        Ntword(Word),
-        Ntword__seq(Vec<Word>),
-    }
-    const __ACTION: &'static [i32] = &[
-        // State 0
-        0, 0, 0, 0, 0, 0, 0,
-        // State 1
-        0, 6, 0, 7, 8, 9, 0,
-        // State 2
-        0, 0, 0, 0, 0, 0, 0,
-        // State 3
-        0, -3, 0, -3, -3, -3, 0,
-        // State 4
-        0, 12, 0, 13, 14, 15, 0,
-        // State 5
-        0, 18, 0, 19, 20, 21, 0,
-        // State 6
-        0, -6, 0, -6, -6, -6, 0,
-        // State 7
-        0, -5, 0, -5, -5, -5, 0,
-        // State 8
-        0, -7, 0, -7, -7, -7, 0,
-        // State 9
-        -10, -10, 0, -10, -10, -10, 0,
-        // State 10
-        23, 12, 0, 13, 14, 15, 0,
-        // State 11
-        0, 18, 0, 19, 20, 21, 0,
-        // State 12
-        -6, -6, 0, -6, -6, -6, 0,
-        // State 13
-        -5, -5, 0, -5, -5, -5, 0,
-        // State 14
-        -7, -7, 0, -7, -7, -7, 0,
-        // State 15
-        0, -10, -10, -10, -10, -10, 0,
-        // State 16
-        0, 18, 26, 19, 20, 21, 0,
-        // State 17
-        0, 18, 0, 19, 20, 21, 0,
-        // State 18
-        0, -6, -6, -6, -6, -6, 0,
-        // State 19
-        0, -5, -5, -5, -5, -5, 0,
-        // State 20
-        0, -7, -7, -7, -7, -7, 0,
-        // State 21
-        -9, -9, 0, -9, -9, -9, 0,
-        // State 22
-        0, -2, 0, -2, -2, -2, 0,
-        // State 23
-        0, 18, 28, 19, 20, 21, 0,
-        // State 24
-        0, -9, -9, -9, -9, -9, 0,
-        // State 25
-        0, -8, 0, -8, -8, -8, 0,
-        // State 26
-        0, 18, 29, 19, 20, 21, 0,
-        // State 27
-        -8, -8, 0, -8, -8, -8, 0,
-        // State 28
-        0, -8, -8, -8, -8, -8, 0,
-    ];
-    const __EOF_ACTION: &'static [i32] = &[
-        0,
-        -4,
-        -1,
-        -3,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        -2,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-    ];
-    const __GOTO: &'static [i32] = &[
-        // State 0
-        0, 0, 2, 3, 0, 0,
-        // State 1
-        0, 4, 0, 0, 5, 0,
-        // State 2
-        0, 0, 0, 0, 0, 0,
-        // State 3
-        0, 0, 0, 0, 0, 0,
-        // State 4
-        0, 0, 0, 0, 10, 11,
-        // State 5
-        0, 0, 0, 0, 16, 17,
-        // State 6
-        0, 0, 0, 0, 0, 0,
-        // State 7
-        0, 0, 0, 0, 0, 0,
-        // State 8
-        0, 0, 0, 0, 0, 0,
-        // State 9
-        0, 0, 0, 0, 0, 0,
-        // State 10
-        0, 0, 0, 0, 22, 0,
-        // State 11
-        0, 0, 0, 0, 16, 24,
-        // State 12
-        0, 0, 0, 0, 0, 0,
-        // State 13
-        0, 0, 0, 0, 0, 0,
-        // State 14
-        0, 0, 0, 0, 0, 0,
-        // State 15
-        0, 0, 0, 0, 0, 0,
-        // State 16
-        0, 0, 0, 0, 25, 0,
-        // State 17
-        0, 0, 0, 0, 16, 27,
-        // State 18
-        0, 0, 0, 0, 0, 0,
-        // State 19
-        0, 0, 0, 0, 0, 0,
-        // State 20
-        0, 0, 0, 0, 0, 0,
-        // State 21
-        0, 0, 0, 0, 0, 0,
-        // State 22
-        0, 0, 0, 0, 0, 0,
-        // State 23
-        0, 0, 0, 0, 25, 0,
-        // State 24
-        0, 0, 0, 0, 0, 0,
-        // State 25
-        0, 0, 0, 0, 0, 0,
-        // State 26
-        0, 0, 0, 0, 25, 0,
-        // State 27
-        0, 0, 0, 0, 0, 0,
-        // State 28
-        0, 0, 0, 0, 0, 0,
-    ];
-    pub fn parse_program<
-        'input,
-    >(
-        input: &'input str,
-    ) -> Result<Program, __lalrpop_util::ParseError<usize, (usize, &'input str), ()>>
-    {
-        let mut __tokens = super::__intern_token::__Matcher::new(input);
-        let mut __states = vec![0_i32];
-        let mut __symbols = vec![];
-        let mut __integer;
-        let mut __lookahead;
-        let mut __last_location = Default::default();
-        '__shift: loop {
-            __lookahead = match __tokens.next() {
-                Some(Ok(v)) => v,
-                None => break '__shift,
-                Some(Err(e)) => return Err(e),
-            };
-            __last_location = __lookahead.2.clone();
-            __integer = match __lookahead.1 {
-                (0, _) if true => 0,
-                (1, _) if true => 1,
-                (2, _) if true => 2,
-                (3, _) if true => 3,
-                (4, _) if true => 4,
-                (5, _) if true => 5,
-                _ => {
-                    return Err(__lalrpop_util::ParseError::UnrecognizedToken {
-                        token: Some(__lookahead),
-                        expected: vec![],
-                    });
-                }
-            };
-            '__inner: loop {
-                let __state = *__states.last().unwrap() as usize;
-                let __action = __ACTION[__state * 7 + __integer];
-                if __action > 0 {
-                    let __symbol = match __integer {
-                        0 => match __lookahead.1 {
-                            (0, __tok0) => __Symbol::Term_22_3b_22(__tok0),
-                            _ => unreachable!(),
-                        },
-                        1 => match __lookahead.1 {
-                            (1, __tok0) => __Symbol::Term_22_5b_22(__tok0),
-                            _ => unreachable!(),
-                        },
-                        2 => match __lookahead.1 {
-                            (2, __tok0) => __Symbol::Term_22_5d_22(__tok0),
-                            _ => unreachable!(),
-                        },
-                        3 => match __lookahead.1 {
-                            (3, __tok0) => __Symbol::Termr_23_22_40_2e_2a_40_22_23(__tok0),
-                            _ => unreachable!(),
-                        },
-                        4 => match __lookahead.1 {
-                            (4, __tok0) => __Symbol::Termr_23_22_5b_2d_5d_3f_5b0_2d9_5d_2a_5b_5c_5c_2e_3f_5d_5b0_2d9_5d_2a_22_23(__tok0),
-                            _ => unreachable!(),
-                        },
-                        5 => match __lookahead.1 {
-                            (5, __tok0) => __Symbol::Termr_23_22_5b__a_2dz_5d_5bA_2dZa_2dz_5c_5cd_5d_2a_22_23(__tok0),
-                            _ => unreachable!(),
-                        },
-                        _ => unreachable!(),
-                    };
-                    __states.push(__action - 1);
-                    __symbols.push((__lookahead.0, __symbol, __lookahead.2));
-                    continue '__shift;
-                } else if __action < 0 {
-                    if let Some(r) = __reduce(input, __action, Some(&__lookahead.0), &mut __states, &mut __symbols, ::std::marker::PhantomData::<()>) {
-                        return r;
+pub fn parse_program(input: &str) -> Result<Program, ParseErr> {
+    parse_statement_seq(input).map(|vec| Program { code: vec })
+}
+
+pub fn parse_statement_seq(input: &str) -> Result<Vec<Statement>, ParseErr> {
+    parse_tokenized_seq(&tokenize(input))
+}
+
+pub fn parse_arg_list(input: &str) -> Result<Option<Statement>, ParseErr> {
+    parse_word_seq(&mut tokenize(input).iter().peekable())
+}
+
+fn parse_tokenized_seq(seq: &[Token]) -> Result<Vec<Statement>, ParseErr> {
+    let mut seq_stream = seq.iter().peekable();
+    let mut stmt_seq = Vec::new();
+    let mut current_stmt = Vec::new();
+
+    //Go through token sequence
+    //If Token t is before a Token::Semicolon, feed to parse_word and push to current_stmt
+    //Find Token::Semicolon => push current_stmt to stmt_seq
+    while let Some(next) = seq_stream.next() {
+        if let &Token::Semicolon = next {
+            if current_stmt.len() != 0 {
+                stmt_seq.push(Statement::new(current_stmt.clone()));
+                current_stmt.clear();
+            }
+        } else {
+            match parse_word(next, &mut seq_stream) {
+                Ok(some_w) => {
+                    if let Some(w) = some_w {
+                        current_stmt.push(w);
                     }
+                }
+                Err(e) => return Err(e),
+            }
+        }
+    }
+
+    Ok(stmt_seq)
+}
+
+/// word_seq -> [word]*;
+pub fn parse_word_seq<'a, 'b, I>(seq: &'b mut Peekable<I>) -> Result<Option<Statement>, ParseErr>
+    where I: Iterator<Item = &'a Token> + 'a
+{
+    let mut seq_stream = seq;
+    let mut result = Vec::new();
+
+    while let Some(ref next) = seq_stream.next() {
+        match parse_word(next, &mut seq_stream) {
+            Ok(some_w) => {
+                if let Some(w) = some_w {
+                    result.push(w)
+                }
+            }
+            Err(e) => return Err(e),
+        }
+    }
+    if result.len() == 0 {
+        for t in seq_stream {
+            if let &Token::Whitespace(_) = t {
+                continue;
+            } else {
+                panic!("result.len() > 0 if parse_word return no error and seq is not all Token::Whitespace");
+            }
+        }
+        Ok(None)
+    } else {
+        Ok(Some(Statement::new(result)))
+    }
+}
+
+/// word -> quoted | cmd | untouched | var_sub | parse_number | parse_bool_then_atom
+/// Order matters. Atom MUST be last
+fn parse_word<'a, 'b, I>(maybe_word: &Token,
+                         stream: &'b mut Peekable<I>)
+                         -> Result<Option<Word>, ParseErr>
+    where I: Iterator<Item = &'a Token> + 'a
+{
+    use super::lexer::Token::*;
+    match maybe_word {
+        &Quote => parse_quoted(stream).map(|w| Some(w)),        //quoted -> ".*"
+        &LBracket => parse_cmd(stream).map(|w| Some(w)),        //cmd -> \[word_seq\]
+        &LBrace => parse_untouched(stream).map(|w| Some(w)),    //untouched -> {.*}
+        &Dollar => parse_varsub(stream, Namespace::Local).map(|w| Some(w)),       //var_sub -> $path
+        &At => parse_varsub(stream, Namespace::Module).map(|w| Some(w)),
+        &Caret => parse_varsub(stream, Namespace::Args).map(|w| Some(w)),
+        &Something(ref s) => {
+            if let Some(first_char) = s.chars().nth(0) {
+                if first_char == '-' || first_char.is_numeric() {
+                    parse_number(maybe_word, stream).map(|w| Some(w)) //parse_number -> [-]?[0-9]*[\.]?[0-9]*
                 } else {
-                    return Err(__lalrpop_util::ParseError::UnrecognizedToken {
-                        token: Some(__lookahead),
-                        expected: vec![],
-                    });
-                }
-            }
-        }
-        loop {
-            let __state = *__states.last().unwrap() as usize;
-            let __action = __EOF_ACTION[__state];
-            if __action < 0 {
-                if let Some(r) = __reduce(input, __action, None, &mut __states, &mut __symbols, ::std::marker::PhantomData::<()>) {
-                    return r;
+                    parse_bool_then_atom(maybe_word).map(|w| Some(w)) //parse_bool_then_atom -> bool | atom
                 }
             } else {
-                let __error = __lalrpop_util::ParseError::UnrecognizedToken {
-                    token: None,
-                    expected: vec![],
-                };
-                return Err(__error);
+                panic!("Token::Something(s) was empty");
             }
         }
-    }
-    pub fn __reduce<
-        'input,
-    >(
-        input: &'input str,
-        __action: i32,
-        __lookahead_start: Option<&usize>,
-        __states: &mut ::std::vec::Vec<i32>,
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>,
-        _: ::std::marker::PhantomData<()>,
-    ) -> Option<Result<Program,__lalrpop_util::ParseError<usize, (usize, &'input str), ()>>>
-    {
-        let __nonterminal = match -__action {
-            1 => {
-                // __program = program => ActionFn(0);
-                let __sym0 = __pop_Ntprogram(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
-                let __nt = super::__action0::<>(input, __sym0);
-                return Some(Ok(__nt));
-            }
-            2 => {
-                // entry = word, word_seq, ";" => ActionFn(3);
-                let __sym2 = __pop_Term_22_3b_22(__symbols);
-                let __sym1 = __pop_Ntword__seq(__symbols);
-                let __sym0 = __pop_Ntword(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym2.2.clone();
-                let __nt = super::__action3::<>(input, __sym0, __sym1, __sym2);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 3);
-                __symbols.push((__start, __Symbol::Ntentry(__nt), __end));
-                1
-            }
-            3 => {
-                // entry_seq = entry_seq, entry => ActionFn(2);
-                let __sym1 = __pop_Ntentry(__symbols);
-                let __sym0 = __pop_Ntentry__seq(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym1.2.clone();
-                let __nt = super::__action2::<>(input, __sym0, __sym1);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 2);
-                __symbols.push((__start, __Symbol::Ntentry__seq(__nt), __end));
-                2
-            }
-            4 => {
-                // program = entry_seq => ActionFn(1);
-                let __sym0 = __pop_Ntentry__seq(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
-                let __nt = super::__action1::<>(input, __sym0);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 1);
-                __symbols.push((__start, __Symbol::Ntprogram(__nt), __end));
-                3
-            }
-            5 => {
-                // word = r#"[-]?[0-9]*[\\.?][0-9]*"# => ActionFn(6);
-                let __sym0 = __pop_Termr_23_22_5b_2d_5d_3f_5b0_2d9_5d_2a_5b_5c_5c_2e_3f_5d_5b0_2d9_5d_2a_22_23(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
-                let __nt = super::__action6::<>(input, __sym0);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 1);
-                __symbols.push((__start, __Symbol::Ntword(__nt), __end));
-                4
-            }
-            6 => {
-                // word = r#"@.*@"# => ActionFn(7);
-                let __sym0 = __pop_Termr_23_22_40_2e_2a_40_22_23(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
-                let __nt = super::__action7::<>(input, __sym0);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 1);
-                __symbols.push((__start, __Symbol::Ntword(__nt), __end));
-                4
-            }
-            7 => {
-                // word = r#"[_a-z][A-Za-z\\d]*"# => ActionFn(8);
-                let __sym0 = __pop_Termr_23_22_5b__a_2dz_5d_5bA_2dZa_2dz_5c_5cd_5d_2a_22_23(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
-                let __nt = super::__action8::<>(input, __sym0);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 1);
-                __symbols.push((__start, __Symbol::Ntword(__nt), __end));
-                4
-            }
-            8 => {
-                // word = "[", word_seq, "]" => ActionFn(9);
-                let __sym2 = __pop_Term_22_5d_22(__symbols);
-                let __sym1 = __pop_Ntword__seq(__symbols);
-                let __sym0 = __pop_Term_22_5b_22(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym2.2.clone();
-                let __nt = super::__action9::<>(input, __sym0, __sym1, __sym2);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 3);
-                __symbols.push((__start, __Symbol::Ntword(__nt), __end));
-                4
-            }
-            9 => {
-                // word_seq = word_seq, word => ActionFn(4);
-                let __sym1 = __pop_Ntword(__symbols);
-                let __sym0 = __pop_Ntword__seq(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym1.2.clone();
-                let __nt = super::__action4::<>(input, __sym0, __sym1);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 2);
-                __symbols.push((__start, __Symbol::Ntword__seq(__nt), __end));
-                5
-            }
-            10 => {
-                // word_seq = word => ActionFn(5);
-                let __sym0 = __pop_Ntword(__symbols);
-                let __start = __sym0.0.clone();
-                let __end = __sym0.2.clone();
-                let __nt = super::__action5::<>(input, __sym0);
-                let __states_len = __states.len();
-                __states.truncate(__states_len - 1);
-                __symbols.push((__start, __Symbol::Ntword__seq(__nt), __end));
-                5
-            }
-            _ => panic!("invalid action code {}", __action)
-        };
-        let __state = *__states.last().unwrap() as usize;
-        let __next_state = __GOTO[__state * 6 + __nonterminal] - 1;
-        __states.push(__next_state);
-        None
-    }
-    fn __pop_Term_22_3b_22<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, &'input str, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Term_22_3b_22(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Term_22_5b_22<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, &'input str, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Term_22_5b_22(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Term_22_5d_22<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, &'input str, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Term_22_5d_22(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Termr_23_22_40_2e_2a_40_22_23<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, &'input str, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Termr_23_22_40_2e_2a_40_22_23(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Termr_23_22_5b_2d_5d_3f_5b0_2d9_5d_2a_5b_5c_5c_2e_3f_5d_5b0_2d9_5d_2a_22_23<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, &'input str, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Termr_23_22_5b_2d_5d_3f_5b0_2d9_5d_2a_5b_5c_5c_2e_3f_5d_5b0_2d9_5d_2a_22_23(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Termr_23_22_5b__a_2dz_5d_5bA_2dZa_2dz_5c_5cd_5d_2a_22_23<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, &'input str, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Termr_23_22_5b__a_2dz_5d_5bA_2dZa_2dz_5c_5cd_5d_2a_22_23(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Termerror<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, __lalrpop_util::ErrorRecovery<usize, (usize, &'input str), ()>, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Termerror(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Nt____program<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Program, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Nt____program(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Ntentry<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Entry, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Ntentry(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Ntentry__seq<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Vec<Entry>, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Ntentry__seq(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Ntprogram<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Program, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Ntprogram(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Ntword<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Word, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Ntword(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
-    }
-    fn __pop_Ntword__seq<
-      'input,
-    >(
-        __symbols: &mut ::std::vec::Vec<(usize,__Symbol<'input>,usize)>
-    ) -> (usize, Vec<Word>, usize) {
-        match __symbols.pop().unwrap() {
-            (__l, __Symbol::Ntword__seq(__v), __r) => (__l, __v, __r),
-            _ => panic!("symbol type mismatch")
-        }
+        &Whitespace(_) => Ok(None),
+        _ => panic!("Found token {}", maybe_word.to_string()),
     }
 }
-pub use self::__parse__program::parse_program;
-mod __intern_token {
-    extern crate lalrpop_util as __lalrpop_util;
-    pub struct __Matcher<'input> {
-        text: &'input str,
-        consumed: usize,
+
+///var_sub -> $path
+fn parse_varsub<'a, 'b, I>(stream: &'b mut Peekable<I>, vsub_t: Namespace) -> Result<Word, ParseErr>
+    where I: Iterator<Item = &'a Token> + 'a
+{
+    let path = parse_path(stream)?;
+    if let Word::Path(path) = path {
+        Ok(Word::VarSub(path, vsub_t))
+    } else {
+        panic!("parse_path should only return Word::Path, not {}", path);
     }
+}
 
-    fn __tokenize(text: &str) -> Option<(usize, usize)> {
-        let mut __chars = text.char_indices();
-        let mut __current_match: Option<(usize, usize)> = None;
-        let mut __current_state: usize = 0;
-        loop {
-            match __current_state {
-                0 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        45 => /* '-' */ {
-                            __current_state = 1;
-                            continue;
-                        }
-                        46 => /* '.' */ {
-                            __current_match = Some((4, __index + 1));
-                            __current_state = 2;
-                            continue;
-                        }
-                        48 ... 57 => {
-                            __current_state = 1;
-                            continue;
-                        }
-                        59 => /* ';' */ {
-                            __current_match = Some((0, __index + 1));
-                            __current_state = 3;
-                            continue;
-                        }
-                        63 => /* '?' */ {
-                            __current_match = Some((4, __index + 1));
-                            __current_state = 2;
-                            continue;
-                        }
-                        64 => /* '@' */ {
-                            __current_state = 4;
-                            continue;
-                        }
-                        91 => /* '[' */ {
-                            __current_match = Some((1, __index + 1));
-                            __current_state = 5;
-                            continue;
-                        }
-                        93 => /* ']' */ {
-                            __current_match = Some((2, __index + 1));
-                            __current_state = 6;
-                            continue;
-                        }
-                        95 => /* '_' */ {
-                            __current_match = Some((5, __index + 1));
-                            __current_state = 7;
-                            continue;
-                        }
-                        97 ... 122 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 7;
-                            continue;
-                        }
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                1 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        46 => /* '.' */ {
-                            __current_match = Some((4, __index + 1));
-                            __current_state = 2;
-                            continue;
-                        }
-                        48 ... 57 => {
-                            __current_state = 1;
-                            continue;
-                        }
-                        63 => /* '?' */ {
-                            __current_match = Some((4, __index + 1));
-                            __current_state = 2;
-                            continue;
-                        }
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                2 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        48 ... 57 => {
-                            __current_match = Some((4, __index + __ch.len_utf8()));
-                            __current_state = 2;
-                            continue;
-                        }
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                3 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                4 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        10 => /* '\n' */ {
-                            return __current_match;
-                        }
-                        13 => /* '\r' */ {
-                            return __current_match;
-                        }
-                        64 => /* '@' */ {
-                            __current_match = Some((3, __index + 1));
-                            __current_state = 9;
-                            continue;
-                        }
-                        _ => {
-                            __current_state = 10;
-                            continue;
-                        }
-                    }
-                }
-                5 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                6 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                7 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        48 ... 57 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        65 ... 90 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        97 ... 122 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        1632 ... 1641 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        1776 ... 1785 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        1984 ... 1993 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2406 ... 2415 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2534 ... 2543 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2662 ... 2671 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2790 ... 2799 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2918 ... 2927 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3046 ... 3055 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3174 ... 3183 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3302 ... 3311 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3430 ... 3439 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3558 ... 3567 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3664 ... 3673 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3792 ... 3801 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3872 ... 3881 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        4160 ... 4169 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        4240 ... 4249 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6112 ... 6121 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6160 ... 6169 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6470 ... 6479 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6608 ... 6617 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6784 ... 6793 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6800 ... 6809 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6992 ... 7001 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        7088 ... 7097 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        7232 ... 7241 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        7248 ... 7257 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        42528 ... 42537 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43216 ... 43225 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43264 ... 43273 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43472 ... 43481 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43504 ... 43513 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43600 ... 43609 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        44016 ... 44025 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        65296 ... 65305 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        66720 ... 66729 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        69734 ... 69743 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        69872 ... 69881 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        69942 ... 69951 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        70096 ... 70105 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        70384 ... 70393 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        70864 ... 70873 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71248 ... 71257 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71360 ... 71369 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71472 ... 71481 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71904 ... 71913 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        92768 ... 92777 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        93008 ... 93017 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        120782 ... 120831 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                8 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                9 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        10 => /* '\n' */ {
-                            return __current_match;
-                        }
-                        13 => /* '\r' */ {
-                            return __current_match;
-                        }
-                        64 => /* '@' */ {
-                            __current_match = Some((3, __index + 1));
-                            __current_state = 12;
-                            continue;
-                        }
-                        _ => {
-                            __current_state = 10;
-                            continue;
-                        }
-                    }
-                }
-                10 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        10 => /* '\n' */ {
-                            return __current_match;
-                        }
-                        13 => /* '\r' */ {
-                            return __current_match;
-                        }
-                        64 => /* '@' */ {
-                            __current_match = Some((3, __index + 1));
-                            __current_state = 12;
-                            continue;
-                        }
-                        _ => {
-                            __current_state = 10;
-                            continue;
-                        }
-                    }
-                }
-                11 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        48 ... 57 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        65 ... 90 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        97 ... 122 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        1632 ... 1641 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        1776 ... 1785 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        1984 ... 1993 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2406 ... 2415 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2534 ... 2543 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2662 ... 2671 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2790 ... 2799 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        2918 ... 2927 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3046 ... 3055 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3174 ... 3183 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3302 ... 3311 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3430 ... 3439 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3558 ... 3567 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3664 ... 3673 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3792 ... 3801 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        3872 ... 3881 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        4160 ... 4169 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        4240 ... 4249 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6112 ... 6121 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6160 ... 6169 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6470 ... 6479 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6608 ... 6617 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6784 ... 6793 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6800 ... 6809 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        6992 ... 7001 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        7088 ... 7097 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        7232 ... 7241 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        7248 ... 7257 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        42528 ... 42537 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43216 ... 43225 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43264 ... 43273 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43472 ... 43481 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43504 ... 43513 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        43600 ... 43609 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        44016 ... 44025 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        65296 ... 65305 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        66720 ... 66729 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        69734 ... 69743 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        69872 ... 69881 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        69942 ... 69951 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        70096 ... 70105 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        70384 ... 70393 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        70864 ... 70873 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71248 ... 71257 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71360 ... 71369 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71472 ... 71481 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        71904 ... 71913 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        92768 ... 92777 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        93008 ... 93017 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        120782 ... 120831 => {
-                            __current_match = Some((5, __index + __ch.len_utf8()));
-                            __current_state = 11;
-                            continue;
-                        }
-                        _ => {
-                            return __current_match;
-                        }
-                    }
-                }
-                12 => {
-                    let (__index, __ch) = match __chars.next() { Some(p) => p, None => return __current_match };
-                    match __ch as u32 {
-                        10 => /* '\n' */ {
-                            return __current_match;
-                        }
-                        13 => /* '\r' */ {
-                            return __current_match;
-                        }
-                        64 => /* '@' */ {
-                            __current_match = Some((3, __index + 1));
-                            __current_state = 12;
-                            continue;
-                        }
-                        _ => {
-                            __current_state = 10;
-                            continue;
-                        }
-                    }
-                }
-                _ => { panic!("invalid state {}", __current_state); }
-            }
-        }
-    }
-
-    impl<'input> __Matcher<'input> {
-        pub fn new(s: &'input str) -> __Matcher<'input> {
-            __Matcher { text: s, consumed: 0 }
-        }
-    }
-
-    impl<'input> Iterator for __Matcher<'input> {
-        type Item = Result<(usize, (usize, &'input str), usize), __lalrpop_util::ParseError<usize,(usize, &'input str),()>>;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            let __text = self.text.trim_left();
-            let __whitespace = self.text.len() - __text.len();
-            let __start_offset = self.consumed + __whitespace;
-            if __text.is_empty() {
-                self.text = __text;
-                self.consumed = __start_offset;
-                None
+///path -> atom path_tail
+///path_tail -> E | .path
+fn parse_path<'a, 'b, I>(stream: &'b mut Peekable<I>) -> Result<Word, ParseErr>
+    where I: Iterator<Item = &'a Token> + 'a
+{
+    let mut result = Vec::new();
+    {
+        if let Some(something @ &Token::Something(_)) = stream.next() {
+            let first_atom = parse_atom(something)?;
+            if let Word::Atom(first_atom) = first_atom {
+                result.push(first_atom);
             } else {
-                match __tokenize(__text) {
-                    Some((__index, __length)) => {
-                        let __result = &__text[..__length];
-                        let __remaining = &__text[__length..];
-                        let __end_offset = __start_offset + __length;
-                        self.text = __remaining;
-                        self.consumed = __end_offset;
-                        Some(Ok((__start_offset, (__index, __result), __end_offset)))
-                    }
-                    None => {
-                        Some(Err(__lalrpop_util::ParseError::InvalidToken { location: __start_offset }))
-                    }
+                panic!("parse_atom should return Word::Atom, not {}", first_atom);
+            }
+        } else {
+            return Err(ParseErr::NoMoreTokens);
+        }
+    }
+
+    loop {
+        if let Some(token) = stream.peek() {
+            if token != &&Token::FullStop {
+                break;
+            }
+        } else {
+            break;
+        }
+        stream.next(); //consume Token::FullStop, look for next segment (Token::Something -> Atom) now
+        if let Some(segment @ &Token::Something(_)) = stream.next() {
+            let next_seg = parse_atom(segment)?;
+            if let Word::Atom(atom) = next_seg {
+                result.push(atom);
+            } else {
+                panic!("parse_atom should return Word::Atom, not {}", next_seg);
+            }
+        } else {
+            return Err(ParseErr::ExpectedAtom);
+        }
+    }
+
+    Ok(Word::Path(Path(result)))
+}
+
+/// quoted -> ".*"
+fn parse_quoted<'a, 'b, I>(stream: &'b mut I) -> Result<Word, ParseErr>
+    where I: Iterator<Item = &'a Token>
+{
+    range_get(None, Token::Quote, stream).and_then(|tok_vec| str_sub(&tok_vec))
+}
+
+/// untouched -> {.*}
+fn parse_untouched<'a, 'b, I>(stream: &'b mut I) -> Result<Word, ParseErr>
+    where I: Iterator<Item = &'a Token>
+{
+    range_get(Some(Token::LBrace), Token::RBrace, stream).map(|tok_vec| {
+                                Word::Untouched(tok_vec.iter().fold(String::new(), 
+                                    |mut result, token| {
+                                        result.push_str(&token.to_string());
+                                        result
+                                    }))
+                            })
+
+}
+
+/// cmd -> \[word_seq]
+fn parse_cmd<'a, 'b, I>(stream: &'b mut I) -> Result<Word, ParseErr>
+    where I: Iterator<Item = &'a Token>
+{
+    range_get(Some(Token::LBracket), Token::RBracket, stream)
+                .and_then(|cmd_body| parse_word_seq(&mut cmd_body.iter().peekable()))
+                .map(|entry| Word::CmdSub(Box::new(entry.expect("Should only be None if input stream was all whitespace"))))
+}
+
+/// Searches through the tokesn of a quoted and looks for var_sub
+fn str_sub(base: &[Token]) -> Result<Word, ParseErr> {
+    let mut result = Vec::new();
+    let mut current = String::new();
+    let mut iter = base.iter();
+
+    while let Some(t) = iter.next() {
+        match t {
+            &Token::Dollar => {
+                if current.is_empty() == false {
+                    result.push(StrData::String(current.clone()));
+                    current.clear();
                 }
+                if let Some(atom @ &Token::Something(_)) = iter.next() {
+                    match parse_atom(atom) {
+                        Ok(Word::Atom(ref atom)) => result.push(StrData::VarSub(atom.0.clone(), Namespace::Local)),
+                        Ok(_) => panic!("parse_atom should only return Word::Atom"),
+                        Err(e) => return Err(e),
+                }
+                } else {
+                    return Err(ParseErr::NoVarName);
+                }
+            }
+
+            &Token::At => {
+                if current.is_empty() == false {
+                    result.push(StrData::String(current.clone()));
+                    current.clear();
+                }
+                if let Some(atom @ &Token::Something(_)) = iter.next() {
+                    match parse_atom(atom) {
+                        Ok(Word::Atom(ref atom)) => result.push(StrData::VarSub(atom.0.clone(), Namespace::Module)),
+                        Ok(_) => panic!("parse_atom should only return Word::Atom"),
+                        Err(e) => return Err(e),
+                }
+                } else {
+                    return Err(ParseErr::NoVarName);
+                }
+            }
+
+            _ => current.push_str(&t.to_string()),
+        }
+    }
+    if current.is_empty() == false {
+        result.push(StrData::String(current.clone()));
+        current.clear();
+    }
+
+    Ok(Word::str_sub_from(result))
+}
+
+/// Collects tokens until it reaches the end token,
+/// If a repeat token is defined, then it has a counter that increments when a repeat token is
+/// found and decrements when a end token is found. This is for embedding and brace/bracket
+/// matching.
+/// TODO: is the cloning necessary? Try taking another inner slice
+fn range_get<'a, 'b, I>(repeat_token: Option<Token>,
+                        end_token: Token,
+                        stream: &'b mut I)
+                        -> Result<Vec<Token>, ParseErr>
+    where I: Iterator<Item = &'a Token>
+{
+    use super::lexer::Token::*;
+    let end_char = match end_token {
+        Quote => '\"',
+        RBracket => ']',
+        RBrace => '}',
+        _ => panic!("Does not represent an end to a range of tokens"),
+    };
+
+    let mut result = Vec::new();
+    let mut found_end = false;
+    let mut repeats: usize = 0;
+    {
+        for token in stream {
+            if let Some(ref repeat) = repeat_token {
+                if token == repeat {
+                    repeats += 1;
+                }
+            }
+            if token == &end_token {
+                if repeats == 0 {
+                    found_end = true;
+                    break;
+                } else {
+                    repeats -= 1;
+                }
+            }
+            result.push(token.clone())
+        }
+    }
+
+    if found_end {
+        Ok(result)
+    } else {
+        Err(ParseErr::CharNotFound(end_char))
+    }
+}
+
+/// parse_bool_then_atom -> bool | atom
+fn parse_bool_then_atom(maybe: &Token) -> Result<Word, ParseErr> {
+    parse_bool(maybe).or(parse_atom(maybe))
+}
+
+/// bool -> true | false
+fn parse_bool(maybe: &Token) -> Result<Word, ParseErr> {
+    if let &Token::Something(ref maybe) = maybe {
+        if maybe == TRUE_STR {
+            Ok(Word::Bool(true))
+        } else if maybe == FALSE_STR {
+            Ok(Word::Bool(false))
+        } else {
+            Err(ParseErr::NotBool(maybe.to_string()))
+        }
+    } else {
+        panic!("Should have been Token::Something");
+    }
+}
+
+/// atom -> [^0-9].*
+/// TODO: This function CAN produce Atom("true") or Atom("false"). Is this desireable?
+fn parse_atom(maybe: &Token) -> Result<Word, ParseErr> {
+
+    if let &Token::Something(ref maybe) = maybe {
+        let mut iter = maybe.chars();
+        if iter.next().unwrap().is_numeric() == true {
+            panic!("parse_atom should not have been called if first char was a number");
+        }
+        Ok(Word::Atom(From::from(maybe.to_string())))
+    } else {
+        panic!("Should have been Token::Something");
+    }
+}
+
+///parse_number -> [-]?[0-9]*[\.]?[0-9]*
+fn parse_number<'a, 'b, 'c, I>(maybe: &'c Token,
+                               stream: &'b mut Peekable<I>)
+                               -> Result<Word, ParseErr>
+    where I: Iterator<Item = &'a Token>
+{
+    let maybe = if let &Token::Something(ref string) = maybe {
+        string
+    } else {
+        panic!("Input should have been Token::Something");
+    };
+    {
+        let mut iter = maybe.chars();
+        let mut found_dot = false;
+
+        let first = iter.next().unwrap();
+        if first.clone().is_numeric() == false && first != '-' {
+            return Err(ParseErr::UnexpectedChar(first, maybe.to_string()));
+        }
+
+        for c in iter {
+            if c.clone().clone().is_numeric() == false {
+                return Err(ParseErr::UnexpectedChar(c, maybe.to_string()));
             }
         }
     }
-}
+    if let Some(next) = stream.peek() {
+        if *next != &Token::FullStop {
+            return Ok(Word::Number(maybe.parse::<f64>().unwrap()));
+        }
+    }
 
-#[allow(unused_variables)]
-pub fn __action0<
-    'input,
->(
-    input: &'input str,
-    (_, __0, _): (usize, Program, usize),
-) -> Program
-{
-    (__0)
-}
+    stream.next(); //found FullStop, proceeding to parse rest
+    if let Some(next) = stream.peek() {
+        if let &&Token::Something(_) = next {
+            ()
+        } else {
+            return Ok(Word::Number(maybe.parse::<f64>().unwrap()));
+        }
+    } else {
+        return Ok(Word::Number(maybe.parse::<f64>().unwrap()));
+    }
 
-#[allow(unused_variables)]
-pub fn __action1<
-    'input,
->(
-    input: &'input str,
-    (_, seq, _): (usize, Vec<Entry>, usize),
-) -> Program
-{
-    {
-		Program {
-			data: seq
-		}
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action2<
-    'input,
->(
-    input: &'input str,
-    (_, seq, _): (usize, Vec<Entry>, usize),
-    (_, tail, _): (usize, Entry, usize),
-) -> Vec<Entry>
-{
-    {
-		let mut v = seq;
-		v.push(tail);
-		v
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action3<
-    'input,
->(
-    input: &'input str,
-    (_, first, _): (usize, Word, usize),
-    (_, seq, _): (usize, Vec<Word>, usize),
-    (_, _, _): (usize, &'input str, usize),
-) -> Entry
-{
-    {
-		Entry::Line(Line {
-					first: first,
-					next: seq,
-					})
-				
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action4<
-    'input,
->(
-    input: &'input str,
-    (_, seq, _): (usize, Vec<Word>, usize),
-    (_, tail, _): (usize, Word, usize),
-) -> Vec<Word>
-{
-    {
-		let mut v = seq;
-		v.push(tail)
-		v
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action5<
-    'input,
->(
-    input: &'input str,
-    (_, w, _): (usize, Word, usize),
-) -> Vec<Word>
-{
-    {
-		vec![w]
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action6<
-    'input,
->(
-    input: &'input str,
-    (_, s, _): (usize, &'input str, usize),
-) -> Word
-{
-    {
-		Word::Number(s)
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action7<
-    'input,
->(
-    input: &'input str,
-    (_, s, _): (usize, &'input str, usize),
-) -> Word
-{
-    {
-		Word::String(s)
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action8<
-    'input,
->(
-    input: &'input str,
-    (_, s, _): (usize, &'input str, usize),
-) -> Word
-{
-    {
-		Word::Single(s)
-	}
-}
-
-#[allow(unused_variables)]
-pub fn __action9<
-    'input,
->(
-    input: &'input str,
-    (_, _, _): (usize, &'input str, usize),
-    (_, c, _): (usize, Vec<Word>, usize),
-    (_, _, _): (usize, &'input str, usize),
-) -> Word
-{
-    {
-		Word::Compound(c)
-	}
-}
-
-pub trait __ToTriple<'input, > {
-    type Error;
-    fn to_triple(value: Self) -> Result<(usize,(usize, &'input str),usize),Self::Error>;
-}
-
-impl<'input, > __ToTriple<'input, > for (usize, (usize, &'input str), usize) {
-    type Error = ();
-    fn to_triple(value: Self) -> Result<(usize,(usize, &'input str),usize),()> {
-        Ok(value)
+    let next = stream.next();
+    if let Some(&Token::Something(ref s)) = next {
+        for char in s.chars() {
+            if char.is_numeric() == false {
+                return Err(ParseErr::UnexpectedChar(char, maybe.to_string()));
+            }
+        }
+        let num_string = format!("{}.{}", maybe, s).to_string();
+        return Ok(Word::Number(num_string.parse::<f64>().unwrap()));
+    } else {
+        panic!("Previous if let should have caught NO Token::Something. {} {:?}",
+               maybe,
+               next);
     }
 }
-impl<'input, > __ToTriple<'input, > for Result<(usize, (usize, &'input str), usize),()> {
-    type Error = ();
-    fn to_triple(value: Self) -> Result<(usize,(usize, &'input str),usize),()> {
-        value
+
+#[cfg(test)]
+mod tests {
+    #![allow(unused_imports)]
+    use super::*;
+    use namespace::Namespace;
+
+    #[test]
+    fn test_parse_localvarsub() {
+        //Word::VarSub test
+        let word = "$_a23;";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(Statement::new(vec![Word::VarSub(From::from("_a23".to_string()), Namespace::Local)]),
+                   result[0]);
+    }
+
+    #[test]
+    fn test_parse_modulevarsub() {
+        //Word::VarSub test
+        let word = "@_a23;";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(Statement::new(vec![Word::VarSub(From::from("_a23".to_string()), Namespace::Module)]),
+                   result[0]);
+    }
+
+    #[test]
+    fn test_parse_number() {
+        //--------------
+        //Word::Number test
+        let word = "-123.5;";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(Statement::new(vec![Word::Number(-123.5f64)]), result[0]);
+    }
+
+    #[test]
+    fn test_parse_neg_number() {
+        let word = "-1337.5;";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(Statement::new(vec![Word::Number(-1337.5_f64)]), result[0]);
+    }
+
+    #[test]
+    fn test_parse_bool() {
+        //--------------
+        //Word::Bool test
+        let word = "false;";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(Statement::new(vec![Word::Bool(false)]), result[0]);
+    }
+
+    #[test]
+    fn test_parse_arg_list() {
+        let proc_args = parse_arg_list("number1 number2").unwrap().unwrap();
+        let mut args = Vec::new();
+        for arg in proc_args.all() {
+            if let Word::Atom(atom) = arg {
+                args.push(atom);
+            } else {
+                panic!("Did not expect {}", arg);
+            }
+        }
+        assert_eq!(args.len(), 2);
+    }
+
+    #[test]
+    fn test_parse_untouched() {
+        //--------------
+        //Word::Untouched test
+        let word = "{untoucheda $123};";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(Statement::new(vec![Word::Untouched("untoucheda $123".to_string())]),
+                   result[0]);
+    }
+
+    #[test]
+    fn test_parse_string() {
+        let word = "\" $var 123 2$var2@var3\";";
+        let result = parse_tokenized_seq(&tokenize(word)).unwrap();
+        assert_eq!(result[0],
+                   Statement::new(vec![Word::StrSub(StrSub(vec![
+                                        StrData::String(" ".to_string()),
+                                        StrData::VarSub(From::from("var".to_string()), Namespace::Local),
+                                        StrData::String(" 123 2".to_string()),
+                                        StrData::VarSub(From::from("var2".to_string()), Namespace::Local),
+                                        StrData::VarSub(From::from("var3".to_string()), Namespace::Module),
+                                        ]))]));
+    }
+
+    #[test]
+    fn embed_cmd() {
+        let cmd = "add [add 2 [add 1 3]];";
+        let result = parse_tokenized_seq(&tokenize(cmd)).unwrap();
+
+        let cmd_1 = Word::CmdSub(Box::new(Statement::new(vec![
+                                            Word::Atom(From::from("add".to_string())),
+                                            Word::Number(1f64),
+                                            Word::Number(3f64),
+        ])));
+        let cmd_2 = Word::CmdSub(Box::new(Statement::new(vec![
+                                            Word::Atom(From::from("add".to_string())),
+                                            Word::Number(2f64),
+                                            cmd_1,
+        ])));
+        assert_eq!(result[0],
+                   Statement::new(vec![Word::Atom(From::from("add".to_string())), cmd_2]));
+    }
+
+    #[test]
+    fn test_parse_tokenized_seq() {
+        let seq = "add 1 [add 3 1 test{123} \"$var _123\"];";
+        let tokenized = tokenize(seq);
+
+        let result = parse_tokenized_seq(&tokenized).unwrap();
+        assert_eq!(result[0],
+                    Statement::new(vec![
+                               Word::Atom(From::from("add".to_string())),
+                               Word::Number(1f64),
+                               Word::CmdSub(Box::new(Statement::new(vec![
+                                                                Word::Atom(From::from("add".to_string())),
+                                                                Word::Number(3f64),
+                                                                Word::Number(1f64),
+                                                                Word::Atom(From::from("test".to_string())),
+                                                                Word::Untouched("123".to_string()),
+                                                                Word::StrSub(StrSub(
+                                                                    vec![
+                                                                    StrData::VarSub(From::from("var".to_string()), Namespace::Local),
+                                                                    StrData::String(" _123".to_string()),
+                                                                    ]
+                                                                )),
+                               ])))
+                    ]))
     }
 }
