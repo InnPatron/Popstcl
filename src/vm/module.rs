@@ -1,4 +1,3 @@
-#[macro_use]
 use super::internal::*;
 
 pub trait Module: Object {}

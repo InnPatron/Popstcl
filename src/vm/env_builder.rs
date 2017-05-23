@@ -1,4 +1,4 @@
-use super::internal::{Value, Env, ObjectKind, EnvEntry, Cmd, Namespace, EntryPermissions};
+use super::internal::{Value, Env, EnvEntry, Namespace, EntryPermissions};
 use cmds::*;
 
 use std::collections::HashMap;

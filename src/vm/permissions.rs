@@ -1,4 +1,3 @@
-#[macro_use]
 use std::collections::HashSet;
 
 #[macro_export]

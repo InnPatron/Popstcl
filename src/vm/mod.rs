@@ -1,5 +1,3 @@
-#![macro_escape]
-
 pub mod user {
     pub use super::basic_vm;
     pub use super::cmd::Cmd;
@@ -29,9 +27,8 @@ pub mod internal {
     pub use namespace::Namespace;
     pub use parser::err::ParseErr;
 
-    #[macro_use]
-    pub use super::object::*;
-	pub use super::module::*;
+    pub use super::object::{Object, ObjectEnv};
+	pub use super::module::{StdModule, InternalModule, LocalModule, Module};
 }
 
 #[macro_use]
@@ -44,6 +41,7 @@ mod executor;
 mod stack;
 mod object_kind;
 mod env_entry;
+#[macro_use]
 mod cir;
 mod env;
 mod env_builder;
@@ -54,16 +52,14 @@ mod module;
 
 use ast::Word;
 use self::err::*;
-use self::cmd::*;
 use self::value::Value;
 use self::env::Env;
 use self::executor::eval_some_cmd;
 use self::stack::Stack;
 use self::exec_signal::ExecSignal;
 use self::env_builder::EnvBuilder;
-use self::module::{Module, InternalModule};
+use self::module::InternalModule;
 use self::object::Object;
-use namespace::Namespace;
 
 #[allow(unused_must_use)]
 pub fn basic_vm() -> Vm {

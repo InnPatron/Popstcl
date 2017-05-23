@@ -1,14 +1,11 @@
 #![allow(unused_variables)]
-#![feature(macro_rules)]
 use vm::internal::*;
 use itertools::Itertools;
 
-#[macro_use]
-use cmds;
 /// popstcl VM command in Rust
 ///
 /// # VM
-/// Takes variable tuples of form (Word::Single, Value)
+/// Takes variable tuples of form (Word::String, Value)
 /// Does NOT return any value
 ///
 #[derive(Clone, Debug)]
@@ -20,9 +17,9 @@ impl Cmd for Let {
         let module = get_module!(self.0, stack);
 
         for (name, value) in args.iter().tuples() {
-            let name = cir_extract!(name => Single)?;
+            let name = cir_extract!(name => String)?;
     
-            let value = cir_extract!(value => Value)?;
+            let value = value.clone_value();
 
             module.insert(name, 
 						  value, 
@@ -42,9 +39,9 @@ impl Cmd for Set {
         exact_args!(&args, 2);
         let module = get_module!(self.0, stack);
 
-        let name = cir_extract!(args[0] => Single)?;
+        let name = cir_extract!(args[0] => String)?;
     
-        let value = cir_extract!(args[1] => Value)?;
+        let value: Value = args[1].clone_value();
 
         module.insert(name, 
                       value.clone(), 

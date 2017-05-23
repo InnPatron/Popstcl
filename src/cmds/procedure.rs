@@ -1,4 +1,3 @@
-#[macro_use]
 use vm::internal::*;
 use ast::*;
 use parser::parse_arg_list;
@@ -24,9 +23,9 @@ impl Cmd for Proc {
             Namespace::Args => unimplemented!(),
         };
 
-        let name = cir_extract!(args[0] => Single, "Name of procedure")?;
+        let name = cir_extract!(args[0] => String, "Name of procedure")?;
         let proc_args = {
-            let proc_args = cir_extract!(args[1] => Untouched, "Arguments of procedure")?;
+            let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?;
             let proc_args = parse_arg_list(proc_args)?
                                           .ok_or(ExecErr::MissingArg("Argument body".to_string()))?;
             let mut string_args = Vec::new();
@@ -40,7 +39,7 @@ impl Cmd for Proc {
             string_args
         };
 
-        let proc_body = parse_statement_seq(cir_extract!(args[2] => Untouched, "Body of procedure")?)?;
+        let proc_body = parse_statement_seq(cir_extract!(args[2] => String, "Body of procedure")?)?;
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
         module.insert(name, Value::Cmd(Box::new(new_cmd)), observable_internal!())?;

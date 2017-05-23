@@ -1,6 +1,4 @@
-#[macro_use]
 use std::fmt;
-use std::collections::HashMap;
 use super::internal::{StdObject, Cmd, Env, StdModule};
 
 #[macro_export]

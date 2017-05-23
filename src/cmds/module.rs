@@ -1,7 +1,5 @@
-#[macro_use]
 use vm::internal::*;
 use std::env;
-use std::path::PathBuf;
 use std::io::prelude::*;
 use std::fs::File;
 use parser::parse_program;
@@ -14,9 +12,9 @@ impl Cmd for Load {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let binding = cir_extract!(args[0] => Single, "Module Name (Single)")?;
+        let binding = cir_extract!(args[0] => String, "Module Name (Single)")?;
 
-        let file_name = cir_extract!(args[1] => Single, "File Name (Single)")?;
+        let file_name = cir_extract!(args[1] => String, "File Name (Single)")?;
 
         let mut file_path = env::current_dir().expect("Require workign directory");
         file_path.set_file_name(&file_name);
@@ -50,7 +48,7 @@ impl Cmd for MakeModule {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let binding = cir_extract!(args[0] => Single, "Module Name (Single)")?;
+        let binding = cir_extract!(args[0] => String, "Module Name (Single)")?;
 
         let module_code = cir_extract!(args[1] => String, "Module Code (String)")?;
 
@@ -80,10 +78,10 @@ impl Cmd for MoveMod {
 		exact_args!(&args, 2);
 
 		let mut pmod = cir_extract!(args[0] => Module)?;
-		let untouched = cir_extract!(args[1] => Untouched)?;
+		let program = cir_extract!(args[1] => String)?;
         let mut mod_scope = InternalModule::new(EnvBuilder::basic_env().consume());
 		let mut temp_stack = Stack::new_module(&mut mod_scope);
-		let program_seq = parse_statement_seq(untouched.trim())?;
+		let program_seq = parse_statement_seq(program.trim())?;
 		for stmt in program_seq.iter() {
 			let signal = eval_some_cmd(&mut temp_stack, &stmt.all())?;
 			if let ExecSignal::NextInstruction(_) = signal {

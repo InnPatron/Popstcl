@@ -359,7 +359,6 @@ fn parse_number<'a, 'b, 'c, I>(maybe: &'c Token,
     };
     {
         let mut iter = num_string.chars();
-        let mut found_dot = false;
 
         let first = iter.next().unwrap();
         if first.clone().is_numeric() == false && first != '-' {

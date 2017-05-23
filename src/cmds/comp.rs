@@ -1,3 +1,4 @@
+#![allow(unused_variables)]
 use vm::internal::*;
 
 #[derive(Clone, Debug)]

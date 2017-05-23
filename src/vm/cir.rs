@@ -1,62 +1,118 @@
-use vm::internal::{Value, Cmd, ObjectKind, Env, Module};
+use vm::internal::{Value,Module};
 use ast::*;
 
-use std::collections::HashMap;
 use std::fmt;
+
+#[macro_export]
+macro_rules! cir_extract {
+
+    ($cir: expr => Bool) => {
+        cir_extract!($cir => Number, "Bool")
+    };
+
+    ($cir: expr => Bool, $expect: expr) => {
+        {
+            $cir.try_get_bool().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => Number) => {
+        cir_extract!($cir => Number, "Number")
+    };
+
+    ($cir: expr => Number, $expect: expr) => {
+        {
+            $cir.try_get_number().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => String) => {
+        cir_extract!($cir => String, "String")
+    };
+
+    ($cir: expr => String, $expect: expr) => {
+        {
+            $cir.try_get_string().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => List) => {
+        cir_extract!($cir => List, "List")
+    };
+
+    ($cir: expr => List, $expect: expr) => {
+        {
+            $cir.try_get_list().ok_or(ExecErr::InvalidArg {
+                                        expect: $expect.to_string(),
+                                        found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => Module) => {
+        cir_extract!($cir => Module, "Module")
+    };
+
+    ($cir: expr => Module, $expect: expr) => {
+        {
+            $cir.try_get_mod().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
+            })
+        }
+    };
+}
 
 /// Command Intermediate Representation
 #[derive(Clone, Debug)]
-pub enum CIR {
-    Single(String),
-    Untouched(String),
-    Value(Value),
+pub struct CIR {
+    pub value: Value,
+    //TODO: Add debug info
 }
 
 impl CIR {
+    
+    pub fn new(value: Value) -> CIR {
+        CIR { value: value }
+    }
+
     pub fn try_from(w: &WordKind) -> Option<CIR> {
         match w {
-            &WordKind::Atom(ref s) => Some(CIR::Single(s.0.clone())),
-            &WordKind::Number(n) => Some(CIR::Value(Value::Number(n))),
-            &WordKind::Bool(b) => Some(CIR::Value(Value::Bool(b))),
-            &WordKind::Untouched(ref s) => Some(CIR::Untouched(s.clone())),
+            &WordKind::Atom(ref s) => Some(CIR::new(p_string!(s.to_string()))),
+            &WordKind::Number(n) => Some(CIR::new(p_number!(n))),
+            &WordKind::Bool(b) => Some(CIR::new(p_bool!(b))),
+            &WordKind::Untouched(ref s) => Some(CIR::new(p_string!(s.to_string()))),
             _ => None,
         }
     }
 
-    pub fn try_to_value(&self) -> Option<Value> {
-        match self {
-            &CIR::Single(_) => None,
-            &CIR::Untouched(_) => None,
-            &CIR::Value(ref v) => Some(v.clone()),
-        }
-    }
-
-    pub fn try_get_single(&self) -> Option<&str> {
-        if let &CIR::Single(ref s) = self {
-            Some(s)
-        } else {
-            None
-        }
-    }
-
     pub fn try_get_number(&self) -> Option<f64> {
-        if let &CIR::Value(Value::Number(n)) = self{
+        if let Value::Number(n) = self.value {
             Some(n)
         } else {
             None
         }
     }
 
-    pub fn try_get_untouched(&self) -> Option<&str> {
-        if let &CIR::Untouched(ref s) = self{
-            Some(s)
+    pub fn try_get_bool(&self) -> Option<bool> {
+        if let Value::Bool(b) = self.value {
+            Some(b)
         } else {
             None
         }
     }
 
 	pub fn try_get_mod(&self) -> Option<&Module> {
-		if let &CIR::Value(Value::Module(ref module)) = self {
+		if let Value::Module(ref module) = self.value {
 			Some(module)
 		} else {
 			None
@@ -64,7 +120,7 @@ impl CIR {
 	} 
 
     pub fn try_get_list(&self) -> Option<&Vec<Value>> {
-        if let &CIR::Value(Value::List(ref vec)) = self {
+        if let Value::List(ref vec) = self.value {
             Some(vec)
         } else {
             None
@@ -72,64 +128,32 @@ impl CIR {
     }
 
     pub fn try_get_string(&self) -> Option<&str> {
-        if let &CIR::Value(Value::String(ref s)) = self {
+        if let Value::String(ref s) = self.value {
             Some(s)
         } else {
             None
         }
     }
 
-    pub fn to_string(&self) -> String {
-        match self {
-            &CIR::Single(ref s) => s.to_owned(),
-            &CIR::Untouched(ref s) => format!("{{{}}}", s).to_owned(),
-            &CIR::Value(ref v) => v.to_string(),
-        }
-    }
-
-    pub fn is_single(&self) -> bool {
-        if let &CIR::Single(_) = self {
-            true
-        } else {
-            false
-        }
-    }
-    
-    /// Return true if matching enum Value.
-    /// TODO: Should Value be its own invariant to make conversion / checking / adding more values
-    /// easier?
-    pub fn is_value(&self) -> bool {
-        match self {
-            &CIR::Value(_) => true,
-            _ => false,
-        }
+    pub fn clone_value(&self) -> Value {
+        self.value.clone()
     }
 }
 
 impl From<Value> for CIR {
     fn from(val: Value) -> CIR {
-        CIR::Value(val)
+        CIR::new(val)
     }
 }
 
 impl PartialEq for CIR {
     fn eq(&self, other: &CIR) -> bool {
-        use self::CIR::*;
-        match (self, other) {
-            (&Single(ref lhs), &Single(ref rhs)) => lhs == rhs,
-            (&Untouched(ref lhs), &Untouched(ref rhs)) => lhs == rhs,
-            (&Value(ref lhs), &Value(ref rhs)) => lhs == rhs,
-            _ => false,
-        }
+        self.value == other.value
     }
 }
 
 impl fmt::Display for CIR {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            &CIR::Single(ref s) => write!(f, "Atom: {}", s),
-            &CIR::Untouched(ref s) => write!(f, "{{{}}}", s),
-            &CIR::Value(ref v) => write!(f, "{}", v),
-        }
+        write!(f, "{}", self.value)
     }
 }

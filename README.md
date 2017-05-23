@@ -21,11 +21,12 @@ Explicit **non-goals**:
 This is valid Popstcl code:
 ~~~~
 $cmd_name arg1 arg2;
+"other cmd name" arg1 arg2;
 ~~~~
 where "cmd" is a valid binding pointing to a command value.
 
 ### Python/Javascript-esque Objects
-Objects are dictionaries.
+Objects are dictionaries. Inheritance is achieved via prototyping
 
 TODO: Example
 
@@ -58,7 +59,7 @@ Commands can be implemented through the popstcl::vm::cmd::Cmd trait and passed a
 
 ## Cool Things
 
-### Moving and non-moving closures are easy to implement.
+### Moving Closures
 TODO: Add example
 
 ...And more!

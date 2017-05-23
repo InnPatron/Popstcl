@@ -1,6 +1,6 @@
 use ast::*;
 use namespace::Namespace;
-use super::internal::{Env, Value, Stack, ExecErr, ExecSignal, CIR, Cmd, Object};
+use super::internal::{Value, Stack, ExecErr, ExecSignal, CIR, Cmd, Object};
 
 enum ReduceResult {
     Return(Option<Value>),
@@ -21,8 +21,8 @@ pub fn eval_some_cmd(stack: &mut Stack, cmd: &[Word]) -> Result<ExecSignal, Exec
 
 fn run(stack: &mut Stack, mut cmd: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
     assert!(cmd.len() > 0);
-    let cmd_obj: Box<Cmd> = match cmd.remove(0) {
-        CIR::Single(ref cmd_name) => {
+    let cmd_obj: Box<Cmd> = match cmd.remove(0).value {
+        Value::String(ref cmd_name) => {
             let env = stack.get_local_env().unwrap_or(stack.get_module_env());
             if let Value::Cmd(ref boxed) = env.get_clone(cmd_name)? {
                 boxed.clone()
@@ -31,7 +31,7 @@ fn run(stack: &mut Stack, mut cmd: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
             }
         },
 
-        CIR::Value(Value::Cmd(ref cmd)) => {
+        Value::Cmd(ref cmd) => {
             cmd.clone()
         },
 

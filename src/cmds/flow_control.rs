@@ -1,4 +1,4 @@
-#[macro_use]
+#![allow(unused_variables)]
 use vm::internal::*;
 
 #[derive(Clone, Debug)]
@@ -11,7 +11,7 @@ impl Cmd for Return {
         if args.len() == 0 {
             Ok(ExecSignal::Return(None))
         } else {
-            Ok(ExecSignal::Return(Some(cir_extract!(args[0] => Value, "Return value")?)))
+            Ok(ExecSignal::Return(Some(args[0].clone_value())))
         }
     }
 }

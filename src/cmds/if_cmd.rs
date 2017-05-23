@@ -127,95 +127,56 @@ impl From<ElifBool> for ElifBody {
 
 impl IfParser for IfBool {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        if let &CIR::Value(Value::Bool(_)) = arg {
-            Ok(())
-        } else {
-            Err(ExecErr::InvalidArg {
-                    expect: "Bool".to_string(),
-                    found: arg.clone(),
-                })
-        }
+        cir_extract!(arg => Bool, "If Condition").map(|_| ())
     }
 }
 
 impl IfParser for IfBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        if let &CIR::Untouched(ref string) = arg {
-            parse_statement_seq(string.trim())
-                .map(|_| ())
-                .map_err(|err| ExecErr::ParseError(err))
-        } else {
-            Err(ExecErr::InvalidArg {
-                    expect: "If Body".to_string(),
-                    found: arg.clone(),
-                })
-        }
+        parse_statement_seq(cir_extract!(arg => String, "If Body")?)
+            .map(|_| ())
+            .map_err(|e| ExecErr::ParseError(e))
     }
 }
 
 impl IfParser for Trailing {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        if let &CIR::Single(ref string) = arg {
-            if string == ELSE {
-                self.decision.set(Some(TrailingBranch::Else));
-            } else if string == ELIF {
-                self.decision.set(Some(TrailingBranch::Elif));
-            } else {
-                return Err(ExecErr::InvalidArg {
-                               expect: "Else or Elif".to_string(),
-                               found: arg.clone(),
-                           });
-            }
-            Ok(())
+        let string = cir_extract!(arg => String)?;
+        
+        if string == ELSE {
+            self.decision.set(Some(TrailingBranch::Else));
+        } else if string == ELIF {
+            self.decision.set(Some(TrailingBranch::Elif));
         } else {
-            Err(ExecErr::InvalidArg {
-                    expect: "Else or Elif".to_string(),
-                    found: arg.clone(),
-                })
+            return Err(ExecErr::InvalidArg {
+                           expect: "Else or Elif".to_string(),
+                           found: arg.clone(),
+                       });
         }
+        Ok(())
     }
 }
 
 impl IfParser for ElseBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        if let &CIR::Untouched(ref string) = arg {
-            parse_statement_seq(string)
-                .map(|_| ())
-                .map_err(|err| ExecErr::ParseError(err))
-        } else {
-            Err(ExecErr::InvalidArg {
-                    expect: "Else Body".to_string(),
-                    found: arg.clone(),
-                })
-        }
+        parse_statement_seq(cir_extract!(arg => String, "Else Body")?)
+            .map(|_| ())
+            .map_err(|err| ExecErr::ParseError(err))
     }
 }
 
 impl IfParser for ElifBool {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        if let &CIR::Value(Value::Bool(_)) = arg {
-            Ok(())
-        } else {
-            Err(ExecErr::InvalidArg {
-                    expect: "Bool".to_string(),
-                    found: arg.clone(),
-                })
-        }
+        cir_extract!(arg => Bool, "Elif Condition")
+            .map(|_| ())
     }
 }
 
 impl IfParser for ElifBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        if let &CIR::Untouched(ref string) = arg {
-            parse_statement_seq(string)
-                .map(|_| ())
-                .map_err(|err| ExecErr::ParseError(err))
-        } else {
-            Err(ExecErr::InvalidArg {
-                    expect: "If Body".to_string(),
-                    found: arg.clone(),
-                })
-        }
+        parse_statement_seq(cir_extract!(arg => String, "Elif Body")?)
+            .map(|_| ())
+            .map_err(|err| ExecErr::ParseError(err))
     }
 }
 ///
@@ -237,13 +198,14 @@ impl Cmd for If {
             step = step.check_step(stack, arg)?;
             if let &ParserState::ElseBody(_) = &step {
                 execute_next = true;
+                continue;
             }
 
-            if let &CIR::Value(Value::Bool(b)) = arg {
+            if let Value::Bool(b) = arg.value {
                 execute_next = b; //read if condition was bool
             }
 
-            if let &CIR::Untouched(ref string) = arg {
+            if let Value::String(ref string) = arg.value {
                 if execute_next {
                     program_seq = Some(parse_statement_seq(string.trim())
                                .expect("Should have been caught by check_step"));
@@ -261,10 +223,11 @@ impl Cmd for If {
                 return Err(ExecErr::MissingArg("Looking for bool condition".to_string()));
             },
 
-            IfBody(_) | ElseBody(_) | ElifBody(_) => {
-                //looking for body
-                return Err(ExecErr::MissingArg("Looking for body".to_string()));
-            },
+            IfBody(_) => return Err(ExecErr::MissingArg("If Body".to_string())),
+
+            ElseBody(_) => return Err(ExecErr::MissingArg("Else Body".to_string())),
+
+            ElifBody(_) => return Err(ExecErr::MissingArg("Elif Body".to_string())),
         }
 
         if let Some(program_seq) = program_seq {

@@ -1,5 +1,5 @@
 #![allow(dead_code)]
-use super::internal::{Value, Permissions, EntryPermissions};
+use super::internal::{Value, EntryPermissions};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct EnvEntry {

@@ -1,3 +1,4 @@
+#![allow(unused_variables)]
 use vm::internal::*;
 
 /// Create a list object and return it
@@ -14,7 +15,7 @@ impl Cmd for List {
         //Convert ALL CIR args into Values
         //Fail if CIR is NOT a value
         for argument in args.iter() {
-            values.push(cir_extract!(argument => Value)?);
+            values.push(argument.clone_value());
         }
 
         Ok(ExecSignal::NextInstruction(Some(Value::List(values))))
@@ -97,7 +98,7 @@ impl Cmd for Append {
 
         let mut list = cir_extract!(args[0] => List)?.clone();
         for index in 1..args.len() {
-            let value = cir_extract!(args[index] => Value)?;
+            let value = args[index].clone_value();
             list.push(value);
         }
         Ok(ExecSignal::NextInstruction(Some(Value::List(list))))

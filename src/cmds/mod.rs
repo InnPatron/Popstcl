@@ -1,5 +1,3 @@
-#![macro_escape]
-
 #[macro_use]
 pub mod macros {
     #[macro_export]
@@ -73,100 +71,6 @@ pub mod macros {
                        .into());
             }
         }
-    }
-
-    #[macro_export]
-    macro_rules! cir_extract {
-        ($cir: expr => Single) => {
-            cir_extract!($cir => Single, "Single")
-        };
-
-        ($cir: expr => Single, $expect: expr) => {
-            {
-                $cir.try_get_single().ok_or(ExecErr::InvalidArg {
-                    expect: $expect.to_string(),
-                    found: $cir.clone()
-                })
-            }
-        };
-
-        ($cir: expr => Untouched) => {
-            cir_extract!($cir => Untouched, "Untouched")
-        };
-
-        ($cir: expr => Untouched, $expect: expr) => {
-            {
-                $cir.try_get_untouched().ok_or(ExecErr::InvalidArg {
-                               expect: $expect.to_string(),
-                               found: $cir.clone(),
-                })
-            }
-        };
-
-        ($cir: expr => Number) => {
-            cir_extract!($cir => Number, "Number")
-        };
-
-        ($cir: expr => Number, $expect: expr) => {
-            {
-                $cir.try_get_number().ok_or(ExecErr::InvalidArg {
-                               expect: $expect.to_string(),
-                               found: $cir.clone(),
-                })
-            }
-        };
-
-        ($cir: expr => String) => {
-            cir_extract!($cir => String, "String")
-        };
-
-        ($cir: expr => String, $expect: expr) => {
-            {
-                $cir.try_get_string().ok_or(ExecErr::InvalidArg {
-                               expect: $expect.to_string(),
-                               found: $cir.clone(),
-                })
-            }
-        };
-
-        ($cir: expr => List) => {
-            cir_extract!($cir => List, "List")
-        };
-
-        ($cir: expr => List, $expect: expr) => {
-            {
-                $cir.try_get_list().ok_or(ExecErr::InvalidArg {
-                                            expect: $expect.to_string(),
-                                            found: $cir.clone(),
-                })
-            }
-        };
-
-        ($cir: expr => Module) => {
-            cir_extract!($cir => Module, "Module")
-        };
-
-        ($cir: expr => Module, $expect: expr) => {
-            {
-                $cir.try_get_mod().ok_or(ExecErr::InvalidArg {
-                               expect: $expect.to_string(),
-                               found: $cir.clone(),
-                })
-            }
-        };
-
-        ($cir: expr => Value) => {
-            cir_extract!($cir => Value, "Value")
-        };
-
-        ($cir: expr => Value, $expect: expr) => {
-            {
-                $cir.try_to_value().ok_or(ExecErr::InvalidArg {
-                       expect: $expect.to_string(),
-                       found: $cir.clone(),
-                  })
-            }
-        };
     }
 }
 

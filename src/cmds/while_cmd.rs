@@ -1,4 +1,3 @@
-#[macro_use]
 use vm::internal::*;
 
 #[derive(Clone, Debug)]
@@ -11,8 +10,8 @@ impl Cmd for While {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let conditional_stmt = cir_extract!(args[0] => Untouched, "While Condition")?;
-        let while_body = cir_extract!(args[1] => Untouched, "While Body")?;
+        let conditional_stmt = cir_extract!(args[0] => String, "While Condition")?;
+        let while_body = cir_extract!(args[1] => String, "While Body")?;
 
         let conditional_stmt = parse_statement_seq(conditional_stmt)?;
         let while_body = parse_statement_seq(while_body)?;
