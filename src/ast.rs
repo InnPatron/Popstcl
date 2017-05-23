@@ -1,6 +1,12 @@
 use std::fmt;
 use std::ops::Deref;
 use namespace::Namespace;
+use line_info::LineInfo;
+
+#[macro_use]
+macro_rules! word {
+    ($kind: expr, $line_info: expr) => { Word { kind: $kind, line_info: $line_info } }
+}
 
 pub struct Program {
     pub code: Vec<Statement>,
@@ -8,7 +14,7 @@ pub struct Program {
 
 #[derive(Clone, Debug)]
 pub struct Statement {
-    words: Vec<Word>,
+    pub words: Vec<Word>,
 }
 
 impl PartialEq for Statement {
@@ -18,7 +24,7 @@ impl PartialEq for Statement {
         }
 
         for (ref l, ref r) in self.words.iter().zip(other.words.iter()) {
-            if l != r {
+            if l.kind != r.kind {
                 return false;
             }
         }
@@ -47,7 +53,7 @@ impl Statement {
         self.words
             .iter()
             .fold(String::new(), |mut result, word| {
-                result.push_str(&word.to_string());
+                result.push_str(&word.kind.to_string());
                 result
             })
     }
@@ -67,8 +73,14 @@ impl Statement {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct Word {
+    pub kind: WordKind,
+    pub line_info: LineInfo,
+}
+
 #[derive(Clone, Debug, PartialEq)]
-pub enum Word {
+pub enum WordKind {
     Atom(Atom),
     StrSub(StrSub),
     Number(f64),
@@ -137,13 +149,13 @@ impl From<String> for Path {
     }
 }
 
-impl Word {
-    pub fn str_sub_from(vec: Vec<StrData>) -> Word {
-        Word::StrSub(StrSub(vec))
+impl WordKind {
+    pub fn str_sub_from(vec: Vec<StrData>) -> WordKind {
+        WordKind::StrSub(StrSub(vec))
     }
 
     pub fn to_string(&self) -> String {
-        use self::Word::*;
+        use self::WordKind::*;
         match self {
             &Atom(ref s) => s.0.clone(),
             &StrSub(ref sub) => {
@@ -164,17 +176,17 @@ impl Word {
     }
 }
 
-impl fmt::Display for Word {
+impl fmt::Display for WordKind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &Word::Atom(ref s) => write!(f, "Single: {}", s),
-            &Word::StrSub(ref s) => write!(f, "String: {}", s),
-            &Word::VarSub(ref path, ref namespace) => write!(f, "Path: {}", &path.to_string()),
-            &Word::Number(num) => write!(f, "Number: {}", num),
-            &Word::Bool(b) => write!(f, "Bool: {}", b),
-            &Word::CmdSub(ref e) => write!(f, "CmdSub: {}", e.first()),
-            &Word::Untouched(ref s) => write!(f, "Untouched: {}", s),
-            &Word::Path(ref vec) => unimplemented!(),
+            &WordKind::Atom(ref s) => write!(f, "Single: {}", s),
+            &WordKind::StrSub(ref s) => write!(f, "String: {}", s),
+            &WordKind::VarSub(ref path, ref namespace) => write!(f, "Path: {}", &path.to_string()),
+            &WordKind::Number(num) => write!(f, "Number: {}", num),
+            &WordKind::Bool(b) => write!(f, "Bool: {}", b),
+            &WordKind::CmdSub(ref e) => write!(f, "CmdSub: {}", e.first().kind),
+            &WordKind::Untouched(ref s) => write!(f, "Untouched: {}", s),
+            &WordKind::Path(ref vec) => unimplemented!(),
         }
     }
 }
@@ -230,13 +242,24 @@ mod tests {
     #[test]
     fn entry_eq_test() {
         let word = "yoyo";
-        assert_eq!(Statement::new(vec![Word::Atom(From::from(word.to_string()))]),
-                   Statement::new(vec![Word::Atom(From::from(word.to_string()))]));
+        assert_eq!(Statement::new(vec![
+                                        word!(WordKind::Atom(From::from(word.to_string())), 
+                                                            location!(0)
+                                            )
+                                      ]),
+                   Statement::new(vec![
+                                        word!(WordKind::Atom(From::from(word.to_string())), 
+                                                            location!(0)
+                                            )
+                                      ])
+                   );
 
-        assert_eq!(Statement::new(vec![Word::VarSub(From::from(word.to_string()), Namespace::Local)]),
-                   Statement::new(vec![Word::VarSub(From::from(word.to_string()), Namespace::Local)]));
+        assert_eq!(Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Local), location!(0))]),
+                   Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Local), location!(0))])
+                   );
 
-        assert_eq!(Statement::new(vec![Word::VarSub(From::from(word.to_string()), Namespace::Module)]),
-                   Statement::new(vec![Word::VarSub(From::from(word.to_string()), Namespace::Module)]));
+        assert_eq!(Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Module), location!(0))]),
+                   Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Module), location!(0))])
+                   );
     }
 }

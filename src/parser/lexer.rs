@@ -1,5 +1,19 @@
-#[derive(Clone, Debug, PartialEq)]
-pub enum Token {
+use line_info::*;
+
+#[derive(Clone, Debug)]
+pub struct Token {
+    pub kind: TokenKind,
+    pub line_info: LineInfo,
+}
+
+impl Token {
+    fn new(kind: TokenKind, line_info: LineInfo) -> Token {
+        Token {kind: kind, line_info: line_info }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum TokenKind {
     LBracket, //[
     RBracket, //]
     LBrace, //{
@@ -14,13 +28,13 @@ pub enum Token {
     Something(String),
 }
 
-macro_rules! push_current {
-
-
-    ($string: ident, $result: ident, $tail: expr) => {{
-        if $string.is_empty() == false {
-            $result.push(Token::Something($string.clone()));
-            $string.clear();
+macro_rules! push_token {
+    ($maybe_something: ident, $result: ident, $tail: expr) => {{
+        if $maybe_something.0.is_empty() == false {
+            assert!($maybe_something.1 != $maybe_something.2);
+            $result.push(Token::new(TokenKind::Something($maybe_something.0.clone()),
+                                    range!($maybe_something.1, $maybe_something.2)));
+            $maybe_something.0.clear();
         }
         $result.push($tail);
     }};
@@ -28,37 +42,44 @@ macro_rules! push_current {
 
 pub fn tokenize(input: &str) -> Vec<Token> {
     let mut result: Vec<Token> = Vec::new();
-    let mut current = String::new();
-    for char in input.chars() {
+    let mut maybe_something: (String, usize, usize) = (String::new(), 0, 0);
+
+    for (i, char) in input.chars().enumerate() {
         match char {
-            '[' => push_current!(current, result, Token::LBracket),
-            ']' => push_current!(current, result, Token::RBracket),
-            '{' => push_current!(current, result, Token::LBrace),
-            '}' => push_current!(current, result, Token::RBrace), 
-            '\"' => push_current!(current, result, Token::Quote), 
-            ';' => push_current!(current, result, Token::Semicolon),
-            '@' => push_current!(current, result, Token::At),
-            '$' => push_current!(current, result, Token::Dollar),
-            '.' => push_current!(current, result, Token::FullStop),
-            '^' => push_current!(current, result, Token::Caret),
+            '[' => push_token!(maybe_something, result, Token::new(TokenKind::LBracket, location!(i))),
+            ']' => push_token!(maybe_something, result, Token::new(TokenKind::RBracket, location!(i))),
+            '{' => push_token!(maybe_something, result, Token::new(TokenKind::LBrace, location!(i))),
+            '}' => push_token!(maybe_something, result, Token::new(TokenKind::RBrace,location!(i))),
+            '\"' => push_token!(maybe_something, result, Token::new(TokenKind::Quote, location!(i))),
+            ';' => push_token!(maybe_something, result, Token::new(TokenKind::Semicolon, location!(i))),
+            '@' => push_token!(maybe_something, result, Token::new(TokenKind::At, location!(i))),
+            '$' => push_token!(maybe_something, result, Token::new(TokenKind::Dollar, location!(i))),
+            '.' => push_token!(maybe_something, result, Token::new(TokenKind::FullStop,location!(i))),
+            '^' => push_token!(maybe_something, result, Token::new(TokenKind::Caret, location!(i))),
             c @ _ => {
                 if c.is_whitespace() {
-                    push_current!(current, result, Token::Whitespace(c));
+                    push_token!(maybe_something, result, Token::new(TokenKind::Whitespace(c), location!(i)));
                 } else {
-                    current.push(c);
+                    if maybe_something.0.is_empty() {
+                        maybe_something.1 = i;
+                    } else {
+                        maybe_something.2 = i;
+                    }
+                    maybe_something.0.push(c);
                 }
             }
         }
     }
-    if current.len() > 0 {
-        result.push(Token::Something(current.clone()));
+    if maybe_something.0.len() > 0 {
+        assert!(maybe_something.1 != maybe_something.2);
+        result.push(Token::new(TokenKind::Something(maybe_something.0.clone()), range!(maybe_something.1, maybe_something.2)));
     }
     result
 }
 
-impl Token {
+impl TokenKind {
     pub fn to_string(&self) -> String {
-        use self::Token::*;
+        use self::TokenKind::*;
         match self {
             &LBracket => "[".to_owned(),
             &RBracket => "]".to_owned(),
@@ -82,9 +103,9 @@ mod tests {
     use super::*;
     #[test]
     fn tokenize_single_statement_test() {
-        use super::Token::*;
+        use super::TokenKind::*;
         let result = tokenize("test\t[bb!!12 13213 \" fdas\"!] ;{123\n #halp};");
-        assert_eq!(result,
+        assert_eq!(result.into_iter().map(|token| token.kind).collect::<Vec<_>>(),
                    vec![Something("test".to_string()),
                         Whitespace('\t'),
                         LBracket,
@@ -111,8 +132,8 @@ mod tests {
 
     #[test]
     fn tokenize_varsub() {
-        use super::Token::*;
+        use super::TokenKind::*;
         let result = tokenize("$abc");
-        assert_eq!(result, vec![Dollar, Something("abc".to_string())]);
+        assert_eq!(result.into_iter().map(|token| token.kind).collect::<Vec<_>>(), vec![Dollar, Something("abc".to_string())]);
     }
 }

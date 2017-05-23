@@ -44,13 +44,13 @@ fn run(stack: &mut Stack, mut cmd: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
 
 fn reduce(stack: &mut Stack, args: &[Word], reduction: &mut Vec<CIR>) -> Result<ReduceResult, ExecErr> {
     for word in args.iter() {
-        match word {
-            &Word::StrSub(ref string) => {
+        match word.kind {
+            WordKind::StrSub(ref string) => {
                 let input = str_sub(stack, string)?;
                 reduction.push(input);
             }
 
-            &Word::CmdSub(ref cmd) => {
+            WordKind::CmdSub(ref cmd) => {
                 let mut reduced_cmd_sub = Vec::new();
 
                 match reduce(stack, &cmd.all(), &mut reduced_cmd_sub)? {
@@ -75,8 +75,8 @@ fn reduce(stack: &mut Stack, args: &[Word], reduction: &mut Vec<CIR>) -> Result<
                 }   
             }
 
-            &Word::VarSub(ref path, ref namespace) => reduction.push(var_sub(stack, path, namespace)?),
-            word @ _ => reduction.push(CIR::try_from(word).unwrap()),
+            WordKind::VarSub(ref path, ref namespace) => reduction.push(var_sub(stack, path, namespace)?),
+            _ => reduction.push(CIR::try_from(&word.kind).unwrap()),
         }
     }
 

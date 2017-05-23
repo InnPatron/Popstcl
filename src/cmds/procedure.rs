@@ -31,7 +31,7 @@ impl Cmd for Proc {
                                           .ok_or(ExecErr::MissingArg("Argument body".to_string()))?;
             let mut string_args = Vec::new();
             for arg in proc_args.all() {
-                if let Word::Atom(atom) = arg {
+                if let WordKind::Atom(atom) = arg.kind {
                     string_args.push(atom);
                 } else {
                     return Err(ExecErr::UnexpectedWord(arg.clone()));

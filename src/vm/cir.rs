@@ -13,12 +13,12 @@ pub enum CIR {
 }
 
 impl CIR {
-    pub fn try_from(w: &Word) -> Option<CIR> {
+    pub fn try_from(w: &WordKind) -> Option<CIR> {
         match w {
-            &Word::Atom(ref s) => Some(CIR::Single(s.0.clone())),
-            &Word::Number(n) => Some(CIR::Value(Value::Number(n))),
-            &Word::Bool(b) => Some(CIR::Value(Value::Bool(b))),
-            &Word::Untouched(ref s) => Some(CIR::Untouched(s.clone())),
+            &WordKind::Atom(ref s) => Some(CIR::Single(s.0.clone())),
+            &WordKind::Number(n) => Some(CIR::Value(Value::Number(n))),
+            &WordKind::Bool(b) => Some(CIR::Value(Value::Bool(b))),
+            &WordKind::Untouched(ref s) => Some(CIR::Untouched(s.clone())),
             _ => None,
         }
     }
