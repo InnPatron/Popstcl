@@ -83,6 +83,7 @@ mod list;
 mod comp;
 mod while_cmd;
 mod flow_control;
+mod print;
 
 pub use self::var_cmds::{Let, Set};
 pub use self::if_cmd::If;
@@ -93,3 +94,4 @@ pub use self::module::{MakeModule};
 pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
+pub use self::print::Print;
