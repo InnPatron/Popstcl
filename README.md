@@ -15,6 +15,9 @@ Explicit **non-goals**:
 * Strive to be used in a production environment (That being said, I do plan on making a text adventure game as a rite of passage)
 * Full compatiblity with vanilla Tcl
 
+## Versioning
+Currently, releases follow semver for the Popstcl library.
+
 ## Organization
 This Git repository is split into two directories:
 > popstcl: core language constructs and virtual machine
