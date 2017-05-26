@@ -15,12 +15,6 @@ Explicit **non-goals**:
 * Strive to be used in a production environment (That being said, I do plan on making a text adventure game as a rite of passage)
 * Full compatiblity with vanilla Tcl
 
-## Versioning
-Currently, releases follow semver for the Popstcl library.
-
-## License
-Released under the [MIT License](https://opensource.org/licenses/MIT) (See LICENSE-MIT). Good luck using this for any commercial projects :|
-
 ## Organization
 This Git repository is split into two directories:
 > popstcl: core language constructs and virtual machine
@@ -46,7 +40,7 @@ Currently, popstcl-i is an extremely barebones REPL.
 
 Hint: Type in 'q' and ENTER to quit the REPL.
 
-## Differences to Tcl
+## Differences to Tcl (Incomplete)
 
 ### Command Invocation
 This is valid Popstcl code:
@@ -94,3 +88,9 @@ Commands can be implemented through the popstcl::vm::cmd::Cmd trait and passed a
 TODO: Add example
 
 ...And more!
+
+## Versioning
+Currently, releases follow semver for the Popstcl library.
+
+## License
+Released under the [MIT License](https://opensource.org/licenses/MIT) (See LICENSE-MIT). Good luck using this for any commercial projects :|
