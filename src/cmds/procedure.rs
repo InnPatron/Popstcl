@@ -1,6 +1,6 @@
 use vm::internal::*;
 use ast::*;
-use parser::parse_arg_list;
+use parser::{parse_program, parse_arg_list };
 use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
@@ -39,7 +39,7 @@ impl Cmd for Proc {
             string_args
         };
 
-        let proc_body = parse_statement_seq(cir_extract!(args[2] => String, "Body of procedure")?)?;
+        let proc_body = parse_program(cir_extract!(args[2] => String, "Body of procedure")?)?;
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
         module.insert(name, Value::Cmd(Box::new(new_cmd)), observable_internal!())?;
@@ -51,13 +51,13 @@ impl Cmd for Proc {
 pub struct ProcCmdObject {
     name: String,
     args: Vec<Atom>,
-    body: Vec<Statement>,
+    body: Program,
 }
 
 impl ProcCmdObject {
-    fn new(name: String, args: Vec<Atom>, body: Vec<Statement>) -> ProcCmdObject {
+    fn new(name: String, args: Vec<Atom>, body: Program) -> ProcCmdObject {
         assert!(args.len() > 0);
-        assert!(body.len() > 0);
+        assert!(body.code.len() > 0);
         ProcCmdObject {
             name: name,
             args: args,
@@ -70,16 +70,15 @@ impl Cmd for ProcCmdObject {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, self.args.len());
         
-        let mut builder = EnvBuilder::basic_env();
         let mut arg_map = HashMap::new();
 
         for (name, cir) in self.args.iter().zip(args.iter()) {
             arg_map.insert(name.to_string(), cir.clone());
         }
-        let mut stack = Stack::local_with_args(stack, builder.consume(), arg_map);
+        let mut stack = Stack::local_with_args(stack, Env::new(), arg_map);
         
-        for statement in self.body.iter() {
-            match eval_some_cmd(&mut stack, &statement.all())? {
+        for stmt in self.body.iter() {
+            match eval_stmt(&mut stack, &stmt)? {
                 ExecSignal::Return(value) => return Ok(ExecSignal::NextInstruction(value)),
                 signal @ ExecSignal::Continue => unimplemented!(), //Err: continue on procedure
                 signal @ ExecSignal::Break => unimplemented!(), //Err: break on procedure

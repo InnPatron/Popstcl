@@ -12,9 +12,7 @@ fn list_eq() {
 mset list_1 [list 1 2 3 4];
 mset list_2 [list [list \"test\" true] 1337];").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(), 
                Value::List(vec![
@@ -43,9 +41,7 @@ mset list_2 [list [list \"test\" true] 1337];
 mset var_1 [list_get @list_1 0];
 mset var_2 [list_get @list_2 1];").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(), 
                Value::List(vec![
@@ -78,9 +74,7 @@ fn list_len() {
 mset list_1 [list 1 2 3 4];
 mset len [list_len @list_1];").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("len").unwrap(),
                Number(4.)
@@ -94,9 +88,7 @@ fn list_append() {
 mset list_1 [list 1 2 3 4];
 mset list_1 [list_append @list_1 5 6 7 8];").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(),
                Value::List(vec![
@@ -119,9 +111,7 @@ fn list_remove() {
 mset list_1 [list 1 2 3 4];
 mset list_1 [list_remove @list_1 0];").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(),
                Value::List(vec![

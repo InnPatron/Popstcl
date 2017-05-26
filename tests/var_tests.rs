@@ -8,9 +8,7 @@ use popstcl::vm::user::basic_vm;
 fn sub_in_cmd() {
     let mut vm = basic_vm();
     let program = parser::parse_program("@mset a [@add 1 2];").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
     
     match vm.inspect_value("a") {
         Ok(val) => {
@@ -29,18 +27,14 @@ fn sub_in_cmd() {
 fn no_ret() {
     let mut vm = basic_vm();
     let program = parser::parse_program("mset a [mlet b 21];").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 }
 
 #[test]
 fn multi_command() {
     let mut vm = basic_vm();
     let program = parser::parse_program("mset a [add [add 3 1] [add [add 1 2] 3]];").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     match vm.inspect_value("a") {
         Ok(val) => {
@@ -65,9 +59,7 @@ mlet d [add @b -1337 [add 1]];
 mset f [mset e 12481632];
 mlet g true h false eggs 999;").unwrap();
     
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![("a", Value::Number(-3.1459_f64)),
                             ("b", Value::Number(1337_f64)), 
@@ -103,9 +95,7 @@ mset f [mset e 12481632];
 mlet g true h false eggs 999;
 mset TEST_STRING \"yoyo: @g@f@h b\";").unwrap();
     
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![("a", Value::Number(-3.1459_f64)),
                             ("b", Value::Number(1337_f64)), 

@@ -89,7 +89,7 @@ pub use self::if_cmd::If;
 pub use self::basic_math::{Add, Sub, Mul, Div};
 pub use self::procedure::Proc;
 pub use self::flow_control::{Return, Continue, Break};
-pub use self::module::{Load, MakeModule};
+pub use self::module::{MakeModule};
 pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;

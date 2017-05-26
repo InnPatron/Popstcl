@@ -1,4 +1,4 @@
-use vm::internal::{Value,Module};
+use vm::internal::{Value, StdModule};
 use ast::*;
 
 use std::fmt;
@@ -111,9 +111,9 @@ impl CIR {
         }
     }
 
-	pub fn try_get_mod(&self) -> Option<&Module> {
+	pub fn try_get_mod(&self) -> Option<StdModule> {
 		if let Value::Module(ref module) = self.value {
-			Some(module)
+			Some(module.clone())
 		} else {
 			None
 		}

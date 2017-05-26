@@ -7,24 +7,52 @@ enum ReduceResult {
     Continue,
 }
 
-//methods for command running
-pub fn eval_some_cmd(stack: &mut Stack, cmd: &[Word]) -> Result<ExecSignal, ExecErr> {
+pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<(), ExecErr> {
+    for stmt in program.iter() {
+        eval_stmt(stack, stmt)?;
+    }
+    Ok(())
+}
+
+pub fn eval_stmt(stack: &mut Stack, stmt: &Statement) -> Result<ExecSignal, ExecErr> {
+    let cmd = stmt.all();
     assert!(cmd.len() > 0);
     let mut reduced_cmd = Vec::new();
-    match reduce(stack, cmd, &mut reduced_cmd)? {
+    match reduce(stack, &stmt.words, &mut reduced_cmd)? {
         ReduceResult::Return(value) => return Ok(ExecSignal::Return(value)),
         ReduceResult::Continue => (),
     }
 
-    run(stack, reduced_cmd)
+    run(stack, reduced_cmd)   
 }
 
 fn run(stack: &mut Stack, mut cmd: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
     assert!(cmd.len() > 0);
     let cmd_obj: Box<Cmd> = match cmd.remove(0).value {
         Value::String(ref cmd_name) => {
-            let env = stack.get_local_env().unwrap_or(stack.get_module_env());
-            if let Value::Cmd(ref boxed) = env.get_clone(cmd_name)? {
+            let cmd = {
+                let mut rcmd = Err(ExecErr::NotCmd(cmd_name.to_string()));
+                if let Some(module) = stack.get_local_env() {
+                    match module.get(cmd_name) {
+                        Ok(cmd @ Value::Cmd(_))  => {
+                            rcmd = Ok(cmd);
+                        },
+                        _ => (),
+                    }
+                }
+
+                if rcmd.is_err() {      //rcmd.is_err() == true => no local command w/ cmd_name
+                    match stack.get_module_env().get(cmd_name) {
+                        Ok(cmd @ Value::Cmd(_)) => {
+                            rcmd = Ok(cmd);
+                        },
+                        _ => (),
+                    }
+                }
+                rcmd
+            }?;
+
+            if let Value::Cmd(ref boxed) = cmd {
                 boxed.clone()
             } else {
                 return Err(ExecErr::NotCmd(cmd_name.to_string()));
@@ -135,7 +163,7 @@ fn str_sub(stack: &Stack, sub: &StrSub) -> Result<CIR, ExecErr> {
                     &Namespace::Module => stack.get_module_env(),
                     &Namespace::Args => unimplemented!(),
                 };
-                let value = module.get_clone(name)?;
+                let value = module.get(name)?;
         
                 match value {
                     Value::Number(num) => result.push_str(&num.to_string()),

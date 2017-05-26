@@ -1,6 +1,7 @@
 #![allow(unused_variables)]
 use vm::internal::*;
 use std::cell::Cell;
+use parser::parse_program;
 
 const ELSE: &'static str = "else";
 const ELIF: &'static str = "elif";
@@ -133,7 +134,7 @@ impl IfParser for IfBool {
 
 impl IfParser for IfBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        parse_statement_seq(cir_extract!(arg => String, "If Body")?)
+        parse_program(cir_extract!(arg => String, "If Body")?)
             .map(|_| ())
             .map_err(|e| ExecErr::ParseError(e))
     }
@@ -159,7 +160,7 @@ impl IfParser for Trailing {
 
 impl IfParser for ElseBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        parse_statement_seq(cir_extract!(arg => String, "Else Body")?)
+        parse_program(cir_extract!(arg => String, "Else Body")?)
             .map(|_| ())
             .map_err(|err| ExecErr::ParseError(err))
     }
@@ -174,7 +175,7 @@ impl IfParser for ElifBool {
 
 impl IfParser for ElifBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        parse_statement_seq(cir_extract!(arg => String, "Elif Body")?)
+        parse_program(cir_extract!(arg => String, "Elif Body")?)
             .map(|_| ())
             .map_err(|err| ExecErr::ParseError(err))
     }
@@ -207,7 +208,7 @@ impl Cmd for If {
 
             if let Value::String(ref string) = arg.value {
                 if execute_next {
-                    program_seq = Some(parse_statement_seq(string.trim())
+                    program_seq = Some(parse_program(string.trim())
                                .expect("Should have been caught by check_step"));
                     break;
                 }
@@ -231,8 +232,8 @@ impl Cmd for If {
         }
 
         if let Some(program_seq) = program_seq {
-            for entry in program_seq.iter() {
-                match eval_some_cmd(stack, &entry.all())? {
+            for stmt in program_seq.iter() {
+                match eval_stmt(stack, stmt)? {
                     signal @ ExecSignal::Return(_) => return Ok(signal),
                     signal @ ExecSignal::Continue => return Ok(signal),
                     signal @ ExecSignal::Break => return Ok(signal),

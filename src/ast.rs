@@ -1,4 +1,5 @@
 use std::fmt;
+use std::slice::Iter;
 use std::ops::Deref;
 use namespace::Namespace;
 use line_info::LineInfo;
@@ -8,8 +9,26 @@ macro_rules! word {
     ($kind: expr, $line_info: expr) => { Word { kind: $kind, line_info: $line_info } }
 }
 
+#[derive(Clone, Debug)]
 pub struct Program {
     pub code: Vec<Statement>,
+}
+
+impl Program {
+    pub fn iter<'a>(&'a self) -> ProgramIter<'a> {
+        ProgramIter { code: self.code.iter() }
+    }
+}
+
+pub struct ProgramIter<'a> {
+    code: Iter<'a, Statement>
+}
+
+impl<'a> Iterator for ProgramIter<'a> {
+    type Item = &'a Statement;
+    fn next(&mut self) -> Option<&'a Statement> {
+        self.code.next()
+    }
 }
 
 #[derive(Clone, Debug)]

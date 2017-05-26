@@ -21,9 +21,7 @@ mproc test_proc { number1 number2} {
     mset test [add ^number1 ^number2];
 };").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 }
 
 #[test]
@@ -34,17 +32,13 @@ mproc test_proc { number1 number2} {
     mset test [add ^number1 ^number2];
 };").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let mut program = parser::parse_program("
 test_proc 21 3;
 ").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
     
     match vm.inspect_value("test") {
         Ok(val) => {
@@ -70,9 +64,7 @@ mproc test_proc { number1 number2} {
 mset test_2 [test_proc 3 5];
 ").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("test_1", Value::Number(8_f64)),
@@ -106,9 +98,7 @@ mproc test_proc { number1 number2} {
 mset test_2 [test_proc 3 5];
 ").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("test_1", Value::Number(1337_f64)),
@@ -138,9 +128,7 @@ mproc test_proc { number1 number2} {
 test_proc 1337 5;
 ").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("test_1", Value::Number(1337_f64)),
@@ -170,9 +158,7 @@ mproc test_proc { number1 number2} {
 mset test_2 [test_proc 1337 5];
 ").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("test_1", Value::Number(1337_f64)),
@@ -204,9 +190,7 @@ mproc test_proc { number1 number2} {
 mset test_1 [test_proc 1337 5];
 ").unwrap();
 
-    for stmt in program.code.iter() {
-        vm.eval_some_cmd(&stmt.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("test_1", Value::Number(-21_f64)),

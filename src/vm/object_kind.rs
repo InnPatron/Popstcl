@@ -27,10 +27,10 @@ impl Object for StdObject {
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<&Value, ExecErr> {
+	fn get(&self, name: &str) -> Result<Value, ExecErr> {
 		let entry = self.0.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
         has_permission!(entry, Permissions::ForeignModRead);
-        Ok(entry.value())
+        Ok(entry.value().clone())
 	}
 }
 

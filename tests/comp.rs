@@ -29,9 +29,7 @@ mset leeq_true_le [<= 123 100000];
 mset leeq_false_gr [<= 1337 -1];"
 ).unwrap();
 
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("eq_true", Value::Bool(true)),

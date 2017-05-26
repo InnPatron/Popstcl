@@ -1,15 +1,23 @@
 use super::internal::*;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub trait Module: Object {}
 
 /// Interface to an Env for modules loaded by popstcl commands
-#[derive(Clone, Debug)]
-pub struct StdModule(Env);
+#[derive(Clone, Debug, PartialEq)]
+pub struct StdModule(Rc<RefCell<Env>>);
 
 impl StdModule {
 	pub fn new(env: Env) -> StdModule {
-		StdModule(env)
+		StdModule(Rc::new(RefCell::new(env)))
 	}
+}
+
+impl From<InternalModule> for StdModule {
+    fn from(m: InternalModule) -> StdModule {
+        StdModule(m.0)
+    }
 }
 
 impl Module for StdModule {}
@@ -20,18 +28,10 @@ impl ToString for StdModule {
     }
 }
 
-impl PartialEq for StdModule {
-    fn eq(&self, other: &StdModule) -> bool {
-        self.0 == other.0
-    }
-}
-
-impl Eq for StdModule {}
-
 impl Object for StdModule {
 
 	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
-		let env = &mut self.0;
+		let env = &mut self.0.borrow_mut();
         if let Some(entry) = env.get(name) {
             has_permission!(entry, Permissions::ForeignModWrite);
         }
@@ -41,48 +41,36 @@ impl Object for StdModule {
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<&Value, ExecErr> {
-		let entry = self.0.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
+	fn get(&self, name: &str) -> Result<Value, ExecErr> {
+        let env = self.0.borrow();
+		let entry = env.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
         has_permission!(entry, Permissions::ForeignModRead);
-        Ok(entry.value())
+        Ok(entry.value().clone())
 	}
 }
 
 /// Interface for the original modules created by a popstcl vm instance
-#[derive(Clone, Debug)]
-pub struct InternalModule(Env);
+#[derive(Clone, Debug, PartialEq)]
+pub struct InternalModule(Rc<RefCell<Env>>);
 
 impl InternalModule {
 	pub fn new(env: Env) -> InternalModule {
-		InternalModule(env)
+		InternalModule(Rc::new(RefCell::new(env)))
 	}
+}
 
-    pub fn into_foreign(self) -> StdModule {
-        StdModule(self.0)
+impl From<StdModule> for InternalModule {
+    fn from(module: StdModule) -> InternalModule {
+        InternalModule(module.0)
     }
 }
 
 impl Module for InternalModule {}
 
-impl ObjectEnv for InternalModule {
-
-	fn get_env(&self) -> &Env {
-		&self.0
-	}
-
-	fn clone_env(&self) -> Env {
-		self.0.clone()
-	}
-
-	fn get_env_mut(&mut self) -> &mut Env {
-		&mut self.0
-	}
-}
-
 impl Object for InternalModule {
 
 	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
-		let env = &mut self.0;
+		let env = &mut self.0.borrow_mut();
         if let Some(entry) = env.get(name) {
             has_permission!(entry, Permissions::InternalWrite);
         }
@@ -92,17 +80,18 @@ impl Object for InternalModule {
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<&Value, ExecErr> {
-		let entry = self.0.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
+	fn get(&self, name: &str) -> Result<Value, ExecErr> {
+		let env = self.0.borrow();
+        let entry = env.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
         has_permission!(entry, Permissions::InternalRead);
-        Ok(entry.value())
+        Ok(entry.value().clone())
 	}
 }
 
 /// Interface to an Env in a subprocess context.
 /// All permission options are ignored b/c LocalModule is a temporary thing only.
 /// Anything is free to inspect or insert into it...
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LocalModule(Env);
 
 impl LocalModule {
@@ -113,21 +102,6 @@ impl LocalModule {
 
 impl Module for LocalModule {}
 
-impl ObjectEnv for LocalModule {
-
-	fn get_env(&self) -> &Env {
-		&self.0
-	}
-
-	fn clone_env(&self) -> Env {
-		self.0.clone()
-	}
-
-	fn get_env_mut(&mut self) -> &mut Env {
-		&mut self.0
-	}
-}
-
 impl Object for LocalModule {
 
 	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
@@ -135,10 +109,11 @@ impl Object for LocalModule {
         Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<&Value, ExecErr> {
+	fn get(&self, name: &str) -> Result<Value, ExecErr> {
 	    Ok(self.0.get(name)
                 .map(|entry| entry.value())
                 .ok_or(ExecErr::UnknownBinding(name.to_string()))?
+                .clone()
           )
 	}
 }

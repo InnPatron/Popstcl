@@ -1,4 +1,5 @@
 use vm::internal::*;
+use parser::parse_program;
 
 #[derive(Clone, Debug)]
 pub struct While;
@@ -10,11 +11,11 @@ impl Cmd for While {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let conditional_stmt = cir_extract!(args[0] => String, "While Condition")?;
+        let conditional_program = cir_extract!(args[0] => String, "While Condition")?;
         let while_body = cir_extract!(args[1] => String, "While Body")?;
 
-        let conditional_stmt = parse_statement_seq(conditional_stmt)?;
-        let while_body = parse_statement_seq(while_body)?;
+        let conditional_program = parse_program(conditional_program)?;
+        let while_body = parse_program(while_body)?;
 
         'popstcl_loop: loop {
             //execute conditional
@@ -24,8 +25,8 @@ impl Cmd for While {
             //TODO: How should the conditional value be captured?
             //Should Return Signals be propogated?
             let mut conditional = None;
-            for entry in conditional_stmt.iter() {
-                match eval_some_cmd(stack, &entry.all())? {
+            for stmt in conditional_program.iter() {
+                match eval_stmt(stack, &stmt)? {
                     ExecSignal::Return(conditional_return) => {
                         conditional = conditional_return;
                         //TODO: replace with 'break conditional_return;'
@@ -50,8 +51,8 @@ impl Cmd for While {
             }
 
             //Execute While body
-            for entry in while_body.iter() {
-                match eval_some_cmd(stack, &entry.all())? {
+            for stmt in while_body.iter() {
+                match eval_stmt(stack, &stmt)? {
                     signal @ ExecSignal::Return(_) => return Ok(signal),    //propogate Return
                     ExecSignal::NextInstruction(_) => (),
                     ExecSignal::Continue => continue 'popstcl_loop,

@@ -15,9 +15,7 @@ while { return [< @index @target]; } {
     mset index [add @index 1];
 };").unwrap();
 
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("index", Value::Number(100.)),
@@ -48,9 +46,7 @@ while { return [< @index @target]; } {
     mset index [add @index 1];
 };").unwrap();
 
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("index", Value::Number(57.)),

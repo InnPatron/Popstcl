@@ -32,7 +32,6 @@ impl EnvBuilder {
         builder.insert_value("continue", Value::Cmd(Box::new(Continue)), all_readonly!());
         builder.insert_value("break", Value::Cmd(Box::new(Break)), all_readonly!());
 
-        builder.insert_value("load", Value::Cmd(Box::new(Load)), all_readonly!());
         builder.insert_value("make", Value::Cmd(Box::new(MakeModule)), all_readonly!());
 
         builder.insert_value("==", Value::Cmd(Box::new(Eq)), all_readonly!());

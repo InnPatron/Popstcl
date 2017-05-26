@@ -50,14 +50,13 @@ gset a @obj.foo;
 gset b @obj.bar;")
                 .unwrap();
         let mut temp_mod = InternalModule::new(env);
-        for entry in program.code.iter() {
-            eval_some_cmd(&mut Stack::new_module(&mut temp_mod), &entry.all()).unwrap();
-        }
+        eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
+        
 
         let inspecting = vec![("a", Value::Number(1337_f64)), ("b", Value::Number(-1_f64))];
 
         for pair in inspecting.iter() {
-            match temp_mod.get_clone(pair.0) {
+            match temp_mod.get(pair.0) {
                 Ok(val) => {
                     assert_eq!(pair.1, val);
                 }
@@ -98,13 +97,12 @@ gset b @obj.nested.bar;")
                 .unwrap();
 
         let mut temp_mod = InternalModule::new(env);
-        for entry in program.code.iter() {
-            eval_some_cmd(&mut Stack::new_module(&mut temp_mod), &entry.all()).unwrap();
-        }
+        eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
+        
 
         let inspecting = vec![("a", Value::Number(1337_f64)), ("b", Value::Number(-1_f64))];
         for pair in inspecting.iter() {
-            match temp_mod.get_clone(pair.0) {
+            match temp_mod.get(pair.0) {
                 Ok(val) => {
                     assert_eq!(pair.1, val);
                 }

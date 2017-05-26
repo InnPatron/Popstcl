@@ -30,9 +30,7 @@ if @foo {
     mset output 1;
 };
     ").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
@@ -59,9 +57,7 @@ if @foo {
     mset output 1;
 };
     ").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
@@ -97,9 +93,7 @@ if @foo {
     mset output 9000;
 };
     ").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
@@ -135,9 +129,7 @@ if @foo {
     mset output 9000;
 };
     ").unwrap();
-    for entry in program.code.iter() {
-        vm.eval_some_cmd(&entry.all()).unwrap();
-    }
+    vm.eval_program(&program).unwrap();
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
