@@ -15,6 +15,31 @@ Explicit **non-goals**:
 * Strive to be used in a production environment (That being said, I do plan on making a text adventure game as a rite of passage)
 * Full compatiblity with vanilla Tcl
 
+## Organization
+This Git repository is split into two directories:
+> popstcl: core language constructs and virtual machine
+> ppostcl-i: REPL for the language
+
+## Building
+Popstcl is written in Rust. [Compiler installer here](https://www.rust-lang.org/en-US/install.html). By default, the Rust package manager [Cargo](https://crates.io/install) is installed as well. Open up a terminal and navigate to the popstcl-i directory and type:
+
+~~~
+cargo build
+~~~
+
+(This may take a while). An executable file should appear within popstcl-i/target/debug. Alternatively, within the popstcl-i directory, you may type:
+
+~~~
+cargo run
+~~~
+
+To directly run the program.
+
+## The REPL
+Currently, popstcl-i is an extremely barebones REPL. 
+
+Hint: Type in 'q' and ENTER to quit the REPL.
+
 ## Differences to Tcl
 
 ### Command Invocation
