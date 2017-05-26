@@ -18,6 +18,9 @@ Explicit **non-goals**:
 ## Versioning
 Currently, releases follow semver for the Popstcl library.
 
+## License
+Released under the [MIT License](https://opensource.org/licenses/MIT) (See LICENSE-MIT). Good luck using this for any commercial projects :|
+
 ## Organization
 This Git repository is split into two directories:
 > popstcl: core language constructs and virtual machine
