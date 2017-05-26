@@ -43,7 +43,7 @@ mlet module_level_name @value;
 'm' stands for "module-level."
 
 ### Comparators
-Use math symbols and return bools
+Use math symbols and return bools.
 Example:
 ~~~
 mset truth [== 1 1];
@@ -73,13 +73,15 @@ proc proc_name { arg_1 arg_2 } {
 ### Flow control
 
 #### If
-~~~ if @bool_value {
+~~~ 
+if @bool_value {
 	//body
 } elif @bool_value {
 	//body
 } else {
 	//body
 };
+~~~
 
 #### While
 ~~~
