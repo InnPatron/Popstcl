@@ -1,6 +1,6 @@
 [package]
 name = "popstcl"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Random_Civvy <vomalexander@gmail.com>"]
 
 [dependencies]
