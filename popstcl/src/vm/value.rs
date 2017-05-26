@@ -101,8 +101,8 @@ impl fmt::Display for Value {
                                                                   );
                                         write!(f, "List: {}", vec)
                                      },
-            &Value::Object(_) => write!(f, "OBJ"),
-            &Value::Module(_) => unimplemented!(),
+            &Value::Object(_) => write!(f, "OBJ"),      //TODO: better display
+            &Value::Module(_) => write!(f, "MODULE"),   //TODO: better display
         }
     }
 }

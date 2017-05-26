@@ -47,6 +47,8 @@ impl EnvBuilder {
         builder.insert_value("list_remove", Value::Cmd(Box::new(Remove)), all_readonly!());
         builder.insert_value("list_pop", Value::Cmd(Box::new(Pop)), all_readonly!());
         builder.insert_value("list_append", Value::Cmd(Box::new(Append)), all_readonly!());
+
+        builder.insert_value("print", Value::Cmd(Box::new(Print)), all_readonly!());
         
         builder
     }
