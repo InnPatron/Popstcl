@@ -17,8 +17,8 @@ Explicit **non-goals**:
 
 ## Organization
 This Git repository is split into two directories:
-> popstcl: core language constructs and virtual machine
-> ppostcl-i: REPL for the language
+* popstcl: core language constructs and virtual machine
+* ppostcl-i: REPL for the language
 
 ## Building
 Popstcl is written in Rust. [Compiler installer here](https://www.rust-lang.org/en-US/install.html). By default, the Rust package manager [Cargo](https://crates.io/install) is installed as well. Open up a terminal and navigate to the popstcl-i directory and type:

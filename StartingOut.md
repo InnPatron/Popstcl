@@ -10,13 +10,13 @@ command stuff;
 ~~~
 
 ## Data Types (Incomplete)
-> Number (floating point, 64bits)
-> Bool
-> String (UTF-8)
-> List
-> Object (Dictionary)
-> Module (Dictionary)
-> Cmd
+* Number (floating point, 64bits)
+* Bool
+* String (UTF-8)
+* List
+* Object (Dictionary)
+* Module (Dictionary)
+* Cmd
 
 ## Variable Substitutions
 ~~~
