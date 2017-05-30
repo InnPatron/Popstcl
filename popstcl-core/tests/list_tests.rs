@@ -1,9 +1,9 @@
-extern crate popstcl;
+extern crate popstcl_core;
 
-use popstcl::vm::internal::*;
-use popstcl::parser::*;
-use popstcl::vm::user::basic_vm;
-use popstcl::vm::internal::Value::*;
+use popstcl_core::vm::internal::*;
+use popstcl_core::parser::*;
+use popstcl_core::vm::user::basic_vm;
+use popstcl_core::vm::internal::Value::*;
 
 #[test]
 fn list_eq() {

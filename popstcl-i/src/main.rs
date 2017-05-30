@@ -1,6 +1,6 @@
-extern crate popstcl;
+extern crate popstcl_core;
 
-use popstcl::vm::basic_vm;
+use popstcl_core::vm::basic_vm;
 
 use std::io;
 use std::io::Write;
