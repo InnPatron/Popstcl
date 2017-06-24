@@ -1,7 +1,7 @@
 extern crate popstcl_core;
 
 use popstcl_core::vm::internal::*;
-use popstcl_core::parser::*;
+use popstcl_core::parser;
 use popstcl_core::vm::user::basic_vm;
 use popstcl_core::vm::internal::Value::*;
 

@@ -5,7 +5,7 @@ use parser::parse_program;
 pub struct MakeModule;
 
 impl MakeModule {
-    pub fn make_module(stack: &mut Stack, parent_module: StdModule, binding: &str, module_code: &str) -> Result<ExecSignal, ExecErr> {
+    pub fn make_module(stack: &mut Stack, parent_module: StdModule, binding: &str, module_code: &str, binding_info: &DebugInfo) -> Result<ExecSignal, ExecErr> {
         //parse loaded module
         let program = parse_program(&module_code).unwrap();
         let mut temp_module = InternalModule::from(parent_module);
@@ -15,7 +15,13 @@ impl MakeModule {
         }
 
         //Set new binding
-        stack.get_module_env_mut().insert(binding, Value::Module(temp_module.into()), observable_internal!())?;
+        stack.get_module_env_mut()
+             .insert(binding, Value::Module(temp_module.into()), observable_internal!())
+             .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                                dinsertion!(binding_info.line_info.clone(),
+                                                            binding_info)
+                                                )
+                      )?;
         Ok(ExecSignal::NextInstruction(None))
     }
 }
@@ -26,23 +32,26 @@ impl Cmd for MakeModule {
 
         let parent_module;
         let binding;
+        let binding_info;
         let module_code;
 
         if args.len() == 2 {
             exact_args!(&args, 2);
             parent_module = StdModule::new(EnvBuilder::basic_env().consume());
             binding = cir_extract!(args[0] => String, "Module Name (Single)")?;
+            binding_info = &args[0].dinfo;
             module_code = cir_extract!(args[1] => String, "Module Code (String)")?;
         } else if args.len() == 3 {
             exact_args!(&args, 3);
             parent_module = cir_extract!(args[0] => Module, "Module for execution")?;
             binding = cir_extract!(args[1] => String, "Module Name (Single)")?;
+            binding_info = &args[1].dinfo;
             module_code = cir_extract!(args[2] => String, "Module Code (String)")?;
         } else {
             return Err(ArityErr::Min { min: 2, found: args.len() }.into());
         }
 
-        MakeModule::make_module(stack, parent_module, &binding, &module_code)
+        MakeModule::make_module(stack, parent_module, &binding, &module_code, binding_info)
     }
 }
 

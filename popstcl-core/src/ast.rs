@@ -1,6 +1,7 @@
 use std::fmt;
 use std::slice::Iter;
 use std::ops::Deref;
+use std::rc::Rc;
 use namespace::Namespace;
 use line_info::LineInfo;
 
@@ -12,6 +13,7 @@ macro_rules! word {
 #[derive(Clone, Debug)]
 pub struct Program {
     pub code: Vec<Statement>,
+    pub program_string: Rc<String>
 }
 
 impl Program {
@@ -34,6 +36,8 @@ impl<'a> Iterator for ProgramIter<'a> {
 #[derive(Clone, Debug)]
 pub struct Statement {
     pub words: Vec<Word>,
+    pub original_string: Rc<String>,
+    pub line_info: LineInfo,
 }
 
 impl PartialEq for Statement {
@@ -53,9 +57,16 @@ impl PartialEq for Statement {
 }
 
 impl Statement {
-    pub fn new(words: Vec<Word>) -> Statement {
+    pub fn new(words: Vec<Word>, original_string: Rc<String>) -> Statement {
         assert!(words.len() > 0);
-        Statement { words: words }
+        let line_info = LineInfo::collapse(&words.iter()
+                                                 .map(|word: &Word| word.line_info.clone())
+                                                 .collect::<Vec<_>>());
+        Statement { 
+            words: words, 
+            original_string: original_string,
+            line_info: line_info
+        }
     }
 
     pub fn first(&self) -> Word {
@@ -110,64 +121,6 @@ pub enum WordKind {
     Path(Path),
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub struct Atom(pub String);
-
-impl Deref for Atom {
-    type Target = String;
-    fn deref(&self) -> &String {
-        &self.0
-    }
-}
-
-impl From<String> for Atom {
-    fn from(val: String) -> Atom {
-        Atom(val)
-    }
-}
-
-impl Atom {
-    pub fn to_string(&self) -> String {
-        self.0.clone()
-    }
-}
-
-impl fmt::Display for Atom {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-#[derive(Clone, Debug, PartialEq)]
-pub struct Path(pub Vec<Atom>);
-
-impl fmt::Display for self::Path {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", &self.to_string())
-    }
-}
-
-impl Path {
-    pub fn to_string(&self) -> String {
-        assert!(self.0.len() > 0);
-        let mut iter = self.0.iter();
-        let first = iter.next().unwrap();
-        let mut result = first.to_string();
-        for segment in iter {
-            result.push_str(*&segment);
-        }
-        result
-    }
-}
-
-impl From<String> for Path {
-    fn from(string: String) -> Path {
-        let mut path = Path(Vec::new());
-        path.0.push(From::from(string));
-        path
-    }
-}
-
 impl WordKind {
     pub fn str_sub_from(vec: Vec<StrData>) -> WordKind {
         WordKind::StrSub(StrSub(vec))
@@ -211,6 +164,84 @@ impl fmt::Display for WordKind {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+pub struct Atom(pub String);
+
+impl Deref for Atom {
+    type Target = String;
+    fn deref(&self) -> &String {
+        &self.0
+    }
+}
+
+impl From<String> for Atom {
+    fn from(val: String) -> Atom {
+        Atom(val)
+    }
+}
+
+impl Atom {
+    pub fn to_string(&self) -> String {
+        self.0.clone()
+    }
+}
+
+impl fmt::Display for Atom {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Path(pub Vec<PathSegment>);
+
+impl fmt::Display for self::Path {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", &self.to_string())
+    }
+}
+
+impl Path {
+    pub fn to_string(&self) -> String {
+        assert!(self.0.len() > 0);
+        let mut iter = self.0.iter();
+        let first = iter.next().unwrap();
+        let mut result = first.segment.to_string();
+        for segment in iter {
+            result.push_str(&*segment.segment);
+        }
+        result
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct PathSegment {
+    pub segment: Atom,
+    pub line_info: LineInfo
+}
+
+impl PathSegment {
+    pub fn new(segment: Atom, line_info: LineInfo) -> PathSegment {
+        PathSegment {
+            segment: segment,
+            line_info: line_info
+        }
+    }
+}
+
+impl PartialEq for PathSegment {
+    fn eq(&self, other: &PathSegment) -> bool {
+        self.segment == other.segment
+    }
+}
+
+impl Deref for PathSegment {
+    type Target = Atom;
+    fn deref(&self) -> &Self::Target {
+        &self.segment
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
 pub struct StrSub(pub Vec<StrData>);
 
 impl fmt::Display for StrSub {
@@ -226,18 +257,30 @@ impl fmt::Display for StrSub {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug)]
 pub enum StrData {
     String(String),
-    VarSub(String, Namespace),
+    VarSub(String, Namespace, LineInfo),
     CmdSub,
 }
 
-impl StrData {
-    pub fn to_string(&self) -> String {
+impl PartialEq for StrData {
+    fn eq(&self, other: &StrData) -> bool {
+        use self::StrData::*;
+        match (self, other) {
+            (&String(ref lhs), &String(ref rhs)) => lhs == rhs,
+            (&VarSub(ref lhstr, ref lhnamespace, _), &VarSub(ref rhstr, ref rhnamespace, _)) => lhstr == rhstr && lhnamespace == rhnamespace,
+            (&CmdSub, &CmdSub) => unimplemented!(),
+            _ => false,
+        }
+    }
+}
+
+impl ToString for StrData {
+    fn to_string(&self) -> String {
         match self {
             &StrData::String(ref s) => s.clone(),
-            &StrData::VarSub(ref s, ref namespace) => {
+            &StrData::VarSub(ref s, ref namespace, _) => {
                 let mut r = String::new();
                 match namespace {
                     &Namespace::Local => r.push('$'),
@@ -250,35 +293,5 @@ impl StrData {
 
             &StrData::CmdSub => unimplemented!(),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    #![allow(unused_imports)]
-    use super::*;
-    use namespace::Namespace;
-    #[test]
-    fn entry_eq_test() {
-        let word = "yoyo";
-        assert_eq!(Statement::new(vec![
-                                        word!(WordKind::Atom(From::from(word.to_string())), 
-                                                            location!(0)
-                                            )
-                                      ]),
-                   Statement::new(vec![
-                                        word!(WordKind::Atom(From::from(word.to_string())), 
-                                                            location!(0)
-                                            )
-                                      ])
-                   );
-
-        assert_eq!(Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Local), location!(0))]),
-                   Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Local), location!(0))])
-                   );
-
-        assert_eq!(Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Module), location!(0))]),
-                   Statement::new(vec![word!(WordKind::VarSub(From::from(word.to_string()), Namespace::Module), location!(0))])
-                   );
     }
 }

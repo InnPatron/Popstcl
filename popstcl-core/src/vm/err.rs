@@ -1,35 +1,34 @@
 use std::convert::From;
-use super::internal::{CIR, ParseErr, Permissions};
+use super::internal::{CIR, ParseErr, Permissions, DebugInfo};
 use ast::*;
 use namespace::Namespace;
+use line_info::LineInfo;
 
 #[derive(Debug)]
 pub enum ExecErr {
-    LocalOpInNonlocalContext,
     UnknownBinding(String),
     NotCmd(String),
 
     Arity(ArityErr),
-    NoArguments,
+    VarSubErr(VarSubErr),
 
     InvalidArg { expect: String, found: CIR },
     InvalidNamespace { expect: String, found: Namespace },
 
     MissingArg(String),
     UnexpectedArg(CIR),
-    UnexpectedWord(Word),
 
     InvalidIndex(usize),
-    VarSubOnCmd(String),
+    VarSubErrOnCmd(String),
 
     NoRet(Word),
-
+    
     CmdReturned(Word),
-
-    NoPermission(Permissions),
     ParseError(ParseErr),
-    UnknownField(String, Path),
-    NonobjectFieldAccess(String, Path),
+    ObjectErr(ObjectErr, DebugInfo),
+    NoLocalModule,
+
+    Generic(String),
 }
 
 #[derive(Debug)]
@@ -47,6 +46,26 @@ impl From<ArityErr> for ExecErr {
     fn from(a: ArityErr) -> ExecErr {
         ExecErr::Arity(a)
     }
+}
+
+#[derive(Debug)]
+pub enum VarSubErr {
+    UnknownBinding(String, Namespace, DebugInfo),
+    NonobjectFieldAccess(String, DebugInfo),
+    NoArgs(DebugInfo),
+    NoLocalModule(DebugInfo),
+}
+
+impl From<VarSubErr> for ExecErr {
+    fn from(e: VarSubErr) -> ExecErr {
+        ExecErr::VarSubErr(e)
+    }
+}
+
+#[derive(Debug)]
+pub enum ObjectErr {
+    UnknownField(String),
+    InsufficientPermissions(Permissions),
 }
 
 impl From<ParseErr> for ExecErr {

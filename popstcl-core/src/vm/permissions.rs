@@ -4,7 +4,7 @@ use std::collections::HashSet;
 macro_rules! has_permission {
     ($entry: expr, $permission: expr) => {{
         if $entry.permissions().has_permission($permission) == false {
-            return Err(ExecErr::NoPermission($permission))
+            return Err(ObjectErr::InsufficientPermissions($permission))
         }
     }};
 }

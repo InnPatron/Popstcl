@@ -30,7 +30,7 @@ impl ToString for StdModule {
 
 impl Object for StdModule {
 
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
+	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
 		let env = &mut self.0.borrow_mut();
         if let Some(entry) = env.get(name) {
             has_permission!(entry, Permissions::ForeignModWrite);
@@ -41,9 +41,9 @@ impl Object for StdModule {
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<Value, ExecErr> {
+	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
         let env = self.0.borrow();
-		let entry = env.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
+		let entry = env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?;
         has_permission!(entry, Permissions::ForeignModRead);
         Ok(entry.value().clone())
 	}
@@ -69,7 +69,7 @@ impl Module for InternalModule {}
 
 impl Object for InternalModule {
 
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
+	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
 		let env = &mut self.0.borrow_mut();
         if let Some(entry) = env.get(name) {
             has_permission!(entry, Permissions::InternalWrite);
@@ -80,9 +80,9 @@ impl Object for InternalModule {
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<Value, ExecErr> {
+	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
 		let env = self.0.borrow();
-        let entry = env.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
+        let entry = env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?;
         has_permission!(entry, Permissions::InternalRead);
         Ok(entry.value().clone())
 	}
@@ -104,15 +104,15 @@ impl Module for LocalModule {}
 
 impl Object for LocalModule {
 
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
+	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
 		self.0.insert(name, value, permissions);
         Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<Value, ExecErr> {
+	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
 	    Ok(self.0.get(name)
                 .map(|entry| entry.value())
-                .ok_or(ExecErr::UnknownBinding(name.to_string()))?
+                .ok_or(ObjectErr::UnknownField(name.to_string()))?
                 .clone()
           )
 	}

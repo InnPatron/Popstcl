@@ -16,16 +16,20 @@ impl Cmd for Let {
         mod_args!(&args, 2);
         let module = get_module!(self.0, stack);
 
-        for (name, value) in args.iter().tuples() {
-            let name = cir_extract!(name => String)?;
+        for (maybe_name, value) in args.iter().tuples() {
+            let name = cir_extract!(maybe_name => String)?;
     
             let value = value.clone_value();
 
             module.insert(name, 
 						  value, 
 						  observable_internal!(),
-
-			)?;
+                          )
+                  .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                                     dinsertion!(maybe_name.dinfo.line_info.clone(),
+                                                                 maybe_name.dinfo)
+                                                     )
+                           )?;
         }
         Ok(ExecSignal::NextInstruction(None))
     }
@@ -39,13 +43,19 @@ impl Cmd for Set {
         exact_args!(&args, 2);
         let module = get_module!(self.0, stack);
 
-        let name = cir_extract!(args[0] => String)?;
+        let maybe_name = &args[0];
+        let name = cir_extract!(maybe_name => String)?;
     
         let value: Value = args[1].clone_value();
 
         module.insert(name, 
                       value.clone(), 
-                      observable_internal!());
+                      observable_internal!())
+              .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                                 dinsertion!(maybe_name.dinfo.line_info.clone(),
+                                                             maybe_name.dinfo)
+                                                )
+                      )?;
         Ok(ExecSignal::NextInstruction(Some(value)))
     }
 }

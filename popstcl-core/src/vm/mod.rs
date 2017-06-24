@@ -9,12 +9,13 @@ pub mod user {
     pub use super::object::Object;
     pub use super::object_kind::StdObject;
     pub use super::env_builder::EnvBuilder;
+    pub use super::debug_info::{DebugInfo, DebugKind};
 }
 
 pub mod internal {
     pub use super::cmd::Cmd;
     pub use super::exec_signal::ExecSignal;
-    pub use super::err::{ExecErr, ArityErr};
+    pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
     pub use super::value::{Value, IntoValue};
     pub use super::object_kind::{ ObjectKind, StdObject };
@@ -24,6 +25,7 @@ pub mod internal {
     pub use super::env_entry::EnvEntry;
     pub use super::executor::{eval_program, eval_stmt};
     pub use super::permissions::{EntryPermissions, Permissions};
+    pub use super::debug_info::{DebugInfo, DebugKind};
 
     pub use namespace::Namespace;
     pub use parser::err::ParseErr;
@@ -38,6 +40,8 @@ mod permissions;
 mod value;
 mod err;
 mod cmd;
+#[macro_use]
+mod debug_info;
 mod executor;
 mod stack;
 mod object_kind;
@@ -90,7 +94,7 @@ impl Vm {
         eval_program(&mut Stack::new_module(&mut self.main_module), &program)
     }
 
-    pub fn inspect_value(&self, name: &str) -> Result<Value, ExecErr> {
+    pub fn inspect_value(&self, name: &str) -> Result<Value, ObjectErr> {
         self.main_module.get(name)
     }
 }

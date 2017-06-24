@@ -1,6 +1,11 @@
 use std::ops::Range;
 
 #[macro_use]
+macro_rules! dummy {
+    () => { LineInfo {range: 0..0}}
+}
+
+#[macro_use]
 macro_rules! range {
     ($start: expr, $exclusive: expr) => {LineInfo { range: $start..$exclusive } }
 }
@@ -10,7 +15,7 @@ macro_rules! location {
     ($location: expr) => { LineInfo { range: $location..$location+1 } }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct LineInfo {
     pub range: Range<usize>
 }

@@ -8,4 +8,5 @@ pub enum ParseErr {
     UnexpectedToken(Token),
     NotBool(String),
     NoMoreTokens,
+    MissingSemicolon,
 }

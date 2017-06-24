@@ -16,7 +16,7 @@ impl StdObject {
 }
 
 impl Object for StdObject {
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ExecErr> {
+	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
 		let env = &mut self.0;
         if let Some(entry) = env.get(name) {
             has_permission!(entry, Permissions::ForeignModWrite);
@@ -27,8 +27,8 @@ impl Object for StdObject {
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<Value, ExecErr> {
-		let entry = self.0.get(name).ok_or(ExecErr::UnknownBinding(name.to_string()))?;
+	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
+		let entry = self.0.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?;
         has_permission!(entry, Permissions::ForeignModRead);
         Ok(entry.value().clone())
 	}

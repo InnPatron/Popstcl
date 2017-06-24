@@ -6,7 +6,7 @@ pub mod macros {
             match $namespace {
                 Namespace::Local => {
                     $stack.get_local_env_mut()
-                    .ok_or(ExecErr::LocalOpInNonlocalContext)?
+                    .ok_or(ExecErr::NoLocalModule)?
                 },
 
                 Namespace::Module => {

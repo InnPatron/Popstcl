@@ -13,7 +13,7 @@ impl Cmd for Proc {
         let module = match self.0 {
             Namespace::Local => {
                 stack.get_local_env_mut()
-                .ok_or(ExecErr::LocalOpInNonlocalContext)?
+                .ok_or(ExecErr::NoLocalModule)?
             },
 
             Namespace::Module => {
@@ -23,7 +23,8 @@ impl Cmd for Proc {
             Namespace::Args => unimplemented!(),
         };
 
-        let name = cir_extract!(args[0] => String, "Name of procedure")?;
+        let maybe_name = &args[0];
+        let name = cir_extract!(maybe_name => String, "Name of procedure")?;
         let proc_args = {
             let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?;
             let proc_args = parse_arg_list(proc_args)?
@@ -33,7 +34,7 @@ impl Cmd for Proc {
                 if let WordKind::Atom(atom) = arg.kind {
                     string_args.push(atom);
                 } else {
-                    return Err(ExecErr::UnexpectedWord(arg.clone()));
+                    return Err(ExecErr::Generic(format!("Arg list must consist only of atoms {:?}", arg.clone())));
                 }
             }
             string_args
@@ -42,7 +43,12 @@ impl Cmd for Proc {
         let proc_body = parse_program(cir_extract!(args[2] => String, "Body of procedure")?)?;
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
-        module.insert(name, Value::Cmd(Box::new(new_cmd)), observable_internal!())?;
+        module.insert(name, Value::Cmd(Box::new(new_cmd)), observable_internal!())
+              .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                                 dinsertion!(maybe_name.dinfo.line_info.clone(),
+                                                             maybe_name.dinfo)
+                                                 )
+                       )?;
         Ok(ExecSignal::NextInstruction(None))
     }
 }
