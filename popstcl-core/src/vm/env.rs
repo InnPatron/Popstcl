@@ -38,8 +38,8 @@ mod tests {
                    );
         let obj_1 = {
             let mut obj = StdObject::empty();
-            obj.insert("foo", Value::Number(1337_f64), all_read_write!());
-            obj.insert("bar", Value::Number(-1_f64), all_read_write!());
+            obj.insert("foo", (1337_f64).into_value(), all_read_write!());
+            obj.insert("bar", (-1_f64).into_value(), all_read_write!());
             Value::Object(obj)
         };
         env.bindings
@@ -53,7 +53,7 @@ gset b @obj.bar;")
         eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
         
 
-        let inspecting = vec![("a", Value::Number(1337_f64)), ("b", Value::Number(-1_f64))];
+        let inspecting = vec![("a", (1337_f64).into_value()), ("b", (-1_f64).into_value())];
 
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
@@ -79,8 +79,8 @@ gset b @obj.bar;")
                    );
         let obj_1 = {
             let mut obj = StdObject::empty();
-            obj.insert("foo", Value::Number(1337_f64), all_read_write!());
-            obj.insert("bar", Value::Number(-1_f64), all_read_write!());
+            obj.insert("foo", (1337_f64).into_value(), all_read_write!());
+            obj.insert("bar", (-1_f64).into_value(), all_read_write!());
             obj
         };
         let obj_2 = {
@@ -100,7 +100,7 @@ gset b @obj.nested.bar;")
         eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
         
 
-        let inspecting = vec![("a", Value::Number(1337_f64)), ("b", Value::Number(-1_f64))];
+        let inspecting = vec![("a", (1337_f64).into_value()), ("b", (-1_f64).into_value())];
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {

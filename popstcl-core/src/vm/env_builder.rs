@@ -77,13 +77,13 @@ impl EnvBuilder {
 #[cfg(test)]
 mod tests {
     use super::EnvBuilder;
-    use vm::internal::{Value, EntryPermissions};
+    use vm::internal::{Value, EntryPermissions, IntoValue};
 
     #[test]
     fn builder() {
         let mut builder = EnvBuilder::basic_env();
-        builder.insert_value("test", Value::Number(5.0), EntryPermissions::new().internal_read().external_read());
+        builder.insert_value("test", (5.0).into_value(), EntryPermissions::new().internal_read().external_read());
         let env = builder.build();
-        assert_eq!(Value::Number(5.0), env.get("test").expect("Missing binding \'test\'").clone_value());
+        assert_eq!((5.0).into_value(), env.get("test").expect("Missing binding \'test\'").clone_value());
     }
 }

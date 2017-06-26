@@ -2,6 +2,7 @@ use vm::internal::{Value, StdModule, DebugInfo, DebugKind};
 use ast::*;
 
 use std::fmt;
+use std::cell::Ref;
 
 /// Command Intermediate Representation
 #[derive(Clone, Debug)]
@@ -17,16 +18,16 @@ impl CIR {
     }
 
     pub fn try_get_number(&self) -> Option<f64> {
-        if let Value::Number(n) = self.value {
-            Some(n)
+        if let Value::Number(ref n) = self.value {
+            Some(n.inner())
         } else {
             None
         }
     }
 
     pub fn try_get_bool(&self) -> Option<bool> {
-        if let Value::Bool(b) = self.value {
-            Some(b)
+        if let Value::Bool(ref b) = self.value {
+            Some(*b.inner())
         } else {
             None
         }
@@ -40,17 +41,17 @@ impl CIR {
 		}
 	} 
 
-    pub fn try_get_list(&self) -> Option<&Vec<Value>> {
+    pub fn try_get_list(&self) -> Option<Ref<Vec<Value>>> {
         if let Value::List(ref vec) = self.value {
-            Some(vec)
+            Some(vec.inner())
         } else {
             None
         }
     }
 
-    pub fn try_get_string(&self) -> Option<&str> {
+    pub fn try_get_string(&self) -> Option<Ref<String>> {
         if let Value::String(ref s) = self.value {
-            Some(s)
+            Some(s.inner())
         } else {
             None
         }

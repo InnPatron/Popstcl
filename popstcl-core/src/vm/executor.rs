@@ -1,6 +1,6 @@
 use ast::*;
 use namespace::Namespace;
-use super::internal::{Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind};
+use super::internal::{Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind, IntoValue};
 use line_info::LineInfo;
 
 pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<(), ExecErr> {
@@ -60,7 +60,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                 let cmd = {
                     let mut rcmd = Err(ExecErr::NotCmd(cmd_name.to_string()));
                     if let Some(module) = self.stack.get_local_env() {
-                        match module.get(cmd_name) {
+                        match module.get(&cmd_name.inner()) {
                             Ok(cmd @ Value::Cmd(_))  => {
                                 rcmd = Ok(cmd);
                             },
@@ -69,7 +69,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                     }
 
                     if rcmd.is_err() {      //rcmd.is_err() == true => no local command w/ cmd_name
-                        match self.stack.get_module_env().get(cmd_name) {
+                        match self.stack.get_module_env().get(&cmd_name.inner()) {
                             Ok(cmd @ Value::Cmd(_)) => {
                                 rcmd = Ok(cmd);
                             },
@@ -333,7 +333,7 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
                                   .map_err(|oerr| ExecErr::ObjectErr(oerr, unimplemented!()))?;
                 match value {
                     Value::Number(num) => result.push_str(&num.to_string()),
-                    Value::String(ref s) => result.push_str(s),
+                    Value::String(ref s) => result.push_str(&s.inner()),
                     Value::Bool(ref b) => result.push_str(&b.to_string()),
                     Value::Cmd(_) => result.push_str(name),
                     Value::List(_) => unimplemented!(),
@@ -344,10 +344,10 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
             &StrData::CmdSub => unimplemented!(),
         }
     }
-    Ok(CIR::new(Value::String(result), dstr_sub!(line_info.clone(), 
-                                                 cur_stmt,
-                                                 root_stmt
-                                                 )
+    Ok(CIR::new(result.into_value(), dstr_sub!(line_info.clone(), 
+                                               cur_stmt,
+                                               root_stmt
+                                               )
                 )
        )
 }
@@ -355,27 +355,27 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
 
 pub fn try_from_word(word: &Word, cur_stmt: &Statement, root_stmt: &Statement) -> Option<CIR> {
     match &word.kind {
-        &WordKind::Atom(ref s) => Some(CIR::new(p_string!(s.to_string()), 
+        &WordKind::Atom(ref s) => Some(CIR::new(s.to_string().into_value(), 
                                                 dliteral!(word.line_info.clone(), 
                                                           cur_stmt, 
                                                           root_stmt)
                                                 )
                                        ),
-        &WordKind::Number(n) => Some(CIR::new(p_number!(n), 
+        &WordKind::Number(n) => Some(CIR::new(n.into_value(),
                                               dliteral!(word.line_info.clone(), 
                                                         cur_stmt,
                                                         root_stmt
                                                         )
                                               )
                                      ),
-        &WordKind::Bool(b) => Some(CIR::new(p_bool!(b), 
+        &WordKind::Bool(b) => Some(CIR::new(b.into_value(), 
                                             dliteral!(word.line_info.clone(), 
                                                       cur_stmt,
                                                       root_stmt
                                                       )
                                             )
                                    ),
-        &WordKind::Untouched(ref s) => Some(CIR::new(p_string!(s.to_string()), 
+        &WordKind::Untouched(ref s) => Some(CIR::new(s.to_string().into_value(), 
                                                      dliteral!(word.line_info.clone(), 
                                                                cur_stmt,
                                                                root_stmt

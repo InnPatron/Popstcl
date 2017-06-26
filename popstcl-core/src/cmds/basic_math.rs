@@ -13,7 +13,7 @@ impl Cmd for Add {
             accu += cir_extract!(input => Number)?;
         }
 
-        Ok(ExecSignal::NextInstruction(Some(Value::Number(accu))))
+        Ok(ExecSignal::NextInstruction(Some(accu.into_value())))
     }
 }
 
@@ -35,7 +35,7 @@ impl Cmd for Sub {
             accu -= cir_extract!(input => Number)?;
         }
         
-        Ok(ExecSignal::NextInstruction(Some(Value::Number(accu))))
+        Ok(ExecSignal::NextInstruction(Some(accu.into_value())))
     }
 }
 
@@ -57,7 +57,7 @@ impl Cmd for Mul {
             accu *= cir_extract!(input => Number)?;
         }
         
-        Ok(ExecSignal::NextInstruction(Some(Value::Number(accu))))
+        Ok(ExecSignal::NextInstruction(Some(accu.into_value())))
     }
 }
 
@@ -85,6 +85,6 @@ impl Cmd for Div {
             }
         }
         
-        Ok(ExecSignal::NextInstruction(Some(Value::Number(accu))))
+        Ok(ExecSignal::NextInstruction(Some(accu.into_value())))
     }
 }

@@ -14,8 +14,8 @@ impl Cmd for While {
         let conditional_program = cir_extract!(args[0] => String, "While Condition")?;
         let while_body = cir_extract!(args[1] => String, "While Body")?;
 
-        let conditional_program = parse_program(conditional_program)?;
-        let while_body = parse_program(while_body)?;
+        let conditional_program = parse_program(&conditional_program)?;
+        let while_body = parse_program(&while_body)?;
 
         'popstcl_loop: loop {
             //execute conditional
@@ -46,7 +46,7 @@ impl Cmd for While {
                 panic!("conditional statement did not return a boolean. (Make this an error)");
             };
 
-            if condition == false {
+            if *condition.inner() == false {
                 break;
             }
 

@@ -10,15 +10,15 @@ impl Cmd for List {
     
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         min_args!(&args, 1);
-        let mut values = Vec::new();
+        let mut list = Vec::new();
         
         //Convert ALL CIR args into Values
         //Fail if CIR is NOT a value
         for argument in args.iter() {
-            values.push(argument.clone_value());
+            list.push(argument.clone_value());
         }
 
-        Ok(ExecSignal::NextInstruction(Some(Value::List(values))))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
     }
 }
 
@@ -32,7 +32,7 @@ impl Cmd for ListLength {
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 1);
         let list = cir_extract!(args[0] => List)?;
-        Ok(ExecSignal::NextInstruction(Some(Value::Number(list.len() as f64))))
+        Ok(ExecSignal::NextInstruction(Some((list.len() as f64).into_value())))
     }
 }
 
@@ -82,7 +82,7 @@ impl Cmd for Remove {
         } else {
             list.remove(usize_index);
         }
-        Ok(ExecSignal::NextInstruction(Some(Value::List(list))))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
     }
 }
 
@@ -101,7 +101,7 @@ impl Cmd for Append {
             let value = args[index].clone_value();
             list.push(value);
         }
-        Ok(ExecSignal::NextInstruction(Some(Value::List(list))))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
     }
 }
 
@@ -118,6 +118,6 @@ impl Cmd for Pop {
 
         let mut list = cir_extract!(args[0] => List)?.clone();
         list.pop();
-        Ok(ExecSignal::NextInstruction(Some(Value::List(list))))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
     }
 }

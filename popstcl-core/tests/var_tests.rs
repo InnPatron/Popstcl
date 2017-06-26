@@ -13,7 +13,7 @@ fn sub_in_cmd() {
     match vm.inspect_value("a") {
         Ok(val) => {
             match val {
-                Value::Number(n) => assert_eq!(3_f64, n),
+                Value::Number(ref n) => assert_eq!(3_f64, n.inner()),
                 _   => panic!("'a' is not a number"),
             }
         }
@@ -39,7 +39,7 @@ fn multi_command() {
     match vm.inspect_value("a") {
         Ok(val) => {
             match val {
-                Value::Number(n) => assert_eq!(10_f64, n),
+                Value::Number(ref n) => assert_eq!(10_f64, n.inner()),
                 _               => panic!("'a' not a number"),
             }
         }
@@ -61,15 +61,15 @@ mlet g true h false eggs 999;").unwrap();
     
     vm.eval_program(&program).unwrap();
 
-    let inspecting = vec![("a", Value::Number(-3.1459_f64)),
-                            ("b", Value::Number(1337_f64)), 
-                            ("c", Value::Number(-3.1459)), 
-                            ("d", Value::Number(1_f64)), 
-                            ("e", Value::Number(12481632_f64)),
-                            ("f", Value::Number(12481632_f64)), 
-                            ("g", Value::Bool( true)),
-                            ("h", Value::Bool(false)),
-                            ("eggs", Value::Number(999_f64))
+    let inspecting = vec![("a", (-3.1459_f64).into_value()),
+                            ("b", (1337_f64).into_value()), 
+                            ("c", (-3.1459).into_value()), 
+                            ("d", (1_f64).into_value()), 
+                            ("e", (12481632_f64).into_value()),
+                            ("f", (12481632_f64).into_value()), 
+                            ("g", true.into_value()),
+                            ("h", false.into_value()),
+                            ("eggs", (999_f64).into_value())
     
                         ];
     for pair in inspecting.iter() {
@@ -97,16 +97,16 @@ mset TEST_STRING \"yoyo: @g@f@h b\";").unwrap();
     
     vm.eval_program(&program).unwrap();
 
-    let inspecting = vec![("a", Value::Number(-3.1459_f64)),
-                            ("b", Value::Number(1337_f64)), 
-                            ("c", Value::Number(-3.1459)), 
-                            ("d", Value::Number(1_f64)), 
-                            ("e", Value::Number(12481632_f64)),
-                            ("f", Value::Number(12481632_f64)), 
-                            ("g", Value::Bool( true)),
-                            ("h", Value::Bool(false)),
-                            ("eggs", Value::Number(999_f64)),
-                            ("TEST_STRING", Value::String("yoyo: true12481632false b".to_string())),
+    let inspecting = vec![("a", (-3.1459_f64).into_value()),
+                            ("b", (1337_f64).into_value()), 
+                            ("c", (-3.1459).into_value()), 
+                            ("d", (1_f64).into_value()), 
+                            ("e", (12481632_f64).into_value()),
+                            ("f", (12481632_f64).into_value()), 
+                            ("g", true.into_value()),
+                            ("h", false.into_value()),
+                            ("eggs", (999_f64).into_value()),
+                            ("TEST_STRING", "yoyo: true12481632false b".to_string().into_value())
     
                         ];
     for pair in inspecting.iter() {

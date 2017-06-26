@@ -134,7 +134,7 @@ impl IfParser for IfBool {
 
 impl IfParser for IfBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        parse_program(cir_extract!(arg => String, "If Body")?)
+        parse_program(&cir_extract!(arg => String, "If Body")?)
             .map(|_| ())
             .map_err(|e| ExecErr::ParseError(e))
     }
@@ -144,9 +144,9 @@ impl IfParser for Trailing {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
         let string = cir_extract!(arg => String)?;
         
-        if string == ELSE {
+        if &*string == ELSE {
             self.decision.set(Some(TrailingBranch::Else));
-        } else if string == ELIF {
+        } else if &*string == ELIF {
             self.decision.set(Some(TrailingBranch::Elif));
         } else {
             return Err(ExecErr::InvalidArg {
@@ -160,7 +160,7 @@ impl IfParser for Trailing {
 
 impl IfParser for ElseBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        parse_program(cir_extract!(arg => String, "Else Body")?)
+        parse_program(&cir_extract!(arg => String, "Else Body")?)
             .map(|_| ())
             .map_err(|err| ExecErr::ParseError(err))
     }
@@ -175,7 +175,7 @@ impl IfParser for ElifBool {
 
 impl IfParser for ElifBody {
     fn check(&self, stack: &Stack, arg: &CIR) -> Result<(), ExecErr> {
-        parse_program(cir_extract!(arg => String, "Elif Body")?)
+        parse_program(&cir_extract!(arg => String, "Elif Body")?)
             .map(|_| ())
             .map_err(|err| ExecErr::ParseError(err))
     }
@@ -202,13 +202,13 @@ impl Cmd for If {
                 continue;
             }
 
-            if let Value::Bool(b) = arg.value {
-                execute_next = b; //read if condition was bool
+            if let Value::Bool(ref b) = arg.value {
+                execute_next = *b.inner(); //read if condition was bool
             }
 
             if let Value::String(ref string) = arg.value {
                 if execute_next {
-                    program_seq = Some(parse_program(string.trim())
+                    program_seq = Some(parse_program(string.inner().trim())
                                .expect("Should have been caught by check_step"));
                     break;
                 }

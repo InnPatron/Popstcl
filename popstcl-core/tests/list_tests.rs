@@ -15,21 +15,23 @@ mset list_2 [list [list \"test\" true] 1337];").unwrap();
     vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(), 
-               Value::List(vec![
-                            Number(1.),
-                            Number(2.),
-                            Number(3.),
-                            Number(4.),
-    ]));
+               vec![
+                            (1.).into_value(),
+                            (2.).into_value(),
+                            (3.).into_value(),
+                            (4.).into_value(),
+               ].into_value()
+    );
 
     assert_eq!(vm.inspect_value("list_2").unwrap(),
-               Value::List(vec![
-                           Value::List(vec![
-                                       Value::String("test".to_string()),
-                                       Bool(true),
-                           ]),
-                           Number(1337.)
-               ]));
+               vec![
+                    vec![
+                        "test".to_string().into_value(),
+                         true.into_value(),
+                    ].into_value(),
+                    (1337.).into_value()
+               ].into_value()
+               );
 }
 
 #[test]
@@ -44,26 +46,27 @@ mset var_2 [list_get @list_2 1];").unwrap();
     vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(), 
-               Value::List(vec![
-                            Number(1.),
-                            Number(2.),
-                            Number(3.),
-                            Number(4.),
-    ]));
+               vec![
+                    (1.).into_value(),
+                    (2.).into_value(),
+                    (3.).into_value(),
+                    (4.).into_value(),
+               ].into_value()
+    );
 
     assert_eq!(vm.inspect_value("list_2").unwrap(),
-               Value::List(vec![
-                           Value::List(vec![
-                                       Value::String("test".to_string()),
-                                       Bool(true),
-                           ]),
-                           Number(1337.)
-               ]));
+               vec![
+                           vec![
+                                       "test".to_string().into_value(),
+                                       true.into_value(),
+                           ].into_value(),
+                           (1337.).into_value()
+               ].into_value());
     assert_eq!(vm.inspect_value("var_1").unwrap(),
-               Value::Number(1.)
+               (1.).into_value()
               );
     assert_eq!(vm.inspect_value("var_2").unwrap(),
-               Value::Number(1337.)
+               (1337.).into_value()
               );
 }
 
@@ -77,7 +80,7 @@ mset len [list_len @list_1];").unwrap();
     vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("len").unwrap(),
-               Number(4.)
+               (4.).into_value()
               );
 }
 
@@ -91,16 +94,16 @@ mset list_1 [list_append @list_1 5 6 7 8];").unwrap();
     vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(),
-               Value::List(vec![
-                           Number(1.),
-                           Number(2.),
-                           Number(3.),
-                           Number(4.),
-                           Number(5.),
-                           Number(6.),
-                           Number(7.),
-                           Number(8.),
-                           ])
+               vec![
+                   (1.).into_value(),
+                   (2.).into_value(),
+                   (3.).into_value(),
+                   (4.).into_value(),
+                   (5.).into_value(),
+                   (6.).into_value(),
+                   (7.).into_value(),
+                   (8.).into_value(),
+               ].into_value()
                );
 }
 
@@ -114,10 +117,10 @@ mset list_1 [list_remove @list_1 0];").unwrap();
     vm.eval_program(&program).unwrap();
 
     assert_eq!(vm.inspect_value("list_1").unwrap(),
-               Value::List(vec![
-                           Number(2.),
-                           Number(3.),
-                           Number(4.),
-                           ])
+               vec![
+                   (2.).into_value(),
+                   (3.).into_value(),
+                   (4.).into_value(),
+               ].into_value()
                );
 }

@@ -21,7 +21,7 @@ impl Cmd for Let {
     
             let value = value.clone_value();
 
-            module.insert(name, 
+            module.insert(&name, 
 						  value, 
 						  observable_internal!(),
                           )
@@ -48,7 +48,7 @@ impl Cmd for Set {
     
         let value: Value = args[1].clone_value();
 
-        module.insert(name, 
+        module.insert(&name, 
                       value.clone(), 
                       observable_internal!())
               .map_err(|oerr| ExecErr::ObjectErr(oerr, 
