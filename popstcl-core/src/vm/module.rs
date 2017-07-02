@@ -6,11 +6,11 @@ pub trait Module: Object {}
 
 /// Interface to an Env for modules loaded by popstcl commands
 #[derive(Clone, Debug, PartialEq)]
-pub struct StdModule(Rc<RefCell<Env>>);
+pub struct StdModule(RefCell<Env>);
 
 impl StdModule {
 	pub fn new(env: Env) -> StdModule {
-		StdModule(Rc::new(RefCell::new(env)))
+		StdModule(RefCell::new(env))
 	}
 }
 
@@ -30,32 +30,30 @@ impl ToString for StdModule {
 
 impl Object for StdModule {
 
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
+	fn insert(&self, name: &str, value: Value) -> Result<(), ObjectErr> {
 		let env = &mut self.0.borrow_mut();
         if let Some(entry) = env.get(name) {
-            has_permission!(entry, Permissions::ForeignModWrite);
+            //has_permission!(entry, Permissions::ForeignModWrite);
         }
         // else no present entry and can write anyways
         
-        env.insert(name, value, permissions);
+        env.insert(name, value);
 		Ok(())
 	}
 
 	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
         let env = self.0.borrow();
-		let entry = env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?;
-        has_permission!(entry, Permissions::ForeignModRead);
-        Ok(entry.value().clone())
+		Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?)
 	}
 }
 
 /// Interface for the original modules created by a popstcl vm instance
 #[derive(Clone, Debug, PartialEq)]
-pub struct InternalModule(Rc<RefCell<Env>>);
+pub struct InternalModule(RefCell<Env>);
 
 impl InternalModule {
 	pub fn new(env: Env) -> InternalModule {
-		InternalModule(Rc::new(RefCell::new(env)))
+		InternalModule(RefCell::new(env))
 	}
 }
 
@@ -69,22 +67,20 @@ impl Module for InternalModule {}
 
 impl Object for InternalModule {
 
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
+	fn insert(&self, name: &str, value: Value) -> Result<(), ObjectErr> {
 		let env = &mut self.0.borrow_mut();
         if let Some(entry) = env.get(name) {
-            has_permission!(entry, Permissions::InternalWrite);
+            //has_permission!(entry, Permissions::InternalWrite);
         }
         // else no present entry and can write anyways
         
-        env.insert(name, value, permissions);
+        env.insert(name, value);
 		Ok(())
 	}
 
 	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
 		let env = self.0.borrow();
-        let entry = env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?;
-        has_permission!(entry, Permissions::InternalRead);
-        Ok(entry.value().clone())
+        Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?)
 	}
 }
 
@@ -92,11 +88,11 @@ impl Object for InternalModule {
 /// All permission options are ignored b/c LocalModule is a temporary thing only.
 /// Anything is free to inspect or insert into it...
 #[derive(Clone, Debug, PartialEq)]
-pub struct LocalModule(Env);
+pub struct LocalModule(RefCell<Env>);
 
 impl LocalModule {
 	pub fn new(env: Env) -> LocalModule {
-		LocalModule(env)
+		LocalModule(RefCell::new(env))
 	}
 }
 
@@ -104,16 +100,14 @@ impl Module for LocalModule {}
 
 impl Object for LocalModule {
 
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
-		self.0.insert(name, value, permissions);
+	fn insert(&self, name: &str, value: Value) -> Result<(), ObjectErr> {
+		self.0.borrow_mut().insert(name, value);
         Ok(())
 	}
 
 	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
-	    Ok(self.0.get(name)
-                .map(|entry| entry.value())
+	    Ok(self.0.borrow().get(name)
                 .ok_or(ObjectErr::UnknownField(name.to_string()))?
-                .clone()
           )
 	}
 }

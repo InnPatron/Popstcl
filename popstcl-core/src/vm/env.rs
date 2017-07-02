@@ -1,9 +1,10 @@
 use super::internal::*;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Env {
-    bindings: HashMap<String, EnvEntry>,
+    bindings: HashMap<String, RcValue>,
 }
 
 impl Env {
@@ -11,16 +12,12 @@ impl Env {
         Env { bindings: HashMap::new() }
     }
 
-    pub fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) {
-        self.bindings.insert(name.to_string(), EnvEntry::new(value, permissions));
+    pub fn insert(&mut self, name: &str, value: Value) {
+        self.bindings.insert(name.to_string(), RcValue::new(value));
     }
 
-    pub fn insert_entry(&mut self, name: &str, entry: EnvEntry) {
-        self.bindings.insert(name.to_string(), entry);
-    }
-
-    pub fn get(&self, name: &str) -> Option<&EnvEntry> {
-        self.bindings.get(name)
+    pub fn get(&self, name: &str) -> Option<Value> {
+        self.bindings.get(name).map(|rc_value| rc_value.inner_clone())
     }
 }
 
@@ -34,16 +31,14 @@ mod tests {
         let mut env = Env::new();
         env.insert("gset", 
                    Value::Cmd(Box::new(Set(Namespace::Module))),
-                   observable_internal!(),
                    );
         let obj_1 = {
             let mut obj = StdObject::empty();
-            obj.insert("foo", (1337_f64).into_value(), all_read_write!());
-            obj.insert("bar", (-1_f64).into_value(), all_read_write!());
+            obj.insert("foo", (1337_f64).into_value());
+            obj.insert("bar", (-1_f64).into_value());
             Value::Object(obj)
         };
-        env.bindings
-            .insert("obj".to_string(), EnvEntry::observable_internal(obj_1));
+        env.insert("obj", obj_1);
 
         let program = parse_program("
 gset a @obj.foo;
@@ -75,21 +70,19 @@ gset b @obj.bar;")
         let mut env = Env::new();
         env.insert("gset", 
                    Value::Cmd(Box::new(Set(Namespace::Module))),
-                   observable_internal!(),
                    );
         let obj_1 = {
             let mut obj = StdObject::empty();
-            obj.insert("foo", (1337_f64).into_value(), all_read_write!());
-            obj.insert("bar", (-1_f64).into_value(), all_read_write!());
+            obj.insert("foo", (1337_f64).into_value());
+            obj.insert("bar", (-1_f64).into_value());
             obj
         };
         let obj_2 = {
             let mut obj = StdObject::empty();
-            obj.insert("nested", Value::Object(obj_1), all_read_write!());
+            obj.insert("nested", Value::Object(obj_1));
             Value::Object(obj)
         };
-        env.bindings
-            .insert("obj".to_string(), EnvEntry::observable_internal(obj_2));
+        env.insert("obj", obj_2);
 
         let program = parse_program("
 gset a @obj.nested.foo;

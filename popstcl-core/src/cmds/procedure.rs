@@ -43,7 +43,7 @@ impl Cmd for Proc {
         let proc_body = parse_program(&cir_extract!(args[2] => String, "Body of procedure")?)?;
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
-        module.insert(&name, Value::Cmd(Box::new(new_cmd)), observable_internal!())
+        module.insert(&name, Value::Cmd(Box::new(new_cmd)))
               .map_err(|oerr| ExecErr::ObjectErr(oerr, 
                                                  dinsertion!(maybe_name.dinfo.line_info.clone(),
                                                              maybe_name.dinfo)

@@ -17,14 +17,12 @@ pub mod internal {
     pub use super::exec_signal::ExecSignal;
     pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
-    pub use super::value::{Value, IntoValue};
+    pub use super::value::{Value, IntoValue, RcValue};
     pub use super::object_kind::{ ObjectKind, StdObject };
     pub use super::stack::Stack;
     pub use super::cir::CIR;
     pub use super::env_builder::EnvBuilder;
-    pub use super::env_entry::EnvEntry;
     pub use super::executor::{eval_program, eval_stmt};
-    pub use super::permissions::{EntryPermissions, Permissions};
     pub use super::debug_info::{DebugInfo, DebugKind};
 
     pub use namespace::Namespace;
@@ -35,8 +33,6 @@ pub mod internal {
 }
 
 #[macro_use]
-mod permissions;
-#[macro_use]
 mod value;
 mod err;
 mod cmd;
@@ -45,7 +41,6 @@ mod debug_info;
 mod executor;
 mod stack;
 mod object_kind;
-mod env_entry;
 #[macro_use]
 mod cir;
 mod env;

@@ -1,6 +1,8 @@
 use std::fmt;
 use std::cell::{RefCell, Ref, RefMut};
 use std::ops::{Deref, Add, Sub, Mul, Div };
+use std::borrow::Borrow;
+use std::rc::Rc;
 use super::internal::{StdObject, Cmd, Env, StdModule};
 
 #[macro_export]
@@ -25,13 +27,35 @@ macro_rules! p_list {
 #[macro_export]
 macro_rules! p_object {
     ( ) => (Object::new());
-    ($([$name: expr, $value: expr, $permissions: expr],)*) => {{
+    ($([$name: expr, $value: expr],)*) => {{
         let mut obj = StdObject::empty();
         $(
-            obj.insert($name, $value.into_value(), $permissions);
+            obj.insert($name, $value.into_value());
         )*
         Value::Object(obj)
     }};
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct RcValue(Rc<Value>);
+
+impl RcValue {
+    
+    pub fn new(value: Value) -> RcValue {
+        RcValue(Rc::new(value))
+    }
+
+    pub fn inner_clone(&self) -> Value {
+        let borrow: &Value = self.0.borrow();
+        borrow.clone()
+    }
+}
+
+impl fmt::Display for RcValue {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        unimplemented!();
+        //TODO: Should it just use Display impl for Value or print something else (i.e. 'pointer')?
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -305,11 +329,11 @@ mod tests {
 
     #[test]
     fn value_macro_object() {
-        assert_eq!(p_object!(["test", 123., all_read_write!()], ["test2", false, all_read_write!()],),
+        assert_eq!(p_object!(["test", 123.], ["test2", false],),
                    {
                         let mut object = StdObject::empty();
-                        object.insert("test", (123.).into_value(), all_read_write!());
-                        object.insert("test2", false.into_value(), all_read_write!());
+                        object.insert("test", (123.).into_value());
+                        object.insert("test2", false.into_value());
                         Value::Object(object)
                    });
     }
