@@ -40,7 +40,7 @@ impl Cmd for While {
 
             //Check condition
             let conditional = conditional.expect("Conditional did not return a value. (Make this an error)");
-            let condition = if let Value::Bool(b) = conditional {
+            let condition = if let Value::Bool(ref b) = *conditional {
                 b
             } else {
                 panic!("conditional statement did not return a boolean. (Make this an error)");

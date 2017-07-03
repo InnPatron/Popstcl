@@ -12,12 +12,12 @@ impl Env {
         Env { bindings: HashMap::new() }
     }
 
-    pub fn insert(&mut self, name: &str, value: Value) {
-        self.bindings.insert(name.to_string(), RcValue::new(value));
+    pub fn insert(&mut self, name: &str, value: RcValue) {
+        self.bindings.insert(name.to_string(), value);
     }
 
-    pub fn get(&self, name: &str) -> Option<Value> {
-        self.bindings.get(name).map(|rc_value| rc_value.inner_clone())
+    pub fn get(&self, name: &str) -> Option<RcValue> {
+        self.bindings.get(name).map(|rc_value| rc_value.clone())
     }
 }
 
@@ -30,15 +30,15 @@ mod tests {
         use cmds::*;
         let mut env = Env::new();
         env.insert("gset", 
-                   Value::Cmd(Box::new(Set(Namespace::Module))),
+                   Value::Cmd(Box::new(Set(Namespace::Module))).into(),
                    );
         let obj_1 = {
             let mut obj = StdObject::empty();
-            obj.insert("foo", (1337_f64).into_value());
-            obj.insert("bar", (-1_f64).into_value());
+            obj.insert("foo", (1337_f64).into_value().into());
+            obj.insert("bar", (-1_f64).into_value().into());
             Value::Object(obj)
         };
-        env.insert("obj", obj_1);
+        env.insert("obj", obj_1.into());
 
         let program = parse_program("
 gset a @obj.foo;
@@ -53,7 +53,7 @@ gset b @obj.bar;")
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {
-                    assert_eq!(pair.1, val);
+                    assert_eq!(pair.1, *val);
                 }
 
                 Err(e @ _) => panic!("{:?}", e),
@@ -69,20 +69,20 @@ gset b @obj.bar;")
 
         let mut env = Env::new();
         env.insert("gset", 
-                   Value::Cmd(Box::new(Set(Namespace::Module))),
+                   Value::Cmd(Box::new(Set(Namespace::Module))).into(),
                    );
         let obj_1 = {
             let mut obj = StdObject::empty();
-            obj.insert("foo", (1337_f64).into_value());
-            obj.insert("bar", (-1_f64).into_value());
+            obj.insert("foo", (1337_f64).into_value().into());
+            obj.insert("bar", (-1_f64).into_value().into());
             obj
         };
         let obj_2 = {
             let mut obj = StdObject::empty();
-            obj.insert("nested", Value::Object(obj_1));
+            obj.insert("nested", Value::Object(obj_1).into());
             Value::Object(obj)
         };
-        env.insert("obj", obj_2);
+        env.insert("obj", obj_2.into());
 
         let program = parse_program("
 gset a @obj.nested.foo;
@@ -97,7 +97,7 @@ gset b @obj.nested.bar;")
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {
-                    assert_eq!(pair.1, val);
+                    assert_eq!(pair.1, *val);
                 }
 
                 Err(err @ _) => panic!("{:?}", err),

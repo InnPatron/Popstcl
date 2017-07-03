@@ -11,7 +11,7 @@ impl Cmd for Return {
         if args.len() == 0 {
             Ok(ExecSignal::Return(None))
         } else {
-            Ok(ExecSignal::Return(Some(args[0].clone_value())))
+            Ok(ExecSignal::Return(Some(args[0].value.clone())))
         }
     }
 }

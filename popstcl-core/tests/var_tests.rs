@@ -12,7 +12,7 @@ fn sub_in_cmd() {
     
     match vm.inspect_value("a") {
         Ok(val) => {
-            match val {
+            match *val {
                 Value::Number(ref n) => assert_eq!(3_f64, n.inner()),
                 _   => panic!("'a' is not a number"),
             }
@@ -38,7 +38,7 @@ fn multi_command() {
 
     match vm.inspect_value("a") {
         Ok(val) => {
-            match val {
+            match *val {
                 Value::Number(ref n) => assert_eq!(10_f64, n.inner()),
                 _               => panic!("'a' not a number"),
             }
@@ -75,7 +75,7 @@ mlet g true h false eggs 999;").unwrap();
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(pair.1, val);
+                assert_eq!(&pair.1, &*val);
             },
 
             Err(_) => panic!("Could not find {}", pair.0),
@@ -112,7 +112,7 @@ mset TEST_STRING \"yoyo: @g@f@h b\";").unwrap();
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(pair.1, val);
+                assert_eq!(&pair.1, &*val);
             },
 
             Err(_) => panic!("Could not find {}", pair.0),

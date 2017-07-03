@@ -1,7 +1,9 @@
 use ast::*;
 use namespace::Namespace;
-use super::internal::{Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind, IntoValue};
+use super::internal::{RcValue, Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind, IntoValue};
 use line_info::LineInfo;
+
+use std::rc::Rc;
 
 pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<(), ExecErr> {
     for stmt in program.iter() {
@@ -25,7 +27,7 @@ pub fn eval_stmt<'a, 'b, 'c:'a>(stack: &'a mut Stack<'c>, stmt: &'b Statement) -
 }
 
 enum ReduceResult {
-    Return(Option<Value>),
+    Return(Option<RcValue>),
     Continue(Vec<CIR>)
 }
 
@@ -55,23 +57,27 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
  
     fn run(mut self) -> Result<ExecSignal, ExecErr> {
         assert!(self.cmd.len() > 0);
-        let cmd_obj: Box<Cmd> = match self.cmd.remove(0).value {
+        let cmd_obj: Box<Cmd> = match *self.cmd.remove(0).value {
             Value::String(ref cmd_name) => {
                 let cmd = {
                     let mut rcmd = Err(ExecErr::NotCmd(cmd_name.to_string()));
-                    if let Some(module) = self.stack.get_local_env() {
+                    if let Some(module) = self.stack.get_local_module() {
                         match module.get(&cmd_name.inner()) {
-                            Ok(cmd @ Value::Cmd(_))  => {
-                                rcmd = Ok(cmd);
+                            Ok(rc)  => {
+                                if let &Value::Cmd(_) = &*rc {
+                                    rcmd = Ok(rc);
+                                }
                             },
                             _ => (),
                         }
                     }
 
                     if rcmd.is_err() {      //rcmd.is_err() == true => no local command w/ cmd_name
-                        match self.stack.get_module_env().get(&cmd_name.inner()) {
-                            Ok(cmd @ Value::Cmd(_)) => {
-                                rcmd = Ok(cmd);
+                        match self.stack.get_module().get(&cmd_name.inner()) {
+                            Ok(rc)  => {
+                                if let &Value::Cmd(_) = &*rc {
+                                    rcmd = Ok(rc);
+                                }                            
                             },
                             _ => (),
                         }
@@ -79,7 +85,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                     rcmd
                 }?;
 
-                if let Value::Cmd(ref boxed) = cmd {
+                if let Value::Cmd(ref boxed) = *cmd {
                     boxed.clone()
                 } else {
                     return Err(ExecErr::NotCmd(cmd_name.to_string()));
@@ -153,7 +159,7 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                         },
 
                         ExecSignal::NextInstruction(Some(val)) => {
-                            reduction.push(CIR::new(val.clone(), dcmd_sub!(debug_info,
+                            reduction.push(CIR::new(val.clone().into(), dcmd_sub!(debug_info,
                                                                            word.line_info.clone(),
                                                                            self.to_reduce,
                                                                            self.root_stmt
@@ -214,8 +220,8 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
         
         let first_name = path_iter.next().unwrap();
 
-        let first_obj = if let Namespace::Args = self.namespace {
-            let value: Option<Value> = self.stack.get_args()
+        let first_obj: RcValue = if let Namespace::Args = self.namespace {
+            let value: Option<RcValue> = self.stack.get_args()
                       .ok_or(ExecErr::from(VarSubErr::NoArgs(dvar_sub!(
                                       self.namespace.clone(), 
                                       self.var_sub.clone(), 
@@ -228,7 +234,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                           )?
                       .get(&***first_name)
                       .map(|cir| cir.value.clone());
-            let value: Result<Value, ExecErr> = value.ok_or(VarSubErr::UnknownBinding(first_name.to_string(), 
+            let value: Result<RcValue, ExecErr> = value.ok_or(VarSubErr::UnknownBinding(first_name.to_string(), 
                                                       Namespace::Args, 
                                                       dvar_sub!(self.namespace.clone(),
                                                                 self.var_sub.clone(),
@@ -241,7 +247,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
         } else {
             let module = match self.namespace {
                 Namespace::Local => { 
-                    self.stack.get_local_env()
+                    self.stack.get_local_module()
                               .ok_or(VarSubErr::NoLocalModule(dvar_sub!(
                                         self.namespace.clone(),
                                         self.var_sub.clone(),
@@ -252,7 +258,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                     )?
                 },
 
-                Namespace::Module => self.stack.get_module_env(),
+                Namespace::Module => self.stack.get_module(),
                 Namespace::Args => panic!("Tring to get env of Namespace::Args"),
             };
             module.get(&***first_name)
@@ -266,16 +272,16 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                                  )
                           )?
         };
-        self.walk_obj(&first_obj, &mut path_iter)
+        self.walk_obj(first_obj, &mut path_iter)
     }
 
-    fn walk_obj<'f, 'g, I>(&mut self, obj: &Value, iter: &'g mut I) -> Result<CIR, ExecErr>
+    fn walk_obj<'f, 'g, I>(&mut self, obj: RcValue, iter: &'g mut I) -> Result<CIR, ExecErr>
     where I: Iterator<Item = &'f PathSegment>
 {
     let segment = iter.next();
     match segment {
         Some(segment) => {
-            match obj {
+            match &*obj {
                 &Value::Object(ref object) => {
                     let value = object.get(&segment.segment.to_string())
                                       .map_err(|oerr| ExecErr::ObjectErr(oerr, 
@@ -288,7 +294,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                                                              )
                                                                          )
                                                )?;
-                    self.walk_obj(&value, iter)
+                    self.walk_obj(value, iter)
                 }
 
                 _ => Err(VarSubErr::NonobjectFieldAccess(segment.segment.to_string(),
@@ -304,7 +310,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
         }
         None => { 
             let line_info = self.var_sub.0.last().unwrap().line_info.clone();
-            Ok(CIR::new(obj.clone(), 
+            Ok(CIR::new(obj, 
                         dvar_sub!(self.namespace.clone(), 
                                   self.var_sub.clone(),
                                   line_info,
@@ -325,27 +331,26 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
             &StrData::String(ref s) => result.push_str(s),
             &StrData::VarSub(ref name, ref namespace, _) => {
                 let module = match namespace {
-                    &Namespace::Local => stack.get_local_env().ok_or(VarSubErr::NoLocalModule(unimplemented!()))?,
-                    &Namespace::Module => stack.get_module_env(),
+                    &Namespace::Local => stack.get_local_module().ok_or(VarSubErr::NoLocalModule(unimplemented!()))?,
+                    &Namespace::Module => stack.get_module(),
                     &Namespace::Args => unimplemented!(),
                 };
                 let value = module.get(name)
                                   .map_err(|oerr| ExecErr::ObjectErr(oerr, unimplemented!()))?;
-                match value {
-                    Value::Number(num) => result.push_str(&num.to_string()),
+                match *value {
+                    Value::Number(ref num) => result.push_str(&num.to_string()),
                     Value::String(ref s) => result.push_str(&s.inner()),
                     Value::Bool(ref b) => result.push_str(&b.to_string()),
                     Value::Cmd(_) => result.push_str(name),
                     Value::List(_) => unimplemented!(),
                     Value::Object(ref obj) => result.push_str(&obj.to_string()),
                     Value::Module(_) => unimplemented!(),
-                    Value::Ref(_) => unimplemented!(),
                 }
             }
             &StrData::CmdSub => unimplemented!(),
         }
     }
-    Ok(CIR::new(result.into_value(), dstr_sub!(line_info.clone(), 
+    Ok(CIR::new(result.into_value().into(), dstr_sub!(line_info.clone(), 
                                                cur_stmt,
                                                root_stmt
                                                )
@@ -356,27 +361,27 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
 
 pub fn try_from_word(word: &Word, cur_stmt: &Statement, root_stmt: &Statement) -> Option<CIR> {
     match &word.kind {
-        &WordKind::Atom(ref s) => Some(CIR::new(s.to_string().into_value(), 
+        &WordKind::Atom(ref s) => Some(CIR::new(s.to_string().into_value().into(), 
                                                 dliteral!(word.line_info.clone(), 
                                                           cur_stmt, 
                                                           root_stmt)
                                                 )
                                        ),
-        &WordKind::Number(n) => Some(CIR::new(n.into_value(),
+        &WordKind::Number(n) => Some(CIR::new(n.into_value().into(),
                                               dliteral!(word.line_info.clone(), 
                                                         cur_stmt,
                                                         root_stmt
                                                         )
                                               )
                                      ),
-        &WordKind::Bool(b) => Some(CIR::new(b.into_value(), 
+        &WordKind::Bool(b) => Some(CIR::new(b.into_value().into(),
                                             dliteral!(word.line_info.clone(), 
                                                       cur_stmt,
                                                       root_stmt
                                                       )
                                             )
                                    ),
-        &WordKind::Untouched(ref s) => Some(CIR::new(s.to_string().into_value(), 
+        &WordKind::Untouched(ref s) => Some(CIR::new(s.to_string().into_value().into(), 
                                                      dliteral!(word.line_info.clone(), 
                                                                cur_stmt,
                                                                root_stmt

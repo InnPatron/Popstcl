@@ -5,12 +5,12 @@ pub mod macros {
         ($namespace: expr, $stack: expr) => {{
             match $namespace {
                 Namespace::Local => {
-                    $stack.get_local_env_mut()
+                    $stack.get_local_module()
                     .ok_or(ExecErr::NoLocalModule)?
                 },
 
                 Namespace::Module => {
-                    $stack.get_module_env_mut()
+                    $stack.get_module()
                 }
 
                 Namespace::Args => return Err(ExecErr::InvalidNamespace {
@@ -84,6 +84,7 @@ mod comp;
 mod while_cmd;
 mod flow_control;
 mod print;
+mod misc;
 
 pub use self::var_cmds::{Let, Set};
 pub use self::if_cmd::If;
@@ -95,3 +96,4 @@ pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
 pub use self::print::Print;
+pub use self::misc::{Clone};

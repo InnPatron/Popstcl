@@ -12,7 +12,7 @@ fn math_sub() {
 
     match vm.inspect_value("a") {
         Ok(val) => {
-            match val {
+            match *val {
                 Value::Number(ref n) => assert_eq!(6_f64, n.inner()),
                 _   => panic!("'a' is not a number"),
             }
@@ -30,7 +30,7 @@ fn math_add() {
     
     match vm.inspect_value("a") {
         Ok(val) => {
-            match val {
+            match *val {
                 Value::Number(ref n) => assert_eq!(10_f64, n.inner()),
                 _   => panic!("'a' is not a number"),
             }
@@ -48,7 +48,7 @@ fn math_mul() {
     
     match vm.inspect_value("a") {
         Ok(val) => {
-            match val {
+            match *val {
                 Value::Number(ref n) => assert_eq!(1.5, n.inner()),
                 _   => panic!("'a' is not a number"),
             }
@@ -66,7 +66,7 @@ fn math_div() {
     
     match vm.inspect_value("a") {
         Ok(val) => {
-            match val {
+            match *val {
                 Value::Number(ref n) => assert_eq!(4_f64, n.inner()),
                 _   => panic!("'a' is not a number"),
             }

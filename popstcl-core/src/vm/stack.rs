@@ -2,32 +2,32 @@ use super::internal::{Module, Env, CIR, StdModule };
 use std::collections::HashMap;
 
 pub struct Stack<'a> {
-    module_env: &'a mut Module,
-    local_env: Option<StdModule>,
+    module: &'a StdModule,
+    local_module: Option<StdModule>,
     args: Option<HashMap<String, CIR>>,
 }
 
 impl<'a> Stack<'a> {
-    pub fn new_module(global: &'a mut Module) -> Stack<'a> {
+    pub fn new_module(module: &'a StdModule) -> Stack<'a> {
         Stack {
-            module_env: global,
-            local_env: None,
+            module: module,
+            local_module: None,
             args: None,
         }
     }
 
     pub fn new_local<'b>(previous: &'a mut Stack<'b>, local: Env) -> Stack<'a> {
         Stack {
-            module_env: previous.module_env,
-            local_env: Some(StdModule::new(local)),
+            module: previous.module,
+            local_module: Some(StdModule::new(local)),
             args: None,
         }
     }
 
     pub fn local_with_args<'b>(previous: &'a mut Stack<'b>, local: Env, args: HashMap<String, CIR>) -> Stack<'a> {
         Stack {
-            module_env: previous.module_env,
-            local_env: Some(StdModule::new(local)),
+            module: previous.module,
+            local_module: Some(StdModule::new(local)),
             args: {
                 if args.is_empty() {
                     None
@@ -38,28 +38,16 @@ impl<'a> Stack<'a> {
         }
     }
 
-    pub fn get_module_env_mut<'b>(&'b mut self) -> &'b mut Module {
-        self.module_env
-    }
-
-    pub fn get_local_env_mut<'b>(&'b mut self) -> Option<&'b mut Module> {
-    	if let Some(ref mut module) = self.local_env {
-			Some(&mut *module)
+    pub fn get_local_module<'b>(&'b self) -> Option<&StdModule> {
+        if let Some(ref module) = self.local_module {
+			Some(module)
 		} else {
 			None
 		}
     }
 
-    pub fn get_local_env<'b>(&'b self) -> Option<&Module> {
-        if let Some(ref module) = self.local_env {
-			Some(&*module)
-		} else {
-			None
-		}
-    }
-
-    pub fn get_module_env<'b>(&'b self) -> &Module {
-        self.module_env
+    pub fn get_module<'b>(&'b self) -> &StdModule {
+        self.module
     }
 
     pub fn get_args<'b>(&'b self) -> Option<&HashMap<String, CIR>> {
