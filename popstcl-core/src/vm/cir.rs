@@ -3,6 +3,7 @@ use ast::*;
 
 use std::fmt;
 use std::cell::Ref;
+use std::rc::Weak;
 
 /// Command Intermediate Representation
 #[derive(Clone, Debug)]
@@ -52,6 +53,14 @@ impl CIR {
     pub fn try_get_string(&self) -> Option<Ref<String>> {
         if let Value::String(ref s) = self.value {
             Some(s.inner())
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_ref(&self) -> Option<Weak<Value>> {
+        if let Value::Ref(ref r) = self.value {
+            Some(r.inner().clone())
         } else {
             None
         }
@@ -141,4 +150,17 @@ macro_rules! cir_extract {
             })
         }
     };
+
+    ($cir: expr => Ref) => {
+        cir_extract!($cir => Ref, "Reference")
+    };
+
+    ($cir: expr => Ref, $expect: expr) => {
+        {
+            $cir.try_get_ref().ok_or(ExecErr::InvalidArg {
+                                     expect: $expect.to_string(),
+                                     found: $cir.clone()
+            })
+        }
+    }
 }

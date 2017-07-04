@@ -2,7 +2,7 @@ use std::fmt;
 use std::cell::{RefCell, Ref, RefMut};
 use std::ops::{Deref, Add, Sub, Mul, Div };
 use std::borrow::Borrow;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use super::internal::{StdObject, Cmd, Env, StdModule};
 
 #[macro_export]
@@ -67,6 +67,7 @@ pub enum Value {
     List(List),
     Object(StdObject),
     Module(StdModule),
+    Ref(ValRef),
 }
 
 impl PartialEq for Value {
@@ -102,6 +103,7 @@ impl fmt::Display for Value {
                                      },
             &Value::Object(_) => write!(f, "OBJ"),      //TODO: better display
             &Value::Module(_) => write!(f, "MODULE"),   //TODO: better display
+            &Value::Ref(_) => write!(f, "Reference"),   //TODO: better display
         }
     }
 }
@@ -249,6 +251,43 @@ impl List {
 
     pub fn inner_mut(&self) -> RefMut<Vec<Value>> {
         self.list.borrow_mut()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ValRef {
+    reference: RefCell<Weak<Value>>,
+    addr: *const Value,
+}
+
+impl ValRef {
+    pub fn new(r: Rc<Value>) -> ValRef {
+        ValRef {
+            reference: RefCell::new(Rc::downgrade(&r)),
+            addr: Rc::into_raw(r),
+        }
+    }
+
+    pub fn set(&self, r: Weak<Value>) {
+        *self.reference.borrow_mut() = r;
+    }
+
+    pub fn inner(&self) -> Ref<Weak<Value>> {
+        self.reference.borrow()
+    }
+
+    pub fn inner_mut(&self) -> RefMut<Weak<Value>> {
+        self.reference.borrow_mut()
+    }
+
+    pub fn dereference(&self) -> Option<Rc<Value>> {
+        self.reference.borrow().upgrade()
+    }
+}
+
+impl PartialEq for ValRef {
+    fn eq(&self, other: &ValRef) -> bool {
+        self.addr == other.addr
     }
 }
 

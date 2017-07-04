@@ -339,6 +339,7 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
                     Value::List(_) => unimplemented!(),
                     Value::Object(ref obj) => result.push_str(&obj.to_string()),
                     Value::Module(_) => unimplemented!(),
+                    Value::Ref(_) => unimplemented!(),
                 }
             }
             &StrData::CmdSub => unimplemented!(),
