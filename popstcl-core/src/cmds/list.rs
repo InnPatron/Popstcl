@@ -52,7 +52,7 @@ impl Cmd for ListIndex {
 
         let usize_index = float_index.floor() as i64 as usize;
 
-        Ok(ExecSignal::NextInstruction(Some(list.get(usize_index)
+        Ok(ExecSignal::NextInstruction(Some(list.inner().get(usize_index)
                               .ok_or(ExecErr::InvalidIndex(usize_index))?
                               .clone())
            ))
@@ -80,7 +80,7 @@ impl Cmd for Remove {
         if usize_index >= list.len() {
             return Err(ExecErr::InvalidIndex(usize_index));
         } else {
-            list.remove(usize_index);
+            list.inner_mut().remove(usize_index);
         }
         Ok(ExecSignal::NextInstruction(Some(list.into_value())))
     }
@@ -99,7 +99,7 @@ impl Cmd for Append {
         let mut list = cir_extract!(args[0] => List)?.clone();
         for index in 1..args.len() {
             let value = args[index].clone_value();
-            list.push(value);
+            list.inner_mut().push(value);
         }
         Ok(ExecSignal::NextInstruction(Some(list.into_value())))
     }

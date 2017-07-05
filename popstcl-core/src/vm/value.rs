@@ -70,6 +70,72 @@ pub enum Value {
     Ref(ValRef),
 }
 
+impl Value {
+    pub fn try_get_number(&self) -> Option<f64> {
+        if let &Value::Number(ref n) = self {
+            Some(n.inner())
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_string(&self) -> Option<&PString> {
+        if let &Value::String(ref s) = self {
+            Some(s)
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_bool(&self) -> Option<bool> {
+        if let &Value::Bool(ref b) = self {
+            Some(*b.inner())
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_cmd(&self) -> Option<&Box<Cmd>> {
+        if let &Value::Cmd(ref c) = self {
+            Some(c)
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_list(&self) -> Option<&List> {
+        if let &Value::List(ref l) = self {
+            Some(l)
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_object(&self) -> Option<&StdObject> {
+        if let &Value::Object(ref obj) = self {
+            Some(obj)
+        } else {
+            None
+        }
+    }
+
+    pub fn try_get_mod(&self) -> Option<&StdModule> {
+        if let &Value::Module(ref module) = self {
+            Some(module)
+        } else {
+            None
+        }
+    } 
+
+    pub fn try_get_ref(&self) -> Option<Weak<Value>> {
+        if let &Value::Ref(ref r) = self {
+            Some(r.inner().clone())
+        } else {
+            None
+        }
+    }
+}
+
 impl PartialEq for Value {
     fn eq(&self, other: &Value) -> bool {
         use self::Value::*;
@@ -251,6 +317,14 @@ impl List {
 
     pub fn inner_mut(&self) -> RefMut<Vec<Value>> {
         self.list.borrow_mut()
+    }
+
+    pub fn len(&self) -> usize {
+        self.list.borrow().len()
+    }
+
+    pub fn pop(&self) -> Option<Value> {
+        self.list.borrow_mut().pop()
     }
 }
 

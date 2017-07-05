@@ -18,54 +18,6 @@ impl CIR {
         CIR { value: value, dinfo: dinfo }
     }
 
-    pub fn try_get_number(&self) -> Option<f64> {
-        if let Value::Number(ref n) = self.value {
-            Some(n.inner())
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_bool(&self) -> Option<bool> {
-        if let Value::Bool(ref b) = self.value {
-            Some(*b.inner())
-        } else {
-            None
-        }
-    }
-
-	pub fn try_get_mod(&self) -> Option<StdModule> {
-		if let Value::Module(ref module) = self.value {
-			Some(module.clone())
-		} else {
-			None
-		}
-	} 
-
-    pub fn try_get_list(&self) -> Option<Ref<Vec<Value>>> {
-        if let Value::List(ref vec) = self.value {
-            Some(vec.inner())
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_string(&self) -> Option<Ref<String>> {
-        if let Value::String(ref s) = self.value {
-            Some(s.inner())
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_ref(&self) -> Option<Weak<Value>> {
-        if let Value::Ref(ref r) = self.value {
-            Some(r.inner().clone())
-        } else {
-            None
-        }
-    }
-
     pub fn clone_value(&self) -> Value {
         self.value.clone()
     }
@@ -86,26 +38,13 @@ impl fmt::Display for CIR {
 #[macro_export]
 macro_rules! cir_extract {
 
-    ($cir: expr => Bool) => {
-        cir_extract!($cir => Number, "Bool")
-    };
-
-    ($cir: expr => Bool, $expect: expr) => {
-        {
-            $cir.try_get_bool().ok_or(ExecErr::InvalidArg {
-                           expect: $expect.to_string(),
-                           found: $cir.clone(),
-            })
-        }
-    };
-
     ($cir: expr => Number) => {
         cir_extract!($cir => Number, "Number")
     };
 
     ($cir: expr => Number, $expect: expr) => {
         {
-            $cir.try_get_number().ok_or(ExecErr::InvalidArg {
+            $cir.value.try_get_number().ok_or(ExecErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -118,7 +57,33 @@ macro_rules! cir_extract {
 
     ($cir: expr => String, $expect: expr) => {
         {
-            $cir.try_get_string().ok_or(ExecErr::InvalidArg {
+            $cir.value.try_get_string().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => Bool) => {
+        cir_extract!($cir => Bool, "Bool")
+    };
+
+    ($cir: expr => Bool, $expect: expr) => {
+        {
+            $cir.value.try_get_bool().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => Cmd) => {
+        cir_extract!($cir => Cmd, "Cmd")
+    };
+
+    ($cir: expr => Cmd, $expect: expr) => {
+        {
+            $cir.value.try_get_cmd().ok_or(ExecErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -131,9 +96,22 @@ macro_rules! cir_extract {
 
     ($cir: expr => List, $expect: expr) => {
         {
-            $cir.try_get_list().ok_or(ExecErr::InvalidArg {
+            $cir.value.try_get_list().ok_or(ExecErr::InvalidArg {
                                         expect: $expect.to_string(),
                                         found: $cir.clone(),
+            })
+        }
+    };
+
+    ($cir: expr => Object) => {
+        cir_extract!($cir => Object, "Object")
+    };
+
+    ($cir: expr => Object, $expect: expr) => {
+        {
+            $cir.value.try_get_object().ok_or(ExecErr::InvalidArg {
+                           expect: $expect.to_string(),
+                           found: $cir.clone(),
             })
         }
     };
@@ -144,7 +122,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Module, $expect: expr) => {
         {
-            $cir.try_get_mod().ok_or(ExecErr::InvalidArg {
+            $cir.value.try_get_mod().ok_or(ExecErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -157,7 +135,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Ref, $expect: expr) => {
         {
-            $cir.try_get_ref().ok_or(ExecErr::InvalidArg {
+            $cir.value.try_get_ref().ok_or(ExecErr::InvalidArg {
                                      expect: $expect.to_string(),
                                      found: $cir.clone()
             })
