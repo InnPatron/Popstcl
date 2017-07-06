@@ -1,36 +1,31 @@
 use vm::internal::*;
+use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
 
 #[derive(Clone, Debug)]
-pub struct StdObject(Env);
+pub struct StdObject(RefCell<Env>);
 
 impl StdObject {
 	pub fn with_env(env: Env) -> StdObject {
-	    StdObject(env)
+	    StdObject(RefCell::new(env))
 	}
 
     pub fn empty() -> StdObject {
-        StdObject(Env::new())
+        StdObject(RefCell::new(Env::new()))
     }
 }
 
 impl Object for StdObject {
-	fn insert(&mut self, name: &str, value: Value, permissions: EntryPermissions) -> Result<(), ObjectErr> {
-		let env = &mut self.0;
-        if let Some(entry) = env.get(name) {
-            has_permission!(entry, Permissions::ForeignModWrite);
-        }
-        // else no present entry and can write anyways
-        
-        env.insert(name, value, permissions);
+	fn insert(&self, name: &str, value: Value) -> Result<(), ObjectErr> {
+		let env = &mut self.0.borrow_mut();       
+        env.insert(name, value);
 		Ok(())
 	}
 
 	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
-		let entry = self.0.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?;
-        has_permission!(entry, Permissions::ForeignModRead);
-        Ok(entry.value().clone())
+        let env = self.0.borrow();
+		Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?)
 	}
 }
 

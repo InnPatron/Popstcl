@@ -24,10 +24,10 @@ impl Cmd for Proc {
         };
 
         let maybe_name = &args[0];
-        let name = cir_extract!(maybe_name => String, "Name of procedure")?;
+        let name = cir_extract!(maybe_name => String, "Name of procedure")?.inner();
         let proc_args = {
-            let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?;
-            let proc_args = parse_arg_list(proc_args)?
+            let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?.inner();
+            let proc_args = parse_arg_list(&proc_args)?
                                           .ok_or(ExecErr::MissingArg("Argument body".to_string()))?;
             let mut string_args = Vec::new();
             for arg in proc_args.all() {
@@ -40,10 +40,10 @@ impl Cmd for Proc {
             string_args
         };
 
-        let proc_body = parse_program(cir_extract!(args[2] => String, "Body of procedure")?)?;
+        let proc_body = parse_program(&cir_extract!(args[2] => String, "Body of procedure")?.inner())?;
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
-        module.insert(name, Value::Cmd(Box::new(new_cmd)), observable_internal!())
+        module.insert(&name, Value::Cmd(Box::new(new_cmd)))
               .map_err(|oerr| ExecErr::ObjectErr(oerr, 
                                                  dinsertion!(maybe_name.dinfo.line_info.clone(),
                                                              maybe_name.dinfo)

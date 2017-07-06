@@ -43,7 +43,7 @@ test_proc 21 3;
     match vm.inspect_value("test") {
         Ok(val) => {
             match val {
-                Value::Number(n) => assert_eq!(24_f64, n),
+                Value::Number(ref n) => assert_eq!(24_f64, n.inner()),
                 _   => panic!("'test' is not a number"),
             }
         }
@@ -67,8 +67,8 @@ mset test_2 [test_proc 3 5];
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("test_1", Value::Number(8_f64)),
-                            ("test_2", Value::Number(15_f64)), 
+                            ("test_1", (8_f64).into_value()),
+                            ("test_2", (15_f64).into_value()), 
                          ];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
@@ -101,8 +101,8 @@ mset test_2 [test_proc 3 5];
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("test_1", Value::Number(1337_f64)),
-                            ("test_2", Value::Number(15_f64)), 
+                            ("test_1", (1337_f64).into_value()),
+                            ("test_2", (15_f64).into_value()), 
                          ];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
@@ -131,7 +131,7 @@ test_proc 1337 5;
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("test_1", Value::Number(1337_f64)),
+                            ("test_1", (1337_f64).into_value()),
                          ];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
@@ -161,7 +161,7 @@ mset test_2 [test_proc 1337 5];
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("test_1", Value::Number(1337_f64)),
+                            ("test_1", (1337_f64).into_value()),
                          ];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
@@ -193,7 +193,7 @@ mset test_1 [test_proc 1337 5];
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("test_1", Value::Number(-21_f64)),
+                            ("test_1", (-21_f64).into_value()),
                          ];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {

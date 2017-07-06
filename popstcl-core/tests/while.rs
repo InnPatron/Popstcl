@@ -18,7 +18,7 @@ while { return [< @index @target]; } {
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("index", Value::Number(100.)),
+                            ("index", (100.).into_value()),
     ];
 
     for pair in inspecting.iter() {
@@ -49,7 +49,7 @@ while { return [< @index @target]; } {
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("index", Value::Number(57.)),
+                            ("index", (57.).into_value()),
     ];
 
     for pair in inspecting.iter() {

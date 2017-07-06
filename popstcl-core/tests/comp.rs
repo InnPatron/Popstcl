@@ -32,25 +32,25 @@ mset leeq_false_gr [<= 1337 -1];"
     vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
-                            ("eq_true", Value::Bool(true)),
-                            ("eq_false", Value::Bool(false)),
+                            ("eq_true", true.into_value()),
+                            ("eq_false", false.into_value()),
                             
-                            ("ineq_true", Value::Bool(true)),
-                            ("ineq_false", Value::Bool(false)),
+                            ("ineq_true", true.into_value()),
+                            ("ineq_false", false.into_value()),
                             
-                            ("gr_true", Value::Bool(true)),
-                            ("gr_false", Value::Bool(false)),
+                            ("gr_true", true.into_value()),
+                            ("gr_false", false.into_value()),
                             
-                            ("le_true", Value::Bool(true)),
-                            ("le_false", Value::Bool(false)),
+                            ("le_true", true.into_value()),
+                            ("le_false", false.into_value()),
                             
-                            ("greq_true_eq", Value::Bool(true)),
-                            ("greq_true_gr", Value::Bool(true)),
-                            ("greq_false_le", Value::Bool(false)),
+                            ("greq_true_eq", true.into_value()),
+                            ("greq_true_gr", true.into_value()),
+                            ("greq_false_le", false.into_value()),
 
-                            ("leeq_true_eq", Value::Bool(true)),
-                            ("leeq_true_le", Value::Bool(true)),
-                            ("leeq_false_gr", Value::Bool(false)),
+                            ("leeq_true_eq", true.into_value()),
+                            ("leeq_true_le", true.into_value()),
+                            ("leeq_false_gr", false.into_value()),
     ];
 
     for pair in inspecting.iter() {

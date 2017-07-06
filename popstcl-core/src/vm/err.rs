@@ -1,5 +1,5 @@
 use std::convert::From;
-use super::internal::{CIR, ParseErr, Permissions, DebugInfo};
+use super::internal::{CIR, ParseErr, DebugInfo};
 use ast::*;
 use namespace::Namespace;
 use line_info::LineInfo;
@@ -65,7 +65,7 @@ impl From<VarSubErr> for ExecErr {
 #[derive(Debug)]
 pub enum ObjectErr {
     UnknownField(String),
-    InsufficientPermissions(Permissions),
+//    InsufficientPermissions(Permissions),
 }
 
 impl From<ParseErr> for ExecErr {

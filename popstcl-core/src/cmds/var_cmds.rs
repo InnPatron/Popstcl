@@ -17,14 +17,12 @@ impl Cmd for Let {
         let module = get_module!(self.0, stack);
 
         for (maybe_name, value) in args.iter().tuples() {
-            let name = cir_extract!(maybe_name => String)?;
+            let name = cir_extract!(maybe_name => String)?.inner();
     
             let value = value.clone_value();
 
-            module.insert(name, 
-						  value, 
-						  observable_internal!(),
-                          )
+            module.insert(&name,
+						  value)
                   .map_err(|oerr| ExecErr::ObjectErr(oerr, 
                                                      dinsertion!(maybe_name.dinfo.line_info.clone(),
                                                                  maybe_name.dinfo)
@@ -44,13 +42,12 @@ impl Cmd for Set {
         let module = get_module!(self.0, stack);
 
         let maybe_name = &args[0];
-        let name = cir_extract!(maybe_name => String)?;
+        let name = cir_extract!(maybe_name => String)?.inner();
     
         let value: Value = args[1].clone_value();
 
-        module.insert(name, 
-                      value.clone(), 
-                      observable_internal!())
+        module.insert(&name, 
+                      value.clone())
               .map_err(|oerr| ExecErr::ObjectErr(oerr, 
                                                  dinsertion!(maybe_name.dinfo.line_info.clone(),
                                                              maybe_name.dinfo)

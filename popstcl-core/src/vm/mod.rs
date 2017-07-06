@@ -17,25 +17,21 @@ pub mod internal {
     pub use super::exec_signal::ExecSignal;
     pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
-    pub use super::value::{Value, IntoValue};
+    pub use super::value::{Value, IntoValue, RcValue};
     pub use super::object_kind::{ ObjectKind, StdObject };
     pub use super::stack::Stack;
     pub use super::cir::CIR;
     pub use super::env_builder::EnvBuilder;
-    pub use super::env_entry::EnvEntry;
     pub use super::executor::{eval_program, eval_stmt};
-    pub use super::permissions::{EntryPermissions, Permissions};
     pub use super::debug_info::{DebugInfo, DebugKind};
 
     pub use namespace::Namespace;
     pub use parser::err::ParseErr;
 
     pub use super::object::Object;
-	pub use super::module::{StdModule, InternalModule, LocalModule, Module};
+	pub use super::module::{StdModule, Module};
 }
 
-#[macro_use]
-mod permissions;
 #[macro_use]
 mod value;
 mod err;
@@ -45,7 +41,6 @@ mod debug_info;
 mod executor;
 mod stack;
 mod object_kind;
-mod env_entry;
 #[macro_use]
 mod cir;
 mod env;
@@ -63,7 +58,7 @@ use self::executor::eval_program;
 use self::stack::Stack;
 use self::exec_signal::ExecSignal;
 use self::env_builder::EnvBuilder;
-use self::module::InternalModule;
+use self::module::StdModule;
 use self::object::Object;
 use parser::parse_program;
 
@@ -73,16 +68,16 @@ pub fn basic_vm() -> Vm {
 }
 
 pub struct Vm {
-    main_module: InternalModule,
+    main_module: StdModule,
 }
 
 impl Vm {
     pub fn new() -> Vm {
-        Vm { main_module: InternalModule::new(Env::new()) }
+        Vm { main_module: StdModule::new(Env::new()) }
     }
 
     pub fn new_with_main_module(env: Env) -> Vm {
-        Vm { main_module: InternalModule::new(env) }
+        Vm { main_module: StdModule::new(env) }
     }
 
     pub fn eval_program(&mut self, program: &Program) -> Result<(), ExecErr> {
