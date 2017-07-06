@@ -1,9 +1,9 @@
-use super::internal::{Module, Env, CIR, LocalModule};
+use super::internal::{Module, Env, CIR, StdModule };
 use std::collections::HashMap;
 
 pub struct Stack<'a> {
     module_env: &'a mut Module,
-    local_env: Option<LocalModule>,
+    local_env: Option<StdModule>,
     args: Option<HashMap<String, CIR>>,
 }
 
@@ -19,7 +19,7 @@ impl<'a> Stack<'a> {
     pub fn new_local<'b>(previous: &'a mut Stack<'b>, local: Env) -> Stack<'a> {
         Stack {
             module_env: previous.module_env,
-            local_env: Some(LocalModule::new(local)),
+            local_env: Some(StdModule::new(local)),
             args: None,
         }
     }
@@ -27,7 +27,7 @@ impl<'a> Stack<'a> {
     pub fn local_with_args<'b>(previous: &'a mut Stack<'b>, local: Env, args: HashMap<String, CIR>) -> Stack<'a> {
         Stack {
             module_env: previous.module_env,
-            local_env: Some(LocalModule::new(local)),
+            local_env: Some(StdModule::new(local)),
             args: {
                 if args.is_empty() {
                     None

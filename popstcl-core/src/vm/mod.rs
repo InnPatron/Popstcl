@@ -29,7 +29,7 @@ pub mod internal {
     pub use parser::err::ParseErr;
 
     pub use super::object::Object;
-	pub use super::module::{StdModule, InternalModule, LocalModule, Module};
+	pub use super::module::{StdModule, Module};
 }
 
 #[macro_use]
@@ -58,7 +58,7 @@ use self::executor::eval_program;
 use self::stack::Stack;
 use self::exec_signal::ExecSignal;
 use self::env_builder::EnvBuilder;
-use self::module::InternalModule;
+use self::module::StdModule;
 use self::object::Object;
 use parser::parse_program;
 
@@ -68,16 +68,16 @@ pub fn basic_vm() -> Vm {
 }
 
 pub struct Vm {
-    main_module: InternalModule,
+    main_module: StdModule,
 }
 
 impl Vm {
     pub fn new() -> Vm {
-        Vm { main_module: InternalModule::new(Env::new()) }
+        Vm { main_module: StdModule::new(Env::new()) }
     }
 
     pub fn new_with_main_module(env: Env) -> Vm {
-        Vm { main_module: InternalModule::new(env) }
+        Vm { main_module: StdModule::new(env) }
     }
 
     pub fn eval_program(&mut self, program: &Program) -> Result<(), ExecErr> {

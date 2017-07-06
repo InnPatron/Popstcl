@@ -44,7 +44,7 @@ mod tests {
 gset a @obj.foo;
 gset b @obj.bar;")
                 .unwrap();
-        let mut temp_mod = InternalModule::new(env);
+        let mut temp_mod = StdModule::new(env);
         eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
         
 
@@ -89,7 +89,7 @@ gset a @obj.nested.foo;
 gset b @obj.nested.bar;")
                 .unwrap();
 
-        let mut temp_mod = InternalModule::new(env);
+        let mut temp_mod = StdModule::new(env);
         eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
         
 

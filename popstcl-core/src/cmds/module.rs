@@ -8,7 +8,7 @@ impl MakeModule {
     pub fn make_module(stack: &mut Stack, parent_module: StdModule, binding: &str, module_code: &str, binding_info: &DebugInfo) -> Result<ExecSignal, ExecErr> {
         //parse loaded module
         let program = parse_program(&module_code).unwrap();
-        let mut temp_module = InternalModule::from(parent_module);
+        let mut temp_module = parent_module;
         {
             let mut other_stack = Stack::new_module(&mut temp_module);
             eval_program(&mut other_stack, &program)?;
@@ -43,7 +43,7 @@ impl Cmd for MakeModule {
             module_code = cir_extract!(args[1] => String, "Module Code (String)")?.inner();
         } else if args.len() == 3 {
             exact_args!(&args, 3);
-            parent_module = cir_extract!(args[0] => Module, "Module for execution")?;
+            parent_module = cir_extract!(args[0] => Module, "Module for execution")?.clone();
             binding = cir_extract!(args[1] => String, "Module Name (Single)")?.inner();
             binding_info = &args[1].dinfo;
             module_code = cir_extract!(args[2] => String, "Module Code (String)")?.inner();
@@ -63,10 +63,9 @@ impl Cmd for MoveMod {
 	fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
 		exact_args!(&args, 2);
 
-		let mut pmod = cir_extract!(args[0] => Module)?;
+		let mut pmod = cir_extract!(args[0] => Module)?.clone();
 		let program = cir_extract!(args[1] => String)?.inner();
-        let mut mod_scope = InternalModule::from(pmod);
-		let mut temp_stack = Stack::new_module(&mut mod_scope);
+		let mut temp_stack = Stack::new_module(&mut pmod);
 		let program_seq = parse_program(program.trim())?;
 		for stmt in program_seq.iter() {
 			let signal = eval_stmt(&mut temp_stack, &stmt)?;
