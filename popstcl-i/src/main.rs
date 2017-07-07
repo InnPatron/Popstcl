@@ -12,7 +12,7 @@ fn main() {
         let mut program = String::new();
         io::stdin().read_line(&mut program).expect("Failed to read line");
 
-        match &*program {
+        match &*program.trim() {
             "q" => break,
             "cls" => { 
                 if let Err(e) = io::stdout().flush() {
