@@ -1,4 +1,8 @@
 extern crate popstcl_core;
+extern crate rustyline;
+
+use rustyline::Editor;
+use rustyline::completion::FilenameCompleter;
 
 use popstcl_core::vm::basic_vm;
 
@@ -7,22 +11,28 @@ use std::io::Write;
 
 fn main() {
     let mut vm = basic_vm();
+    let mut editor = Editor::<()>::new();
     greetings();
     loop {
-        let mut program = String::new();
-        io::stdin().read_line(&mut program).expect("Failed to read line");
-
-        match &*program.trim() {
+        let input = match editor.readline(">>> ") {
+            Ok(str) => str,
+            Err(e) => {
+                println!("{}", e);
+                continue;
+            },
+        };
+        let input = &*input.trim();
+        match input {
             "q" => break,
             "cls" => { 
-                if let Err(e) = io::stdout().flush() {
-                    panic!("Nonrecoverable Error\n{:?}", e);
-                }
+                clear();
+                greetings();
+                continue;
             },
             _ => (),
         }
 
-        match vm.eval_string(&program) {
+        match vm.eval_string(input) {
             Ok(_) => (),
             Err(e) => println!("Execution Error: {:?}", e),
         }
@@ -31,4 +41,15 @@ fn main() {
 
 fn greetings() {
     println!("Popstcl REPL TEST BUILD");
+}
+
+#[cfg(windows)]
+fn clear() {
+    std::process::Command::new("cls").status().unwrap();
+}
+
+#[cfg(unix)]
+fn clear() {
+    std::process::Command::new("clear").status().unwrap();
+    //println!("{}[2J", 27 as char);
 }
