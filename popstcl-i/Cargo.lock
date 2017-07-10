@@ -2,7 +2,7 @@
 name = "popstcl-i"
 version = "0.1.0"
 dependencies = [
- "popstcl-core 0.7.0",
+ "popstcl-core 0.8.0",
  "rustyline 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -54,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "popstcl-core"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "itertools 0.5.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
