@@ -31,7 +31,7 @@ pub enum TokenKind {
 macro_rules! push_token {
     ($maybe_something: ident, $result: ident, $tail: expr) => {{
         if $maybe_something.0.is_empty() == false {
-            assert!($maybe_something.1 != $maybe_something.2);
+            assert!($maybe_something.1 != $maybe_something.2);  //TODO: this causes a panic when "\n\0" is encountered. Should this be removed? ['\0'.is_whitespace() == false]
             $result.push(Token::new(TokenKind::Something($maybe_something.0.clone()),
                                     range!($maybe_something.1, $maybe_something.2)));
             $maybe_something.0.clear();
