@@ -85,6 +85,7 @@ mod while_cmd;
 mod flow_control;
 mod print;
 mod misc;
+mod object;
 
 pub use self::var_cmds::{Let, Set};
 pub use self::if_cmd::If;
@@ -97,3 +98,4 @@ pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq}
 pub use self::while_cmd::While;
 pub use self::print::Print;
 pub use self::misc::{Clone};
+pub use self::object::{MakeObject, Field, RmField};

@@ -39,4 +39,9 @@ impl Object for StdModule {
         let env = self.0.borrow();
 		Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?.clone())
 	}
+
+    fn remove(&self, name: &str) -> Option<RcValue> {
+        let env = &mut self.0.borrow_mut();
+        env.remove(name)
+    }
 }

@@ -51,6 +51,10 @@ impl EnvBuilder {
         builder.insert_value("print", Value::Cmd(Box::new(Print)));
 
         builder.insert_value("clone", Value::Cmd(Box::new(Clone)));
+
+        builder.insert_value("object", Value::Cmd(Box::new(MakeObject)));
+        builder.insert_value("field", Value::Cmd(Box::new(Field)));
+        builder.insert_value("rmf", Value::Cmd(Box::new(RmField)));
         
         builder
     }

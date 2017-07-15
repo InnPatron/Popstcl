@@ -19,6 +19,10 @@ impl Env {
     pub fn get(&self, name: &str) -> Option<RcValue> {
         self.bindings.get(name).map(|rc_value| rc_value.clone())
     }
+
+    pub fn remove(&mut self, name: &str) -> Option<RcValue> {
+        self.bindings.remove(name)
+    }
 }
 
 #[cfg(test)]

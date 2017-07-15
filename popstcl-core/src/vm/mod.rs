@@ -6,8 +6,7 @@ pub mod user {
     pub use super::env::Env;
     pub use super::value::{Value, IntoValue};
     pub use super::err::ExecErr;
-    pub use super::object::Object;
-    pub use super::object_kind::StdObject;
+    pub use super::object::{Object, ObjectKind};
     pub use super::env_builder::EnvBuilder;
     pub use super::debug_info::{DebugInfo, DebugKind};
 }
@@ -18,7 +17,7 @@ pub mod internal {
     pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
     pub use super::value::{Value, IntoValue, RcValue};
-    pub use super::object_kind::{ ObjectKind, StdObject };
+    pub use super::object::{ Object, ObjectKind, StdObject };
     pub use super::stack::Stack;
     pub use super::cir::CIR;
     pub use super::env_builder::EnvBuilder;
@@ -28,7 +27,6 @@ pub mod internal {
     pub use namespace::Namespace;
     pub use parser::err::ParseErr;
 
-    pub use super::object::Object;
 	pub use super::module::{StdModule, Module};
 }
 
@@ -40,7 +38,6 @@ mod cmd;
 mod debug_info;
 mod executor;
 mod stack;
-mod object_kind;
 #[macro_use]
 mod cir;
 mod env;
