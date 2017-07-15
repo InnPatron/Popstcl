@@ -1,6 +1,7 @@
 use super::internal::*;
 use std::rc::Rc;
 use std::cell::RefCell;
+use ccrc::{Collectable, Tracer};
 
 pub trait Module: Object {}
 
@@ -43,5 +44,11 @@ impl Object for StdModule {
     fn remove(&self, name: &str) -> Option<RcValue> {
         let env = &mut self.0.borrow_mut();
         env.remove(name)
+    }
+}
+
+impl Collectable for StdModule {
+    fn trace(&self, tracer: &Tracer) {
+        Collectable::trace(&*self.0.borrow(), tracer);
     }
 }

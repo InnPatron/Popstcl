@@ -2,6 +2,7 @@ use vm::internal::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display};
+use ccrc::{Collectable, Tracer};
 
 pub trait Object {
 	fn insert(&self, name: &str, value: RcValue) -> Result<(), ObjectErr>;
@@ -39,6 +40,12 @@ impl Object for StdObject {
     fn remove(&self, name: &str) -> Option<RcValue> {
         let env = &mut self.0.borrow_mut();
         env.remove(name)
+    }
+}
+
+impl Collectable for StdObject {
+    fn trace(&self, tracer: &Tracer) {
+        Collectable::trace(&*self.0.borrow(), tracer);
     }
 }
 

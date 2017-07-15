@@ -4,6 +4,7 @@ use std::ops::{Deref, Add, Sub, Mul, Div };
 use std::borrow::Borrow;
 use std::rc::Rc;
 use super::internal::{StdObject, Cmd, Env, StdModule};
+use ccrc::{Collectable, Ccrc, Tracer};
 
 #[macro_export]
 macro_rules! into_value {
@@ -37,16 +38,22 @@ macro_rules! p_object {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RcValue(Rc<Value>);
+pub struct RcValue(Ccrc<Value>);
 
 impl RcValue {   
     pub fn new(value: Value) -> RcValue {
-        RcValue(Rc::new(value))
+        RcValue(Ccrc::new(value))
     }
 
     pub fn inner_clone(&self) -> Value {
         let borrow: &Value = self.0.borrow();
         borrow.clone()
+    }
+}
+
+impl Collectable for RcValue {
+    fn trace(&self, tracer: &Tracer) {
+        Collectable::trace(&self.0, tracer)
     }
 }
 
@@ -71,7 +78,7 @@ impl Borrow<Value> for RcValue {
 
 impl From<Value> for RcValue {
     fn from(val: Value) -> RcValue {
-        RcValue(Rc::new(val))
+        RcValue(Ccrc::new(val))
     }
 }
 
@@ -142,6 +149,24 @@ impl Value {
             None
         }
     } 
+}
+
+impl Collectable for Value {
+    fn trace(&self, tracer: &Tracer) {
+        use super::object::Object;
+
+        use self::Value::*;
+        match *self {
+            Number(_) | String(_) | Bool(_) | Cmd(_) => (),
+            Object(ref obj) => Collectable::trace(obj, tracer),
+            Module(ref obj) => Collectable::trace(obj, tracer),
+            List(ref l) => {
+                for item in l.list.borrow().iter() {
+                    Collectable::trace(item, tracer);
+                }
+            },
+        }
+    }
 }
 
 impl PartialEq for Value {
