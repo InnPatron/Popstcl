@@ -9,4 +9,5 @@ pub enum ParseErr {
     NotBool(String),
     NoMoreTokens,
     MissingSemicolon,
+    IncompleteComment,
 }

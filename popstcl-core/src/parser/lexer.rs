@@ -24,6 +24,7 @@ pub enum TokenKind {
     At, //@
     FullStop, //.
     Caret, //^
+    Backslash, // /
     Whitespace(char),
     Something(String),
 }
@@ -56,6 +57,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             '$' => push_token!(maybe_something, result, Token::new(TokenKind::Dollar, location!(i))),
             '.' => push_token!(maybe_something, result, Token::new(TokenKind::FullStop,location!(i))),
             '^' => push_token!(maybe_something, result, Token::new(TokenKind::Caret, location!(i))),
+            '/' => push_token!(maybe_something, result, Token::new(TokenKind::Backslash, location!(i))),
             c @ _ => {
                 if c.is_whitespace() {
                     push_token!(maybe_something, result, Token::new(TokenKind::Whitespace(c), location!(i)));
@@ -91,6 +93,7 @@ impl TokenKind {
             &At => "@".to_owned(),
             &FullStop => ".".to_owned(),
             &Caret => "^".to_owned(),
+            &Backslash => "/".to_owned(),
             &Whitespace(char) => char.to_string(),
             &Something(ref s) => s.to_string(),
         }
