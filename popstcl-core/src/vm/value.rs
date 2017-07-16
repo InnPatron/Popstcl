@@ -2,7 +2,7 @@ use std::fmt;
 use std::cell::{RefCell, Ref, RefMut};
 use std::ops::{Deref, Add, Sub, Mul, Div };
 use std::borrow::Borrow;
-use std::rc::{Rc, Weak};
+use std::rc::Rc;
 use super::internal::{StdObject, Cmd, Env, StdModule};
 
 #[macro_export]
@@ -21,7 +21,7 @@ macro_rules! p_cmd {
 
 #[macro_export]
 macro_rules! p_list {
-    ($($x:expr,)*) => (Value::List(List::new(vec![$($x.into_value()),*])))
+    ($($x:expr,)*) => (Value::List(List::new(vec![$($x.into_value().into()),*])))
 }
 
 #[macro_export]
@@ -30,7 +30,7 @@ macro_rules! p_object {
     ($([$name: expr, $value: expr],)*) => {{
         let mut obj = StdObject::empty();
         $(
-            obj.insert($name, $value.into_value());
+            obj.insert($name, $value.into_value().into());
         )*
         Value::Object(obj)
     }};
@@ -39,8 +39,7 @@ macro_rules! p_object {
 #[derive(Clone, Debug, PartialEq)]
 pub struct RcValue(Rc<Value>);
 
-impl RcValue {
-    
+impl RcValue {   
     pub fn new(value: Value) -> RcValue {
         RcValue(Rc::new(value))
     }
@@ -53,8 +52,26 @@ impl RcValue {
 
 impl fmt::Display for RcValue {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!();
-        //TODO: Should it just use Display impl for Value or print something else (i.e. 'pointer')?
+        self.0.fmt(f)
+    }
+}
+
+impl Deref for RcValue {
+    type Target = Value;
+    fn deref(&self) -> &Self::Target {
+        &*self.0
+    }
+}
+
+impl Borrow<Value> for RcValue {
+    fn borrow(&self) -> &Value {
+        &*self.0
+    }
+}
+
+impl From<Value> for RcValue {
+    fn from(val: Value) -> RcValue {
+        RcValue(Rc::new(val))
     }
 }
 
@@ -67,7 +84,6 @@ pub enum Value {
     List(List),
     Object(StdObject),
     Module(StdModule),
-    Ref(ValRef),
 }
 
 impl Value {
@@ -126,14 +142,6 @@ impl Value {
             None
         }
     } 
-
-    pub fn try_get_ref(&self) -> Option<Weak<Value>> {
-        if let &Value::Ref(ref r) = self {
-            Some(r.inner().clone())
-        } else {
-            None
-        }
-    }
 }
 
 impl PartialEq for Value {
@@ -169,7 +177,6 @@ impl fmt::Display for Value {
                                      },
             &Value::Object(_) => write!(f, "OBJ"),      //TODO: better display
             &Value::Module(_) => write!(f, "MODULE"),   //TODO: better display
-            &Value::Ref(_) => write!(f, "Reference"),   //TODO: better display
         }
     }
 }
@@ -297,25 +304,25 @@ impl Bool {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct List {
-    list: RefCell<Vec<Value>>
+    list: RefCell<Vec<RcValue>>
 }
 
 impl List {
-    pub fn new(l: Vec<Value>) -> List {
+    pub fn new(l: Vec<RcValue>) -> List {
         List {
             list: RefCell::new(l)
         }
     }
 
-    pub fn set(&self, l: Vec<Value>) {
+    pub fn set(&self, l: Vec<RcValue>) {
         *self.list.borrow_mut() = l;
     }
 
-    pub fn inner(&self) -> Ref<Vec<Value>> {
+    pub fn inner(&self) -> Ref<Vec<RcValue>> {
         self.list.borrow()
     }
 
-    pub fn inner_mut(&self) -> RefMut<Vec<Value>> {
+    pub fn inner_mut(&self) -> RefMut<Vec<RcValue>> {
         self.list.borrow_mut()
     }
 
@@ -323,45 +330,8 @@ impl List {
         self.list.borrow().len()
     }
 
-    pub fn pop(&self) -> Option<Value> {
+    pub fn pop(&self) -> Option<RcValue> {
         self.list.borrow_mut().pop()
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct ValRef {
-    reference: RefCell<Weak<Value>>,
-    addr: *const Value,
-}
-
-impl ValRef {
-    pub fn new(r: Rc<Value>) -> ValRef {
-        ValRef {
-            reference: RefCell::new(Rc::downgrade(&r)),
-            addr: Rc::into_raw(r),
-        }
-    }
-
-    pub fn set(&self, r: Weak<Value>) {
-        *self.reference.borrow_mut() = r;
-    }
-
-    pub fn inner(&self) -> Ref<Weak<Value>> {
-        self.reference.borrow()
-    }
-
-    pub fn inner_mut(&self) -> RefMut<Weak<Value>> {
-        self.reference.borrow_mut()
-    }
-
-    pub fn dereference(&self) -> Option<Rc<Value>> {
-        self.reference.borrow().upgrade()
-    }
-}
-
-impl PartialEq for ValRef {
-    fn eq(&self, other: &ValRef) -> bool {
-        self.addr == other.addr
     }
 }
 
@@ -419,6 +389,12 @@ impl IntoValue for List {
 
 impl IntoValue for Vec<Value> {
     fn into_value(self) -> Value {
+        Value::List(List::new(self.into_iter().map(|val| val.into()).collect::<Vec<RcValue>>()))
+    }
+}
+
+impl IntoValue for Vec<RcValue> {
+    fn into_value(self) -> Value {
         Value::List(List::new(self))
     }
 }
@@ -445,8 +421,8 @@ mod tests {
         assert_eq!(p_object!(["test", 123.], ["test2", false],),
                    {
                         let mut object = StdObject::empty();
-                        object.insert("test", (123.).into_value());
-                        object.insert("test2", false.into_value());
+                        object.insert("test", (123.).into_value().into());
+                        object.insert("test2", false.into_value().into());
                         Value::Object(object)
                    });
     }

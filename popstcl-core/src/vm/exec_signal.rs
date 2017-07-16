@@ -1,8 +1,8 @@
-use super::internal::Value;
+use super::internal::RcValue;
 
 pub enum ExecSignal {
-    NextInstruction(Option<Value>),
+    NextInstruction(Option<RcValue>),
     Continue,
-    Return(Option<Value>),
+    Return(Option<RcValue>),
     Break,
 }

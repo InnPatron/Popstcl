@@ -15,8 +15,8 @@ impl MakeModule {
         }
 
         //Set new binding
-        stack.get_module_env_mut()
-             .insert(binding, Value::Module(temp_module.into()))
+        stack.get_module()
+             .insert(binding, Value::Module(temp_module).into())
              .map_err(|oerr| ExecErr::ObjectErr(oerr, 
                                                 dinsertion!(binding_info.line_info.clone(),
                                                             binding_info)

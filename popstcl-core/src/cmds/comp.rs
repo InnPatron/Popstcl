@@ -11,7 +11,7 @@ impl Cmd for Eq {
         let lhs = &args[0];
         let rhs = &args[1];
 
-        Ok(ExecSignal::NextInstruction(Some((lhs == rhs).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((lhs == rhs).into_value().into())))
     }
 }
 
@@ -25,7 +25,7 @@ impl Cmd for InEq {
         let lhs = &args[0];
         let rhs = &args[1];
 
-        Ok(ExecSignal::NextInstruction(Some((lhs != rhs).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((lhs != rhs).into_value().into())))
     }
 }
 
@@ -39,7 +39,7 @@ impl Cmd for GreaterThan {
         let lhs = cir_extract!(args[0] => Number)?;
         let rhs = cir_extract!(args[1] => Number)?;
 
-        Ok(ExecSignal::NextInstruction(Some((lhs > rhs).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((lhs > rhs).into_value().into())))
     }
 }
 
@@ -53,7 +53,7 @@ impl Cmd for GreaterThanEq {
         let lhs = cir_extract!(args[0] => Number)?;
         let rhs = cir_extract!(args[1] => Number)?;
 
-        Ok(ExecSignal::NextInstruction(Some((lhs >= rhs).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((lhs >= rhs).into_value().into())))
     }
 }
 
@@ -67,7 +67,7 @@ impl Cmd for LessThan {
         let lhs = cir_extract!(args[0] => Number)?;
         let rhs = cir_extract!(args[1] => Number)?;
 
-        Ok(ExecSignal::NextInstruction(Some((lhs < rhs).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((lhs < rhs).into_value().into())))
     }
 }
 
@@ -81,6 +81,6 @@ impl Cmd for LessThanEq {
         let lhs = cir_extract!(args[0] => Number)?;
         let rhs = cir_extract!(args[1] => Number)?;
 
-        Ok(ExecSignal::NextInstruction(Some((lhs <= rhs).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((lhs <= rhs).into_value().into())))
     }
 }

@@ -14,9 +14,9 @@ fn module_from_string() {
     vm.eval_program(&program).unwrap();
 
     let other_mod = vm.inspect_value("other_mod").expect("Could not find foreign module \'other_mod\'");
-    if let Value::Module(other_mod) = other_mod {
+    if let Value::Module(ref other_mod) = *other_mod {
         let inner_value = other_mod.get("inner_value").expect("Could not find foreign module value \'inner_value\'");
-        if let Value::Number(ref num) = inner_value {
+        if let Value::Number(ref num) = *inner_value {
             assert_eq!(num.inner(), 1337.0);
         } else {
             panic!("\'inner_value\' is not Value::Number. Found {}", inner_value);

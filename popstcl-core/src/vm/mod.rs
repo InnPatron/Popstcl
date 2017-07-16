@@ -52,7 +52,7 @@ mod module;
 
 use ast::Program;
 use self::err::*;
-use self::value::Value;
+use self::value::RcValue;
 use self::env::Env;
 use self::executor::eval_program;
 use self::stack::Stack;
@@ -89,7 +89,7 @@ impl Vm {
         eval_program(&mut Stack::new_module(&mut self.main_module), &program)
     }
 
-    pub fn inspect_value(&self, name: &str) -> Result<Value, ObjectErr> {
+    pub fn inspect_value(&self, name: &str) -> Result<RcValue, ObjectErr> {
         self.main_module.get(name)
     }
 }

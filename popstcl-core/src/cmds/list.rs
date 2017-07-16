@@ -15,10 +15,10 @@ impl Cmd for List {
         //Convert ALL CIR args into Values
         //Fail if CIR is NOT a value
         for argument in args.iter() {
-            list.push(argument.clone_value());
+            list.push(argument.value.clone());
         }
 
-        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
     }
 }
 
@@ -32,7 +32,7 @@ impl Cmd for ListLength {
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 1);
         let list = cir_extract!(args[0] => List)?;
-        Ok(ExecSignal::NextInstruction(Some((list.len() as f64).into_value())))
+        Ok(ExecSignal::NextInstruction(Some((list.len() as f64).into_value().into())))
     }
 }
 
@@ -54,7 +54,7 @@ impl Cmd for ListIndex {
 
         Ok(ExecSignal::NextInstruction(Some(list.inner().get(usize_index)
                               .ok_or(ExecErr::InvalidIndex(usize_index))?
-                              .clone())
+                              .clone().into())
            ))
     }
 }
@@ -82,7 +82,7 @@ impl Cmd for Remove {
         } else {
             list.inner_mut().remove(usize_index);
         }
-        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
     }
 }
 
@@ -98,10 +98,10 @@ impl Cmd for Append {
 
         let mut list = cir_extract!(args[0] => List)?.clone();
         for index in 1..args.len() {
-            let value = args[index].clone_value();
+            let value = args[index].value.clone();
             list.inner_mut().push(value);
         }
-        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
     }
 }
 
@@ -118,6 +118,6 @@ impl Cmd for Pop {
 
         let mut list = cir_extract!(args[0] => List)?.clone();
         list.pop();
-        Ok(ExecSignal::NextInstruction(Some(list.into_value())))
+        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
     }
 }

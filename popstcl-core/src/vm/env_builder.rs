@@ -49,6 +49,8 @@ impl EnvBuilder {
         builder.insert_value("list_append", Value::Cmd(Box::new(Append)));
 
         builder.insert_value("print", Value::Cmd(Box::new(Print)));
+
+        builder.insert_value("clone", Value::Cmd(Box::new(Clone)));
         
         builder
     }
@@ -60,7 +62,7 @@ impl EnvBuilder {
     pub fn build(&self) -> Env {
         let mut env = Env::new();
         for (name, entry) in self.values.iter() {
-            env.insert(name, entry.clone());
+            env.insert(name, entry.clone().into());
         }
         env
     }
@@ -68,7 +70,7 @@ impl EnvBuilder {
     pub fn consume(self) -> Env {
         let mut env = Env::new();
         for (name, entry) in self.values.into_iter() {
-            env.insert(&name, entry);
+            env.insert(&name, entry.into());
         }
         env
     }
@@ -84,6 +86,6 @@ mod tests {
         let mut builder = EnvBuilder::basic_env();
         builder.insert_value("test", (5.0).into_value());
         let env = builder.build();
-        assert_eq!((5.0).into_value(), env.get("test").expect("Missing binding \'test\'"));
+        assert_eq!((5.0).into_value(), *env.get("test").expect("Missing binding \'test\'"));
     }
 }

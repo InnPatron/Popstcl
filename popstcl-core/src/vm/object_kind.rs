@@ -17,15 +17,15 @@ impl StdObject {
 }
 
 impl Object for StdObject {
-	fn insert(&self, name: &str, value: Value) -> Result<(), ObjectErr> {
+	fn insert(&self, name: &str, value: RcValue) -> Result<(), ObjectErr> {
 		let env = &mut self.0.borrow_mut();       
         env.insert(name, value);
 		Ok(())
 	}
 
-	fn get(&self, name: &str) -> Result<Value, ObjectErr> {
+	fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
         let env = self.0.borrow();
-		Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?)
+		Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?.clone())
 	}
 }
 

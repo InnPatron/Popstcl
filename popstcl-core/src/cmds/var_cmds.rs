@@ -19,7 +19,7 @@ impl Cmd for Let {
         for (maybe_name, value) in args.iter().tuples() {
             let name = cir_extract!(maybe_name => String)?.inner();
     
-            let value = value.clone_value();
+            let value = value.value.clone();
 
             module.insert(&name,
 						  value)
@@ -44,7 +44,7 @@ impl Cmd for Set {
         let maybe_name = &args[0];
         let name = cir_extract!(maybe_name => String)?.inner();
     
-        let value: Value = args[1].clone_value();
+        let value = args[1].value.clone();
 
         module.insert(&name, 
                       value.clone())
@@ -53,6 +53,6 @@ impl Cmd for Set {
                                                              maybe_name.dinfo)
                                                 )
                       )?;
-        Ok(ExecSignal::NextInstruction(Some(value)))
+        Ok(ExecSignal::NextInstruction(Some(value.into())))
     }
 }

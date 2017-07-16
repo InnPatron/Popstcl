@@ -1,4 +1,4 @@
-use vm::internal::{Value, StdModule, DebugInfo, DebugKind};
+use vm::internal::{Value, RcValue, StdModule, DebugInfo, DebugKind};
 use ast::*;
 
 use std::fmt;
@@ -8,18 +8,14 @@ use std::rc::Weak;
 /// Command Intermediate Representation
 #[derive(Clone, Debug)]
 pub struct CIR {
-    pub value: Value,
+    pub value: RcValue,
     pub dinfo: DebugInfo,
 }
 
 impl CIR {
     
-    pub fn new(value: Value, dinfo: DebugInfo) -> CIR {
+    pub fn new(value: RcValue, dinfo: DebugInfo) -> CIR {
         CIR { value: value, dinfo: dinfo }
-    }
-
-    pub fn clone_value(&self) -> Value {
-        self.value.clone()
     }
 }
 
@@ -128,17 +124,4 @@ macro_rules! cir_extract {
             })
         }
     };
-
-    ($cir: expr => Ref) => {
-        cir_extract!($cir => Ref, "Reference")
-    };
-
-    ($cir: expr => Ref, $expect: expr) => {
-        {
-            $cir.value.try_get_ref().ok_or(ExecErr::InvalidArg {
-                                     expect: $expect.to_string(),
-                                     found: $cir.clone()
-            })
-        }
-    }
 }
