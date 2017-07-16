@@ -35,8 +35,8 @@ cargo run
 
 To directly run the program.
 
-## The REPL
-Currently, popstcl-i is an extremely barebones REPL. 
+## The Interpreter
+Currently, [popstcl-i](https://gitlab.com/Random_Civvy/popstcl-i) is an extremely barebones REPL. 
 
 Hint: Type in 'q' and ENTER to quit the REPL.
 
