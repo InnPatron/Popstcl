@@ -38,15 +38,15 @@ impl Cmd for MakeModule {
         if args.len() == 2 {
             exact_args!(&args, 2);
             parent_module = StdModule::new(EnvBuilder::basic_env().consume());
-            binding = cir_extract!(args[0] => String, "Module Name (Single)")?.inner();
+            binding = cir_extract!(args[0] => String, "Module Name (Single)")?;
             binding_info = &args[0].dinfo;
-            module_code = cir_extract!(args[1] => String, "Module Code (String)")?.inner();
+            module_code = cir_extract!(args[1] => String, "Module Code (String)")?;
         } else if args.len() == 3 {
             exact_args!(&args, 3);
             parent_module = cir_extract!(args[0] => Module, "Module for execution")?.clone();
-            binding = cir_extract!(args[1] => String, "Module Name (Single)")?.inner();
+            binding = cir_extract!(args[1] => String, "Module Name (Single)")?;
             binding_info = &args[1].dinfo;
-            module_code = cir_extract!(args[2] => String, "Module Code (String)")?.inner();
+            module_code = cir_extract!(args[2] => String, "Module Code (String)")?;
         } else {
             return Err(ArityErr::Min { min: 2, found: args.len() }.into());
         }
@@ -64,7 +64,7 @@ impl Cmd for MoveMod {
 		exact_args!(&args, 2);
 
 		let mut pmod = cir_extract!(args[0] => Module)?.clone();
-		let program = cir_extract!(args[1] => String)?.inner();
+		let program = cir_extract!(args[1] => String)?;
 		let mut temp_stack = Stack::new_module(&mut pmod);
 		let program_seq = parse_program(program.trim())?;
 		for stmt in program_seq.iter() {

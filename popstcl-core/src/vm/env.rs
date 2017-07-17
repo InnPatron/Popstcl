@@ -66,7 +66,7 @@ gset b @obj.bar;")
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {
-                    assert_eq!(pair.1, *val);
+                    assert_eq!(pair.1, *val.borrow());
                 }
 
                 Err(e @ _) => panic!("{:?}", e),
@@ -110,7 +110,7 @@ gset b @obj.nested.bar;")
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {
-                    assert_eq!(pair.1, *val);
+                    assert_eq!(pair.1, *val.borrow());
                 }
 
                 Err(err @ _) => panic!("{:?}", err),

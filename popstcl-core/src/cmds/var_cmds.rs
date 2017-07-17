@@ -17,7 +17,7 @@ impl Cmd for Let {
         let module = get_module!(self.0, stack);
 
         for (maybe_name, value) in args.iter().tuples() {
-            let name = cir_extract!(maybe_name => String)?.inner();
+            let name = cir_extract!(maybe_name => String)?;
     
             let value = value.value.clone();
 
@@ -42,7 +42,7 @@ impl Cmd for Set {
         let module = get_module!(self.0, stack);
 
         let maybe_name = &args[0];
-        let name = cir_extract!(maybe_name => String)?.inner();
+        let name = cir_extract!(maybe_name => String)?;
     
         let value = args[1].value.clone();
 

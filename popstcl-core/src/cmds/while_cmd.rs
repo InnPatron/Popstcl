@@ -11,8 +11,8 @@ impl Cmd for While {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let conditional_program = cir_extract!(args[0] => String, "While Condition")?.inner();
-        let while_body = cir_extract!(args[1] => String, "While Body")?.inner();
+        let conditional_program = cir_extract!(args[0] => String, "While Condition")?;
+        let while_body = cir_extract!(args[1] => String, "While Body")?;
 
         let conditional_program = parse_program(&conditional_program)?;
         let while_body = parse_program(&while_body)?;
@@ -40,13 +40,13 @@ impl Cmd for While {
 
             //Check condition
             let conditional = conditional.expect("Conditional did not return a value. (Make this an error)");
-            let condition = if let Value::Bool(ref b) = *conditional {
-                b
+            let condition = if let Value::Bool(ref b) = *conditional.borrow() {
+                b.clone()
             } else {
                 panic!("conditional statement did not return a boolean. (Make this an error)");
             };
 
-            if *condition.inner() == false {
+            if condition.inner() == false {
                 break;
             }
 

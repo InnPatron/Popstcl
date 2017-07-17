@@ -42,7 +42,7 @@ test_proc 21 3;
     
     match vm.inspect_value("test") {
         Ok(val) => {
-            match *val {
+            match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(24_f64, n.inner()),
                 _   => panic!("'test' is not a number"),
             }
@@ -73,7 +73,7 @@ mset test_2 [test_proc 3 5];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(&pair.1, &*val);
+                assert_eq!(&pair.1, &*val.borrow());
             },
 
             Err(_) => panic!("Could not find {}", pair.0),
@@ -107,7 +107,7 @@ mset test_2 [test_proc 3 5];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(&pair.1, &*val);
+                assert_eq!(&pair.1, &*val.borrow());
             },
 
             Err(_) => panic!("Could not find {}", pair.0),
@@ -136,7 +136,7 @@ test_proc 1337 5;
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(pair.1, *val);
+                assert_eq!(pair.1, *val.borrow());
             },
 
             Err(_) => panic!("Could not find {}", pair.0),
@@ -166,7 +166,7 @@ mset test_2 [test_proc 1337 5];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(pair.1, *val);
+                assert_eq!(pair.1, *val.borrow());
             },
 
             Err(_) => panic!("Could not find {}", pair.0),
@@ -198,7 +198,7 @@ mset test_1 [test_proc 1337 5];
     for pair in inspecting.iter() {
         match vm.inspect_value(pair.0) {
             Ok(val) => {
-                assert_eq!(pair.1, *val);
+                assert_eq!(pair.1, *val.borrow());
             },
 
             Err(_) => panic!("Could not find {}", pair.0),

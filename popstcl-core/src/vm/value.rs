@@ -1,9 +1,10 @@
 use std::fmt;
 use std::cell::{RefCell, Ref, RefMut};
-use std::ops::{Deref, Add, Sub, Mul, Div };
+use std::ops::{Deref, DerefMut, Add, Sub, Mul, Div };
 use std::borrow::Borrow;
 use std::rc::Rc;
 use super::internal::{StdObject, Cmd, Env, StdModule};
+use super::val_ref::*;
 use ccrc::{Collectable, Ccrc, Tracer};
 
 #[macro_export]
@@ -38,15 +39,23 @@ macro_rules! p_object {
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct RcValue(Ccrc<Value>);
+pub struct RcValue(Ccrc<RefCell<Value>>);
 
 impl RcValue {   
     pub fn new(value: Value) -> RcValue {
-        RcValue(Ccrc::new(value))
+        RcValue(Ccrc::new(RefCell::new(value)))
+    }
+
+    pub fn borrow(&self) -> ValueRef {
+        ValueRef::new((*self.0).borrow())
+    }
+
+    pub fn borrow_mut(&self) -> ValueRefMut {
+        ValueRefMut::new((*self.0).borrow_mut())
     }
 
     pub fn inner_clone(&self) -> Value {
-        let borrow: &Value = self.0.borrow();
+        let borrow = (*self.0).borrow();
         borrow.clone()
     }
 }
@@ -59,26 +68,13 @@ impl Collectable for RcValue {
 
 impl fmt::Display for RcValue {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        self.0.fmt(f)
-    }
-}
-
-impl Deref for RcValue {
-    type Target = Value;
-    fn deref(&self) -> &Self::Target {
-        &*self.0
-    }
-}
-
-impl Borrow<Value> for RcValue {
-    fn borrow(&self) -> &Value {
-        &*self.0
+        (*self.0).borrow().fmt(f)
     }
 }
 
 impl From<Value> for RcValue {
     fn from(val: Value) -> RcValue {
-        RcValue(Ccrc::new(val))
+        RcValue(Ccrc::new(RefCell::new(val)))
     }
 }
 
@@ -94,61 +90,14 @@ pub enum Value {
 }
 
 impl Value {
-    pub fn try_get_number(&self) -> Option<f64> {
-        if let &Value::Number(ref n) = self {
-            Some(n.inner())
-        } else {
-            None
+
+    pub fn is_cmd(&self) -> bool {
+        match self {
+            &Value::Cmd(_) => true,
+            _ => false,
         }
     }
 
-    pub fn try_get_string(&self) -> Option<&PString> {
-        if let &Value::String(ref s) = self {
-            Some(s)
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_bool(&self) -> Option<bool> {
-        if let &Value::Bool(ref b) = self {
-            Some(*b.inner())
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_cmd(&self) -> Option<&Box<Cmd>> {
-        if let &Value::Cmd(ref c) = self {
-            Some(c)
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_list(&self) -> Option<&List> {
-        if let &Value::List(ref l) = self {
-            Some(l)
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_object(&self) -> Option<&StdObject> {
-        if let &Value::Object(ref obj) = self {
-            Some(obj)
-        } else {
-            None
-        }
-    }
-
-    pub fn try_get_mod(&self) -> Option<&StdModule> {
-        if let &Value::Module(ref module) = self {
-            Some(module)
-        } else {
-            None
-        }
-    } 
 }
 
 impl Collectable for Value {
@@ -161,7 +110,7 @@ impl Collectable for Value {
             Object(ref obj) => Collectable::trace(obj, tracer),
             Module(ref obj) => Collectable::trace(obj, tracer),
             List(ref l) => {
-                for item in l.list.borrow().iter() {
+                for item in l.list.iter() {
                     Collectable::trace(item, tracer);
                 }
             },
@@ -208,28 +157,41 @@ impl fmt::Display for Value {
 
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
 pub struct Number {
-    num: RefCell<f64>,
+    num: f64,
 }
 
 impl Number {
     pub fn new(val: f64) -> Number {
         Number {
-            num: RefCell::new(val)
+            num: val 
         }
     }
 
-    pub fn set(&self, val: f64) {
-        *self.num.borrow_mut() = val;
+    pub fn set(&mut self, val: f64) {
+        self.num = val;
     }
 
     pub fn inner(&self) -> f64 {
-        self.num.borrow_mut().clone()
+        self.num.clone()
     }
 }
 
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", *self.num.borrow())
+        write!(f, "{}", self.num)
+    }
+}
+
+impl Deref for Number {
+    type Target = f64;
+    fn deref(&self) -> &f64 {
+        &self.num
+    }
+}
+
+impl DerefMut for Number {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.num
     }
 }
 
@@ -237,7 +199,7 @@ impl Add for Number {
     type Output = Number;
 
     fn add(self, other: Number) -> Number {
-        Number::new(*self.num.borrow() + *self.num.borrow())
+        Number::new(self.num + self.num)
     }
 }
 
@@ -245,7 +207,7 @@ impl Sub for Number {
     type Output = Number;
 
     fn sub(self, other: Number) -> Number {
-        Number::new(*self.num.borrow() - *self.num.borrow())
+        Number::new(self.num - self.num)
     }
 }
 
@@ -253,7 +215,7 @@ impl Div for Number {
     type Output = Number;
 
     fn div(self, other: Number) -> Number {
-        Number::new(*self.num.borrow() / *self.num.borrow())
+        Number::new(self.num / self.num)
     }
 }
 
@@ -261,102 +223,137 @@ impl Mul for Number {
     type Output = Number;
 
     fn mul(self, other: Number) -> Number {
-        Number::new(*self.num.borrow() * *self.num.borrow())
+        Number::new(self.num * self.num)
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd)]
 pub struct PString {
-    str: RefCell<String>
+    str: String
 }
 
 impl fmt::Display for PString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", *self.str.borrow())
+        write!(f, "{}", self.str)
     }
 }
 
 impl PString {
     pub fn new(str: String) -> PString {
         PString {
-            str: RefCell::new(str)
+            str: str
         }
     }
 
-    pub fn set(&self, str: String) {
-        *self.str.borrow_mut() = str;
+    pub fn set(&mut self, str: String) {
+        self.str = str;
     }
 
-    pub fn inner(&self) -> Ref<String> {
-        self.str.borrow()
+    pub fn inner(&self) -> &String {
+        &self.str
     }
 
-    pub fn inner_mut(&self) -> RefMut<String> {
-        self.str.borrow_mut()
+    pub fn inner_mut(&mut self) -> &mut String {
+        &mut self.str
+    }
+}
+
+impl Deref for PString {
+    type Target = String;
+    fn deref(&self) -> &String {
+        &self.str
+    }
+}
+
+impl DerefMut for PString {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.str
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd)]
 pub struct Bool {
-    boolean: RefCell<bool>
-}
-
-impl fmt::Display for Bool {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", *self.boolean.borrow())
-    }
+    boolean: bool 
 }
 
 impl Bool {
     pub fn new(b: bool) -> Bool {
         Bool {
-            boolean: RefCell::new(b)
+            boolean: b
         }
     }
 
-    pub fn set(&self, b: bool) {
-        *self.boolean.borrow_mut() = b;
+    pub fn set(&mut self, b: bool) {
+        self.boolean = b;
     }
 
-    pub fn inner(&self) -> Ref<bool> {
-        self.boolean.borrow()
+    pub fn inner(&self) ->  bool {
+        self.boolean
     }
+}
 
-    pub fn inner_mut(&self) -> RefMut<bool> {
-        self.boolean.borrow_mut()
+impl fmt::Display for Bool {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.boolean) 
+    }
+}
+
+impl Deref for Bool {
+    type Target = bool;
+    fn deref(&self) -> &bool {
+        &self.boolean
+    }
+}
+
+impl DerefMut for Bool {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.boolean
     }
 }
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct List {
-    list: RefCell<Vec<RcValue>>
+    list: Vec<RcValue>
 }
 
 impl List {
     pub fn new(l: Vec<RcValue>) -> List {
         List {
-            list: RefCell::new(l)
+            list: l
         }
     }
 
-    pub fn set(&self, l: Vec<RcValue>) {
-        *self.list.borrow_mut() = l;
+    pub fn set(&mut self, l: Vec<RcValue>) {
+        self.list = l;
     }
 
-    pub fn inner(&self) -> Ref<Vec<RcValue>> {
-        self.list.borrow()
+    pub fn inner(&self) -> &Vec<RcValue> {
+        &self.list
     }
 
-    pub fn inner_mut(&self) -> RefMut<Vec<RcValue>> {
-        self.list.borrow_mut()
+    pub fn inner_mut(&mut self) -> &mut Vec<RcValue> {
+        &mut self.list
     }
 
     pub fn len(&self) -> usize {
-        self.list.borrow().len()
+        self.list.len()
     }
 
-    pub fn pop(&self) -> Option<RcValue> {
-        self.list.borrow_mut().pop()
+    pub fn pop(&mut self) -> Option<RcValue> {
+        self.list.pop()
+    }
+}
+
+impl Deref for List {
+    type Target = Vec<RcValue>;
+    fn deref(&self) -> &Vec<RcValue> {
+        &self.list
+    }
+}
+
+impl DerefMut for List {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.list
     }
 }
 

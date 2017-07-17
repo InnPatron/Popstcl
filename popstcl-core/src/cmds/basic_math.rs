@@ -10,7 +10,7 @@ impl Cmd for Add {
         let mut accu = 0.;
 
         for input in args.iter() {
-            accu += cir_extract!(input => Number)?;
+            accu += *cir_extract!(input => Number)?;
         }
 
         Ok(ExecSignal::NextInstruction(Some(accu.into_value().into())))
@@ -28,11 +28,11 @@ impl Cmd for Sub {
         let mut iter = args.iter(); 
         {
             let input = iter.next().unwrap();
-            accu = cir_extract!(input => Number)?;
+            accu = *cir_extract!(input => Number)?;
         }
 
         for input in iter {
-            accu -= cir_extract!(input => Number)?;
+            accu -= *cir_extract!(input => Number)?;
         }
         
         Ok(ExecSignal::NextInstruction(Some(accu.into_value().into())))
@@ -50,11 +50,11 @@ impl Cmd for Mul {
         let mut iter = args.iter(); 
         {
             let input = iter.next().unwrap();
-            accu = cir_extract!(input => Number)?;
+            accu = *cir_extract!(input => Number)?;
         }
 
         for input in iter {
-            accu *= cir_extract!(input => Number)?;
+            accu *= *cir_extract!(input => Number)?;
         }
         
         Ok(ExecSignal::NextInstruction(Some(accu.into_value().into())))
@@ -72,12 +72,12 @@ impl Cmd for Div {
         let mut iter = args.iter(); 
         {
             let input = iter.next().unwrap();
-            accu = cir_extract!(input => Number)?;
+            accu = *cir_extract!(input => Number)?;
 
         }
 
         for input in iter {
-            let divisor = cir_extract!(input => Number)?;
+            let divisor = *cir_extract!(input => Number)?;
             if divisor == 0.0 {
                 accu = 0.0;
             } else {

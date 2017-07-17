@@ -35,7 +35,7 @@ if @foo {
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
             Ok(val) => {
-                if let Value::Number(ref n) = *val {
+                if let Value::Number(ref n) = *val.borrow() {
                     assert_eq!(1_f64, n.inner());
                 } else {
                     panic!("output not a number");
@@ -62,7 +62,7 @@ if @foo {
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
             Ok(val) => {
-                if let Value::Number(ref n) = *val {
+                if let Value::Number(ref n) = *val.borrow() {
                     assert_eq!(1337_f64, n.inner());
                 } else {
                     panic!("output not a number");
@@ -98,7 +98,7 @@ if @foo {
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
             Ok(val) => {
-                if let Value::Number(ref n) = *val {
+                if let Value::Number(ref n) = *val.borrow() {
                     assert_eq!(9000_f64, n.inner());
                 } else {
                     panic!("output not a number");
@@ -134,7 +134,7 @@ if @foo {
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
             Ok(val) => {
-                if let Value::Number(ref n) = *val {
+                if let Value::Number(ref n) = *val.borrow() {
                     assert_eq!(2_f64, n.inner());
                 } else {
                     panic!("output not a number");

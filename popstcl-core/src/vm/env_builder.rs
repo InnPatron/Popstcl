@@ -90,6 +90,8 @@ mod tests {
         let mut builder = EnvBuilder::basic_env();
         builder.insert_value("test", (5.0).into_value());
         let env = builder.build();
-        assert_eq!((5.0).into_value(), *env.get("test").expect("Missing binding \'test\'"));
+        let value = env.get("test").expect("Missing binding \'test\'");
+        let borrow = value.borrow();
+        assert_eq!((5.0).into_value(), *borrow);
     }
 }

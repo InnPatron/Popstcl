@@ -202,11 +202,11 @@ impl Cmd for If {
                 continue;
             }
 
-            if let Value::Bool(ref b) = *arg.value {
-                execute_next = *b.inner(); //read if condition was bool
+            if let Value::Bool(ref b) = *arg.value.borrow() {
+                execute_next = b.inner(); //read if condition was bool
             }
 
-            if let Value::String(ref string) = *arg.value {
+            if let Value::String(ref string) = *arg.value.borrow() {
                 if execute_next {
                     program_seq = Some(parse_program(string.inner().trim())
                                .expect("Should have been caught by check_step"));
