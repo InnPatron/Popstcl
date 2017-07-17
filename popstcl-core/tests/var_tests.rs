@@ -119,3 +119,30 @@ mset TEST_STRING \"yoyo: @g@f@h b\";").unwrap();
         }
     }
 }
+
+#[test]
+fn comments() {
+    let mut vm = basic_vm();
+    let program = parser::parse_program("
+    mset a 21;
+    //mset a 100;
+    mset b 9000;
+    //mset b -1;
+    mset c 1000; //mset c 6; if true { print [add 1 4]; };").unwrap();
+    
+    vm.eval_program(&program).unwrap();
+    let inspecting = vec![("a", (21.0).into_value()),
+                          ("b", (9000.0).into_value()),
+                          ("c", (1000.0).into_value()),
+    ];
+
+    for pair in inspecting.iter() {
+        match vm.inspect_value(pair.0) {
+            Ok(val) => {
+                assert_eq!(&pair.1, &*val);
+            },
+
+            Err(e) => panic!("{:?}"),
+        }
+    }
+}

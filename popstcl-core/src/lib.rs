@@ -1,6 +1,7 @@
 #![allow(unused_imports)]
 
 extern crate itertools;
+extern crate ccrc;
 
 #[macro_use]
 pub mod line_info;

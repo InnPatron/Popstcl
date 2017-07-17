@@ -108,6 +108,7 @@ impl Parser {
             Dollar => self.parse_varsub(stream, Namespace::Local).map(|w| Some(w)),       //var_sub -> $path
             At => self.parse_varsub(stream, Namespace::Module).map(|w| Some(w)),
             Caret => self.parse_varsub(stream, Namespace::Args).map(|w| Some(w)),
+            Backslash => self.eat_comment(stream).map(|_| None),
             Something(ref s) => {
                 if let Some(first_char) = s.chars().nth(0) {
                     if first_char == '-' || first_char.is_numeric() {
@@ -381,6 +382,31 @@ impl Parser {
             panic!("Previous if let should have caught NO TokenKind::Something. {} {:?}",
                    num_string,
                    next);
+        }
+    }
+
+    fn eat_comment<'a, 'b, I>(&self, stream: &'b mut Peekable<I>) -> Result<(), ParseErr>
+        where I: Iterator<Item = &'a Token> 
+    {
+        if let Some(ref t) = stream.next() {
+            if t.kind == TokenKind::Backslash {
+                loop {
+                    if let Some(ref t) = stream.next() {
+                        if t.kind == TokenKind::Whitespace('\n') {
+                            break; //comment ends at newline
+                        }
+                    } else {
+                        break; //end of input; comment goes to end
+                    }
+                }
+                Ok(())
+            } else {
+                Err(ParseErr::IncompleteComment)
+                //Found single backslash
+            }
+        } else {
+            Err(ParseErr::IncompleteComment)
+            //Found trailing backslash
         }
     }
 }

@@ -42,6 +42,7 @@ mset module_level_name @value;
 mlet module_level_name @value;
 ~~~
 'm' stands for "module-level."
+Most commands using a local scope removes the 'm' prefix.
 
 ### Comparators
 Use math symbols and return bools.

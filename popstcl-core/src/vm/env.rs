@@ -1,6 +1,7 @@
 use super::internal::*;
 use std::collections::HashMap;
 use std::rc::Rc;
+use ccrc::{Tracer, Collectable};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Env {
@@ -18,6 +19,18 @@ impl Env {
 
     pub fn get(&self, name: &str) -> Option<RcValue> {
         self.bindings.get(name).map(|rc_value| rc_value.clone())
+    }
+
+    pub fn remove(&mut self, name: &str) -> Option<RcValue> {
+        self.bindings.remove(name)
+    }
+}
+
+impl Collectable for Env {
+    fn trace(&self, tracer: &Tracer) {
+        for val in self.bindings.values() {
+            Collectable::trace(val, tracer)
+        }
     }
 }
 

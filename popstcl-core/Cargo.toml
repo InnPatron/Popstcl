@@ -1,7 +1,8 @@
 [package]
 name = "popstcl-core"
-version = "0.9.0"
+version = "0.10.0"
 authors = ["Random_Civvy <vomalexander@gmail.com>"]
 
 [dependencies]
 itertools = "0.5.9"
+ccrc = { git = "https://gitlab.com/Random_Civvy/cc.git" }
