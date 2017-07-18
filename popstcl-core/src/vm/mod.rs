@@ -4,7 +4,7 @@ pub mod user {
     pub use super::cmd::Cmd;
     pub use super::exec_signal::ExecSignal;
     pub use super::env::Env;
-    pub use super::value::{Value, IntoValue};
+    pub use super::value::{Value, IntoValue, DeepClone};
     pub use super::val_ref::*;
     pub use super::err::ExecErr;
     pub use super::object::{Object, ObjectKind};
@@ -17,7 +17,7 @@ pub mod internal {
     pub use super::exec_signal::ExecSignal;
     pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
-    pub use super::value::{Value, IntoValue, RcValue};
+    pub use super::value::{Value, IntoValue, RcValue, DeepClone};
     pub use super::val_ref::*;
     pub use super::object::{ Object, ObjectKind, StdObject };
     pub use super::stack::Stack;

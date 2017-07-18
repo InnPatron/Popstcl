@@ -19,14 +19,39 @@ impl Cmd for MakeObject {
 }
 
 #[derive(Clone, Debug)]
-pub struct Field;
+pub struct FSet;
 
-impl Cmd for Field {
+impl Cmd for FSet {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(args, 3);
         let obj = cir_extract!(args[0] => Object)?;
         let name = cir_extract!(args[1] => String)?;
         obj.insert(&name, args[2].value.clone());
+
+        Ok(ExecSignal::NextInstruction(None))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct FMut;
+
+impl Cmd for FMut {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+        exact_args!(args, 3);
+        let obj = cir_extract!(args[0] => Object)?;
+        let name = cir_extract!(args[1] => String)?;
+        let value = args[2].value.inner_clone();
+        
+        let field = match obj.get(&name) {
+            Ok(value) => value,
+            Err(_) => {
+                let v: RcValue = (0.0).into_value().into();
+                obj.insert(&name, v.clone());
+                v
+            },
+        };
+
+        *field.borrow_mut() = value;
 
         Ok(ExecSignal::NextInstruction(None))
     }

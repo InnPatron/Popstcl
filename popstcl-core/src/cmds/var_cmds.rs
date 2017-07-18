@@ -56,3 +56,36 @@ impl Cmd for Set {
         Ok(ExecSignal::NextInstruction(Some(value.into())))
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct Mutate(pub Namespace);
+
+impl Cmd for Mutate {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+        exact_args!(&args, 2);
+        let module = get_module!(self.0, stack);
+
+        let maybe_name = &args[0];
+        let name = cir_extract!(maybe_name => String)?;
+    
+        let value = args[1].value.inner_clone();
+
+        match module.get(&name) {
+            Ok(rcval) => {
+                *rcval.borrow_mut() = value;
+            }
+
+            Err(_) => {
+                module.insert(&name, 
+                              value.into())
+                .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                             dinsertion!(maybe_name.dinfo.line_info.clone(),
+                                                         maybe_name.dinfo)
+                                            )
+                )?;
+            }
+        }
+
+        Ok(ExecSignal::NextInstruction(None))
+    }
+}

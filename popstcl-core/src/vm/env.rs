@@ -34,6 +34,16 @@ impl Collectable for Env {
     }
 }
 
+impl DeepClone for Env {
+    fn deep_clone(&self) -> Self {
+        let mut env = Env::new();
+        for (k, v) in self.bindings.iter() {
+            env.insert(k, v.deep_clone());
+        }
+        env
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

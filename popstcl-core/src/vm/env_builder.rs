@@ -15,10 +15,12 @@ impl EnvBuilder {
         builder.insert_value("let", Value::Cmd(Box::new(Let(Namespace::Local))));
         builder.insert_value("set", Value::Cmd(Box::new(Set(Namespace::Local))));
         builder.insert_value("proc", Value::Cmd(Box::new(Proc(Namespace::Local))));
+        builder.insert_value("mut", Value::Cmd(Box::new(Mutate(Namespace::Local))));
 
         builder.insert_value("mlet", Value::Cmd(Box::new(Let(Namespace::Module))));
         builder.insert_value("mset", Value::Cmd(Box::new(Set(Namespace::Module))));
         builder.insert_value("mproc", Value::Cmd(Box::new(Proc(Namespace::Module))));
+        builder.insert_value("mmut", Value::Cmd(Box::new(Mutate(Namespace::Module))));
 
         builder.insert_value("add", Value::Cmd(Box::new(Add)));
         builder.insert_value("sub", Value::Cmd(Box::new(Sub)));
@@ -53,7 +55,8 @@ impl EnvBuilder {
         builder.insert_value("clone", Value::Cmd(Box::new(Clone)));
 
         builder.insert_value("object", Value::Cmd(Box::new(MakeObject)));
-        builder.insert_value("field", Value::Cmd(Box::new(Field)));
+        builder.insert_value("fset", Value::Cmd(Box::new(FSet)));
+        builder.insert_value("fmut", Value::Cmd(Box::new(FMut)));
         builder.insert_value("rmf", Value::Cmd(Box::new(RmField)));
         
         builder

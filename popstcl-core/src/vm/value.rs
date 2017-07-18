@@ -427,6 +427,42 @@ impl IntoValue for Value {
     }
 }
 
+pub trait DeepClone: Clone {
+    fn deep_clone(&self) -> Self;
+}
+
+impl DeepClone for RcValue {
+    fn deep_clone(&self) -> Self {
+        let value: Value = self.borrow().deep_clone();
+        RcValue::new(value)
+    }
+}
+
+impl DeepClone for Value {
+    fn deep_clone(&self) -> Self {
+        use self::Value::*;
+        match *self {
+            Number(ref n) => Value::Number(n.clone()),
+            String(ref s) => Value::String(s.clone()),
+            Bool(ref b) => Value::Bool(b.clone()),
+            Cmd(ref c) => Value::Cmd(c.clone()),
+            List(ref l) => Value::List(l.deep_clone()),
+            Object(ref o) => Value::Object(o.deep_clone()),
+            Module(ref m) => Value::Module(m.deep_clone()),
+        }
+    }
+}
+
+impl DeepClone for List {
+    fn deep_clone(&self) -> Self {
+        let mut l = Vec::new();
+        for item in self.list.iter() {
+            l.push(item.deep_clone());
+        }
+        List { list: l }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

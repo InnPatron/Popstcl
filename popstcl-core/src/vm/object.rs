@@ -67,6 +67,12 @@ impl PartialEq for StdObject {
     }
 }
 
+impl DeepClone for StdObject {
+    fn deep_clone(&self) -> Self {
+        StdObject::with_env(self.0.borrow().deep_clone())
+    }
+}
+
 impl Eq for StdObject {}
 
 #[derive(Clone, Debug)]

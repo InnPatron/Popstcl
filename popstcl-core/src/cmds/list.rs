@@ -71,7 +71,7 @@ impl Cmd for Remove {
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let mut list = cir_extract!(args[0] => List)?.clone();
+        let mut list = cir_extract!(args[0] => mut List)?;
 
         let float_index = cir_extract!(args[1] => Number)?;
 
@@ -80,9 +80,9 @@ impl Cmd for Remove {
         if usize_index >= list.len() {
             return Err(ExecErr::InvalidIndex(usize_index));
         } else {
-            list.inner_mut().remove(usize_index);
+            list.remove(usize_index);
         }
-        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
+        Ok(ExecSignal::NextInstruction(Some(args[0].value.clone())))
     }
 }
 
@@ -96,12 +96,12 @@ impl Cmd for Append {
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         min_args!(&args, 2);
 
-        let mut list = cir_extract!(args[0] => List)?.clone();
+        let mut list = cir_extract!(args[0] => mut List)?;
         for index in 1..args.len() {
             let value = args[index].value.clone();
-            list.inner_mut().push(value);
+            list.push(value);
         }
-        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
+        Ok(ExecSignal::NextInstruction(Some(args[0].value.clone())))
     }
 }
 
@@ -116,8 +116,8 @@ impl Cmd for Pop {
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 1);
 
-        let mut list = cir_extract!(args[0] => List)?.clone();
+        let mut list = cir_extract!(args[0] => mut List)?;
         list.pop();
-        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
+        Ok(ExecSignal::NextInstruction(Some(args[0].value.clone())))
     }
 }
