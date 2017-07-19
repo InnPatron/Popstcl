@@ -50,7 +50,7 @@ mod tests {
     fn object_walk() {
         use parser::parse_program;
         use vm::internal::*;
-        use cmds::*;
+        use std_cmds::*;
         let mut env = Env::new();
         env.insert("gset", 
                    Value::Cmd(Box::new(Set(Namespace::Module))).into(),
@@ -88,7 +88,7 @@ gset b @obj.bar;")
     fn nested_object_walk() {
         use vm::internal::*;
         use parser::parse_program;
-        use cmds::*;
+        use std_cmds::*;
 
         let mut env = Env::new();
         env.insert("gset", 

@@ -37,7 +37,7 @@ impl Cmd for MakeModule {
 
         if args.len() == 2 {
             exact_args!(&args, 2);
-            parent_module = StdModule::new(EnvBuilder::basic_env().consume());
+            parent_module = StdModule::new(EnvBuilder::std_env().consume());
             binding = cir_extract!(args[0] => String, "Module Name (Single)")?;
             binding_info = &args[0].dinfo;
             module_code = cir_extract!(args[1] => String, "Module Code (String)")?;

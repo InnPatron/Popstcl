@@ -64,7 +64,7 @@ use parser::parse_program;
 
 #[allow(unused_must_use)]
 pub fn basic_vm() -> Vm {
-    Vm::new_with_main_module(EnvBuilder::basic_env().consume())
+    Vm::new_with_main_module(EnvBuilder::std_env().consume())
 }
 
 pub struct Vm {

@@ -97,5 +97,5 @@ pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
 pub use self::print::Print;
-pub use self::misc::{Clone};
 pub use self::object::{MakeObject, FSet, FMut, RmField};
+pub use self::misc::{Std, Clone};

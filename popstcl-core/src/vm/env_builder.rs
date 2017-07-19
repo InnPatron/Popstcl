@@ -1,5 +1,5 @@
 use super::internal::{Value, Env, Namespace};
-use cmds::*;
+use std_cmds::*;
 
 use std::collections::HashMap;
 
@@ -9,13 +9,18 @@ pub struct EnvBuilder {
 }
 
 impl EnvBuilder {
-    pub fn basic_env() -> EnvBuilder {
+    pub fn std_env() -> EnvBuilder {
         let mut builder = EnvBuilder { values: HashMap::new() };
 
-        builder.insert_value("let", Value::Cmd(Box::new(Let(Namespace::Local))));
-        builder.insert_value("set", Value::Cmd(Box::new(Set(Namespace::Local))));
-        builder.insert_value("proc", Value::Cmd(Box::new(Proc(Namespace::Local))));
-        builder.insert_value("mut", Value::Cmd(Box::new(Mutate(Namespace::Local))));
+        builder.insert_value("llet", Value::Cmd(Box::new(Let(Namespace::Local))));
+        builder.insert_value("lset", Value::Cmd(Box::new(Set(Namespace::Local))));
+        builder.insert_value("lproc", Value::Cmd(Box::new(Proc(Namespace::Local))));
+        builder.insert_value("lmut", Value::Cmd(Box::new(Mutate(Namespace::Local))));
+
+        builder.insert_value("let", Value::Cmd(Box::new(Let(Namespace::Module))));
+        builder.insert_value("set", Value::Cmd(Box::new(Set(Namespace::Module))));
+        builder.insert_value("proc", Value::Cmd(Box::new(Proc(Namespace::Module))));
+        builder.insert_value("mut", Value::Cmd(Box::new(Mutate(Namespace::Module))));
 
         builder.insert_value("mlet", Value::Cmd(Box::new(Let(Namespace::Module))));
         builder.insert_value("mset", Value::Cmd(Box::new(Set(Namespace::Module))));
@@ -58,6 +63,8 @@ impl EnvBuilder {
         builder.insert_value("fset", Value::Cmd(Box::new(FSet)));
         builder.insert_value("fmut", Value::Cmd(Box::new(FMut)));
         builder.insert_value("rmf", Value::Cmd(Box::new(RmField)));
+
+        builder.insert_value("std", Value::Cmd(Box::new(Std)));
         
         builder
     }
@@ -90,7 +97,7 @@ mod tests {
 
     #[test]
     fn builder() {
-        let mut builder = EnvBuilder::basic_env();
+        let mut builder = EnvBuilder::std_env();
         builder.insert_value("test", (5.0).into_value());
         let env = builder.build();
         let value = env.get("test").expect("Missing binding \'test\'");
