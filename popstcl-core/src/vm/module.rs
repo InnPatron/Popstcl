@@ -52,3 +52,9 @@ impl Collectable for StdModule {
         Collectable::trace(&*self.0.borrow(), tracer);
     }
 }
+
+impl DeepClone for StdModule {
+    fn deep_clone(&self) -> Self {
+        StdModule::new(self.0.borrow().deep_clone())
+    }
+}

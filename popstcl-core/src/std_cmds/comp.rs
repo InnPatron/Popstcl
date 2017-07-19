@@ -36,8 +36,8 @@ impl Cmd for GreaterThan {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let lhs = cir_extract!(args[0] => Number)?;
-        let rhs = cir_extract!(args[1] => Number)?;
+        let lhs = *cir_extract!(args[0] => Number)?;
+        let rhs = *cir_extract!(args[1] => Number)?;
 
         Ok(ExecSignal::NextInstruction(Some((lhs > rhs).into_value().into())))
     }
@@ -50,8 +50,8 @@ impl Cmd for GreaterThanEq {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let lhs = cir_extract!(args[0] => Number)?;
-        let rhs = cir_extract!(args[1] => Number)?;
+        let lhs = *cir_extract!(args[0] => Number)?;
+        let rhs = *cir_extract!(args[1] => Number)?;
 
         Ok(ExecSignal::NextInstruction(Some((lhs >= rhs).into_value().into())))
     }
@@ -64,8 +64,8 @@ impl Cmd for LessThan {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let lhs = cir_extract!(args[0] => Number)?;
-        let rhs = cir_extract!(args[1] => Number)?;
+        let lhs = *cir_extract!(args[0] => Number)?;
+        let rhs = *cir_extract!(args[1] => Number)?;
 
         Ok(ExecSignal::NextInstruction(Some((lhs < rhs).into_value().into())))
     }
@@ -78,8 +78,8 @@ impl Cmd for LessThanEq {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 2);
 
-        let lhs = cir_extract!(args[0] => Number)?;
-        let rhs = cir_extract!(args[1] => Number)?;
+        let lhs = *cir_extract!(args[0] => Number)?;
+        let rhs = *cir_extract!(args[1] => Number)?;
 
         Ok(ExecSignal::NextInstruction(Some((lhs <= rhs).into_value().into())))
     }

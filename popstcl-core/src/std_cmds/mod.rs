@@ -87,7 +87,7 @@ mod print;
 mod misc;
 mod object;
 
-pub use self::var_cmds::{Let, Set};
+pub use self::var_cmds::{Let, Set, Mutate};
 pub use self::if_cmd::If;
 pub use self::basic_math::{Add, Sub, Mul, Div};
 pub use self::procedure::Proc;
@@ -97,5 +97,5 @@ pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
 pub use self::print::Print;
-pub use self::misc::{Clone};
-pub use self::object::{MakeObject, Field, RmField};
+pub use self::object::{MakeObject, FSet, FMut, RmField};
+pub use self::misc::{Std, Clone};

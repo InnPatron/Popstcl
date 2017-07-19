@@ -3,8 +3,6 @@ use namespace::Namespace;
 use super::internal::{RcValue, Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind, IntoValue};
 use line_info::LineInfo;
 
-use std::rc::Rc;
-
 pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<(), ExecErr> {
     for stmt in program.iter() {
         eval_stmt(stack, stmt)?;
@@ -57,14 +55,16 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
  
     fn run(mut self) -> Result<ExecSignal, ExecErr> {
         assert!(self.cmd.len() > 0);
-        let cmd_obj: Box<Cmd> = match *self.cmd.remove(0).value {
-            Value::String(ref cmd_name) => {
-                let cmd = {
+        let value = self.cmd.remove(0).value;
+        let borrow = value.borrow();
+        let cmd_obj: Box<Cmd> = match &*borrow {
+            &Value::String(ref cmd_name) => {
+                let cmd: RcValue = {
                     let mut rcmd = Err(ExecErr::NotCmd(cmd_name.to_string()));
                     if let Some(module) = self.stack.get_local_module() {
                         match module.get(&cmd_name.inner()) {
                             Ok(rc)  => {
-                                if let &Value::Cmd(_) = &*rc {
+                                if rc.borrow().is_cmd() == true {
                                     rcmd = Ok(rc);
                                 }
                             },
@@ -75,7 +75,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                     if rcmd.is_err() {      //rcmd.is_err() == true => no local command w/ cmd_name
                         match self.stack.get_module().get(&cmd_name.inner()) {
                             Ok(rc)  => {
-                                if let &Value::Cmd(_) = &*rc {
+                                if rc.borrow().is_cmd() == true {
                                     rcmd = Ok(rc);
                                 }                            
                             },
@@ -85,14 +85,15 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                     rcmd
                 }?;
 
-                if let Value::Cmd(ref boxed) = *cmd {
+                let borrow = cmd.borrow();
+                if let &Value::Cmd(ref boxed) = &*borrow {
                     boxed.clone()
                 } else {
                     return Err(ExecErr::NotCmd(cmd_name.to_string()));
                 }
             },
 
-            Value::Cmd(ref cmd) => {
+            &Value::Cmd(ref cmd) => {
                 cmd.clone()
             },
 
@@ -281,7 +282,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
     let segment = iter.next();
     match segment {
         Some(segment) => {
-            match &*obj {
+            match &*obj.borrow() {
                 &Value::Object(ref object) => {
                     let value = object.get(&segment.segment.to_string())
                                       .map_err(|oerr| ExecErr::ObjectErr(oerr, 
@@ -337,7 +338,8 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
                 };
                 let value = module.get(name)
                                   .map_err(|oerr| ExecErr::ObjectErr(oerr, unimplemented!()))?;
-                match *value {
+                let borrow = value.borrow();
+                match *borrow {
                     Value::Number(ref num) => result.push_str(&num.to_string()),
                     Value::String(ref s) => result.push_str(&s.inner()),
                     Value::Bool(ref b) => result.push_str(&b.to_string()),

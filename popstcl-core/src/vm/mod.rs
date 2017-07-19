@@ -4,7 +4,8 @@ pub mod user {
     pub use super::cmd::Cmd;
     pub use super::exec_signal::ExecSignal;
     pub use super::env::Env;
-    pub use super::value::{Value, IntoValue};
+    pub use super::value::{Value, IntoValue, DeepClone};
+    pub use super::val_ref::*;
     pub use super::err::ExecErr;
     pub use super::object::{Object, ObjectKind};
     pub use super::env_builder::EnvBuilder;
@@ -16,7 +17,8 @@ pub mod internal {
     pub use super::exec_signal::ExecSignal;
     pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
-    pub use super::value::{Value, IntoValue, RcValue};
+    pub use super::value::{Value, IntoValue, RcValue, DeepClone};
+    pub use super::val_ref::*;
     pub use super::object::{ Object, ObjectKind, StdObject };
     pub use super::stack::Stack;
     pub use super::cir::CIR;
@@ -46,6 +48,7 @@ mod exec_signal;
 #[macro_use]
 mod object;
 mod module;
+mod val_ref;
 
 use ast::Program;
 use self::err::*;
@@ -61,7 +64,7 @@ use parser::parse_program;
 
 #[allow(unused_must_use)]
 pub fn basic_vm() -> Vm {
-    Vm::new_with_main_module(EnvBuilder::basic_env().consume())
+    Vm::new_with_main_module(EnvBuilder::std_env().consume())
 }
 
 pub struct Vm {

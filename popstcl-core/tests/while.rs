@@ -22,7 +22,9 @@ while { return [< @index @target]; } {
     ];
 
     for pair in inspecting.iter() {
-        assert_eq!((&pair.0, &*vm.inspect_value(pair.0).expect(&format!("Could not find {}", pair.0))), 
+        let value = vm.inspect_value(pair.0).unwrap();
+        let borrow = value.borrow();
+        assert_eq!((&pair.0, &*borrow), 
                    (&pair.0, &pair.1));
     }
 }
@@ -53,7 +55,9 @@ while { return [< @index @target]; } {
     ];
 
     for pair in inspecting.iter() {
-        assert_eq!((&pair.0, &*vm.inspect_value(pair.0).expect(&format!("Could not find {}", pair.0))), 
+        let value = vm.inspect_value(pair.0).unwrap();
+        let borrow = value.borrow();
+        assert_eq!((&pair.0, &*borrow), 
                    (&pair.0, &pair.1));
     }   
 }

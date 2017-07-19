@@ -10,7 +10,7 @@ pub mod ast;
 pub mod parser;
 #[macro_use]
 pub mod vm;
-pub mod cmds;
+pub mod std_cmds;
 
 mod namespace;
 
@@ -19,7 +19,7 @@ pub mod user {
     use super::parser::parse_program;
     use super::parser::err::ParseErr;
     use super::vm::user;
-    use super::cmds::*;
+    use super::std_cmds::*;
     use super::line_info::LineInfo;
 }
 
@@ -29,6 +29,6 @@ pub mod internal {
     use super::namespace::Namespace;
     use super::parser::parse_program;
     use super::parser::err::ParseErr;
-    use super::cmds::*;
+    use super::std_cmds::*;
     use super::line_info::LineInfo;
 }

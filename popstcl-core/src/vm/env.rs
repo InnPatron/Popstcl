@@ -34,13 +34,23 @@ impl Collectable for Env {
     }
 }
 
+impl DeepClone for Env {
+    fn deep_clone(&self) -> Self {
+        let mut env = Env::new();
+        for (k, v) in self.bindings.iter() {
+            env.insert(k, v.deep_clone());
+        }
+        env
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
     fn object_walk() {
         use parser::parse_program;
         use vm::internal::*;
-        use cmds::*;
+        use std_cmds::*;
         let mut env = Env::new();
         env.insert("gset", 
                    Value::Cmd(Box::new(Set(Namespace::Module))).into(),
@@ -66,7 +76,7 @@ gset b @obj.bar;")
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {
-                    assert_eq!(pair.1, *val);
+                    assert_eq!(pair.1, *val.borrow());
                 }
 
                 Err(e @ _) => panic!("{:?}", e),
@@ -78,7 +88,7 @@ gset b @obj.bar;")
     fn nested_object_walk() {
         use vm::internal::*;
         use parser::parse_program;
-        use cmds::*;
+        use std_cmds::*;
 
         let mut env = Env::new();
         env.insert("gset", 
@@ -110,7 +120,7 @@ gset b @obj.nested.bar;")
         for pair in inspecting.iter() {
             match temp_mod.get(pair.0) {
                 Ok(val) => {
-                    assert_eq!(pair.1, *val);
+                    assert_eq!(pair.1, *val.borrow());
                 }
 
                 Err(err @ _) => panic!("{:?}", err),

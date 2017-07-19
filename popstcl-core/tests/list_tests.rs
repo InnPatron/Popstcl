@@ -14,7 +14,9 @@ mset list_2 [list [list \"test\" true] 1337];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
-    assert_eq!(&*vm.inspect_value("list_1").unwrap(), 
+    let value = vm.inspect_value("list_1").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &vec![
                             (1.).into_value(),
                             (2.).into_value(),
@@ -23,7 +25,9 @@ mset list_2 [list [list \"test\" true] 1337];").unwrap();
                ].into_value()
     );
 
-    assert_eq!(&*vm.inspect_value("list_2").unwrap(),
+    let value = vm.inspect_value("list_2").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &vec![
                     vec![
                         "test".to_string().into_value(),
@@ -45,7 +49,9 @@ mset var_2 [list_get @list_2 1];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
-    assert_eq!(&*vm.inspect_value("list_1").unwrap(), 
+    let value = vm.inspect_value("list_1").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow, 
                &vec![
                     (1.).into_value(),
                     (2.).into_value(),
@@ -54,7 +60,9 @@ mset var_2 [list_get @list_2 1];").unwrap();
                ].into_value()
     );
 
-    assert_eq!(&*vm.inspect_value("list_2").unwrap(),
+    let value = vm.inspect_value("list_2").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &vec![
                            vec![
                                        "test".to_string().into_value(),
@@ -62,10 +70,14 @@ mset var_2 [list_get @list_2 1];").unwrap();
                            ].into_value(),
                            (1337.).into_value()
                ].into_value());
-    assert_eq!(&*vm.inspect_value("var_1").unwrap(),
+    let value = vm.inspect_value("var_1").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &(1.).into_value()
               );
-    assert_eq!(&*vm.inspect_value("var_2").unwrap(),
+    let value = vm.inspect_value("var_2").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &(1337.).into_value()
               );
 }
@@ -79,7 +91,9 @@ mset len [list_len @list_1];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
-    assert_eq!(&*vm.inspect_value("len").unwrap(),
+    let value = vm.inspect_value("len").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &(4.).into_value()
               );
 }
@@ -93,7 +107,9 @@ mset list_1 [list_append @list_1 5 6 7 8];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
-    assert_eq!(&*vm.inspect_value("list_1").unwrap(),
+    let value = vm.inspect_value("list_1").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &vec![
                    (1.).into_value(),
                    (2.).into_value(),
@@ -116,7 +132,9 @@ mset list_1 [list_remove @list_1 0];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
-    assert_eq!(&*vm.inspect_value("list_1").unwrap(),
+    let value = vm.inspect_value("list_1").unwrap();
+    let borrow = value.borrow();
+    assert_eq!(&*borrow,
                &vec![
                    (2.).into_value(),
                    (3.).into_value(),
