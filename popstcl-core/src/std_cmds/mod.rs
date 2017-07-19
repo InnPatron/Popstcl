@@ -24,7 +24,7 @@ pub mod macros {
     #[macro_export]
     macro_rules! mod_args {
         ($args: expr, $modulo: expr) => {
-            if ($args.len() % $modulo != 0) || ($args.len() == 0) {
+            if $args.len() % $modulo != 0 {
                 return Err(ArityErr::Modulo {
                                modulo: $modulo,
                                found: $args.len(),
