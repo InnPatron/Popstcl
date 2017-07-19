@@ -9,7 +9,6 @@ pub struct List;
 impl Cmd for List {
     
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
-        min_args!(&args, 1);
         let mut list = Vec::new();
         
         //Convert ALL CIR args into Values
