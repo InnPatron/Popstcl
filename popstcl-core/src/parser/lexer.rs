@@ -32,7 +32,6 @@ pub enum TokenKind {
 macro_rules! push_token {
     ($maybe_something: ident, $result: ident, $tail: expr) => {{
         if $maybe_something.0.is_empty() == false {
-            assert!($maybe_something.1 != $maybe_something.2);  //TODO: this causes a panic when "\n\0" is encountered. Should this be removed? ['\0'.is_whitespace() == false]
             $result.push(Token::new(TokenKind::Something($maybe_something.0.clone()),
                                     range!($maybe_something.1, $maybe_something.2)));
             $maybe_something.0.clear();
@@ -73,7 +72,6 @@ pub fn tokenize(input: &str) -> Vec<Token> {
         }
     }
     if maybe_something.0.len() > 0 {
-        assert!(maybe_something.1 != maybe_something.2);
         result.push(Token::new(TokenKind::Something(maybe_something.0.clone()), range!(maybe_something.1, maybe_something.2)));
     }
     result
@@ -138,5 +136,25 @@ mod tests {
         use super::TokenKind::*;
         let result = tokenize("$abc");
         assert_eq!(result.into_iter().map(|token| token.kind).collect::<Vec<_>>(), vec![Dollar, Something("abc".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_single_letter_variants() {
+        use super::TokenKind::*;
+        macro_rules! compare {
+            ($lhs: expr, $rhs: expr) => { 
+                assert_eq!($lhs.into_iter().map(|token| token.kind).collect::<Vec<_>>(), $rhs);
+            }
+        }
+        use super::TokenKind::*;
+        compare!(tokenize("a"), vec![Something("a".to_string())]);
+        compare!(tokenize("^"), vec![Caret]);
+        compare!(tokenize(" "), vec![Whitespace(' ')]);
+        compare!(tokenize("\n "), vec![Whitespace('\n'), Whitespace(' ')]);
+        compare!(tokenize("a;"), vec![Something("a".to_string()), Semicolon]);
+        compare!(tokenize("$a"), vec![Dollar, Something("a".to_string())]);
+        compare!(tokenize("@a;"), vec![At, Something("a".to_string()), Semicolon]);
+        compare!(tokenize("a@;"), vec![Something("a".to_string()), At, Semicolon]);
+        compare!(tokenize("@;a"), vec![At, Semicolon, Something("a".to_string())]);
     }
 }
