@@ -105,9 +105,9 @@ impl Parser {
             Quote => self.parse_quoted(stream).map(|w| Some(w)),        //quoted -> ".*"
             LBracket => self.parse_cmd(stream).map(|w| Some(w)),        //cmd -> \[word_seq\]
             LBrace => self.parse_untouched(stream).map(|w| Some(w)),    //untouched -> {.*}
-            Dollar => self.parse_varsub(stream, Namespace::Local).map(|w| Some(w)),       //var_sub -> $path
-            At => self.parse_varsub(stream, Namespace::Module).map(|w| Some(w)),
-            Caret => self.parse_varsub(stream, Namespace::Args).map(|w| Some(w)),
+            Dollar => self.parse_varsub(stream, Namespace::Module).map(|w| Some(w)),       //var_sub -> $path
+            At => self.parse_varsub(stream, Namespace::Args).map(|w| Some(w)),
+            Pound => self.parse_varsub(stream, Namespace::Local).map(|w| Some(w)),
             Backslash => self.eat_comment(stream).map(|_| None),
             Something(ref s) => {
                 if let Some(first_char) = s.chars().nth(0) {
@@ -244,6 +244,26 @@ impl Parser {
                         let word = self.parse_atom(something)?;
                         if let WordKind::Atom(atom) = word.kind {
                             line_info.push(word.line_info.clone());
+                            result.push(StrData::VarSub(atom.to_string(), Namespace::Module, something.line_info.clone()))
+                        } else {
+                            panic!("parse_atom should only return atom, not {}", word.kind);
+                        }
+                        
+                    } else {
+                        return Err(ParseErr::NoVarName);
+                    }
+                }
+
+                TokenKind::Pound => {
+                    if current.is_empty() == false {
+                        line_info.push(t.line_info.clone());
+                        result.push(StrData::String(current.clone()));
+                        current.clear();
+                    }
+                    if let Some(something @ &Token { kind: TokenKind::Something(_), line_info: _}) = iter.next() {
+                        let word = self.parse_atom(something)?;
+                        if let WordKind::Atom(atom) = word.kind {
+                            line_info.push(word.line_info.clone());
                             result.push(StrData::VarSub(atom.to_string(), Namespace::Local, something.line_info.clone()))
                         } else {
                             panic!("parse_atom should only return atom, not {}", word.kind);
@@ -264,7 +284,7 @@ impl Parser {
                         let word = self.parse_atom(something)?;
                         if let WordKind::Atom(atom) = word.kind {
                             line_info.push(word.line_info.clone());
-                            result.push(StrData::VarSub(atom.to_string(), Namespace::Module, something.line_info.clone()))
+                            result.push(StrData::VarSub(atom.to_string(), Namespace::Args, something.line_info.clone()))
                         } else {
                             panic!("parse_atom should only return atom, not {}", word.kind);
                         }       
@@ -482,8 +502,8 @@ mod tests {
     #[test]
     fn test_parse_localvarsub() {
         //WordKind::VarSub test
-        let word = "$_a23;";
-        let parser = Parser { original_string: Rc::new("$_a23;".to_string()) };
+        let word = "#_a23;";
+        let parser = Parser { original_string: Rc::new("#_a23;".to_string()) };
         let result = parser.parse_tokenized_seq(&tokenize(word)).unwrap();
         assert_eq!(
             quick_stmt!(
@@ -502,8 +522,8 @@ mod tests {
     #[test]
     fn test_parse_modulevarsub() {
         //WordKind::VarSub test
-        let word = "@_a23;";
-        let parser = Parser { original_string: Rc::new("@_a23;".to_string()) };
+        let word = "$_a23;";
+        let parser = Parser { original_string: Rc::new("$_a23;".to_string()) };
         let result = parser.parse_tokenized_seq(&tokenize(word)).unwrap();
         assert_eq!(quick_stmt!(WordKind::VarSub(Path(vec![
                                                      PathSegment::new("_a23".to_string().into(), dummy!())
@@ -568,8 +588,8 @@ mod tests {
 
     #[test]
     fn test_parse_string() {
-        let word = "\" $var 123 2$var2@var3\";";
-        let parser = Parser { original_string: Rc::new("\" $var 123 2$var2@var3\";".to_string()) };
+        let word = "\" #var 123 2#var2$var3\";";
+        let parser = Parser { original_string: Rc::new("\" #var 123 2#var2$var3\";".to_string()) };
         let result = parser.parse_tokenized_seq(&tokenize(word)).unwrap();
 
         assert_eq!(quick_stmt!(WordKind::StrSub(StrSub(vec![
@@ -605,10 +625,10 @@ mod tests {
 
     #[test]
     fn test_parse_tokenized_seq() {
-        let seq = "add 1 [add 3 1 test{123} \"$var _123\"];";
+        let seq = "add 1 [add 3 1 test{123} \"#var _123\"];";
         let tokenized = tokenize(seq);
 
-        let parser = Parser { original_string: Rc::new("add 1 [add 3 1 test{123} \"$var _123\"];".to_string()) };
+        let parser = Parser { original_string: Rc::new("add 1 [add 3 1 test{123} \"#var _123\"];".to_string()) };
         let result = parser.parse_tokenized_seq(&tokenize(seq)).unwrap();
         assert_eq!(quick_stmt!(
                        WordKind::Atom(From::from("add".to_string())),

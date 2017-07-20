@@ -44,8 +44,8 @@ fn list_index() {
     let program = parser::parse_program("
 mset list_1 [list 1 2 3 4];
 mset list_2 [list [list \"test\" true] 1337];
-mset var_1 [list_get @list_1 0];
-mset var_2 [list_get @list_2 1];").unwrap();
+mset var_1 [list_get $list_1 0];
+mset var_2 [list_get $list_2 1];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
@@ -87,7 +87,7 @@ fn list_len() {
     let mut vm = basic_vm();
     let program = parser::parse_program("
 mset list_1 [list 1 2 3 4];
-mset len [list_len @list_1];").unwrap();
+mset len [list_len $list_1];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
@@ -103,7 +103,7 @@ fn list_append() {
     let mut vm = basic_vm();
     let program = parser::parse_program("
 mset list_1 [list 1 2 3 4];
-mset list_1 [list_append @list_1 5 6 7 8];").unwrap();
+mset list_1 [list_append $list_1 5 6 7 8];").unwrap();
 
     vm.eval_program(&program).unwrap();
 
@@ -128,7 +128,7 @@ fn list_remove() {
     let mut vm = basic_vm();
     let program = parser::parse_program("
 mset list_1 [list 1 2 3 4];
-mset list_1 [list_remove @list_1 0];").unwrap();
+mset list_1 [list_remove $list_1 0];").unwrap();
 
     vm.eval_program(&program).unwrap();
 

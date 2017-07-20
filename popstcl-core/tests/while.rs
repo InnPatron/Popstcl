@@ -11,8 +11,8 @@ fn while_test() {
 mset index 0;
 mset target 100;
 
-while { return [< @index @target]; } {
-    mset index [add @index 1];
+while { return [< $index $target]; } {
+    mset index [add $index 1];
 };").unwrap();
 
     vm.eval_program(&program).unwrap();
@@ -36,16 +36,16 @@ fn while_flow_control() {
 mset index 0;
 mset target 100;
 
-while { return [< @index @target]; } {
-    if [== @index 55] {
-        mset index [add @index 2];
+while { return [< $index $target]; } {
+    if [== $index 55] {
+        mset index [add $index 2];
         continue;
     };
 
-    if [== @index 57] {
+    if [== $index 57] {
         break;
     };
-    mset index [add @index 1];
+    mset index [add $index 1];
 };").unwrap();
 
     vm.eval_program(&program).unwrap();

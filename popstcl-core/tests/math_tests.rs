@@ -7,7 +7,7 @@ use popstcl_core::vm::user::basic_vm;
 #[test]
 fn math_sub() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("@mset a [sub 5 -1];").unwrap();
+    let program = parser::parse_program("$mset a [sub 5 -1];").unwrap();
     vm.eval_program(&program).unwrap();
 
     match vm.inspect_value("a") {
@@ -25,7 +25,7 @@ fn math_sub() {
 #[test]
 fn math_add() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("@mset a [add 4 3 2 1];").unwrap();
+    let program = parser::parse_program("$mset a [add 4 3 2 1];").unwrap();
     vm.eval_program(&program).unwrap();
     
     match vm.inspect_value("a") {
@@ -43,7 +43,7 @@ fn math_add() {
 #[test]
 fn math_mul() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("@mset a [mul 0.5 3];").unwrap();
+    let program = parser::parse_program("$mset a [mul 0.5 3];").unwrap();
     vm.eval_program(&program).unwrap();
     
     match vm.inspect_value("a") {
@@ -61,7 +61,7 @@ fn math_mul() {
 #[test]
 fn math_div() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("@mset a [div 8 2];").unwrap();
+    let program = parser::parse_program("$mset a [div 8 2];").unwrap();
     vm.eval_program(&program).unwrap();
     
     match vm.inspect_value("a") {

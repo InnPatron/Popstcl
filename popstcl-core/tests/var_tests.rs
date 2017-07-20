@@ -7,7 +7,7 @@ use popstcl_core::vm::user::basic_vm;
 #[test]
 fn sub_in_cmd() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("@mset a [@add 1 2];").unwrap();
+    let program = parser::parse_program("$mset a [$add 1 2];").unwrap();
     vm.eval_program(&program).unwrap();
     
     match vm.inspect_value("a") {
@@ -54,8 +54,8 @@ fn let_mset () {
     let program = parser::parse_program("
 mlet a 21.0 b 1337.0;
 mlet a -3.1459;
-mlet c @a;
-mlet d [add @b -1337 [add 1]];
+mlet c $a;
+mlet d [add $b -1337 [add 1]];
 mset f [mset e 12481632];
 mlet g true h false eggs 999;").unwrap();
     
@@ -89,11 +89,11 @@ fn var_sub() {
     let program = parser::parse_program("
 mlet a 21.0 b 1337.0;
 mlet a -3.1459;
-mlet c @a;
-mlet d [add @b -1337 [add 1]];
+mlet c $a;
+mlet d [add $b -1337 [add 1]];
 mset f [mset e 12481632];
 mlet g true h false eggs 999;
-mset TEST_STRING \"yoyo: @g@f@h b\";").unwrap();
+mset TEST_STRING \"yoyo: $g$f$h b\";").unwrap();
     
     vm.eval_program(&program).unwrap();
 

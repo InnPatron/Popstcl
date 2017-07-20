@@ -283,9 +283,9 @@ impl ToString for StrData {
             &StrData::VarSub(ref s, ref namespace, _) => {
                 let mut r = String::new();
                 match namespace {
-                    &Namespace::Local => r.push('$'),
-                    &Namespace::Module => r.push('@'),
-                    &Namespace::Args => r.push('^'),
+                    &Namespace::Local => r.push('#'),
+                    &Namespace::Module => r.push('$'),
+                    &Namespace::Args => r.push('@'),
                 }
                 r.push_str(s);
                 r

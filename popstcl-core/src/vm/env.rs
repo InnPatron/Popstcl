@@ -64,8 +64,8 @@ mod tests {
         env.insert("obj", obj_1.into());
 
         let program = parse_program("
-gset a @obj.foo;
-gset b @obj.bar;")
+gset a $obj.foo;
+gset b $obj.bar;")
                 .unwrap();
         let mut temp_mod = StdModule::new(env);
         eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
@@ -108,8 +108,8 @@ gset b @obj.bar;")
         env.insert("obj", obj_2.into());
 
         let program = parse_program("
-gset a @obj.nested.foo;
-gset b @obj.nested.bar;")
+gset a $obj.nested.foo;
+gset b $obj.nested.bar;")
                 .unwrap();
 
         let mut temp_mod = StdModule::new(env);

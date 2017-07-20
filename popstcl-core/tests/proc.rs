@@ -9,7 +9,7 @@ fn proc_parse() {
     let mut vm = basic_vm();
     let mut program = parser::parse_program("
 mproc test_proc { number1 number 2} {
-    mset test [add ^number1 ^number2];
+    mset test [add @number1 @number2];
 };").unwrap();
 }
 
@@ -18,7 +18,7 @@ fn proc_build_obj() {
     let mut vm = basic_vm();
     let mut program = parser::parse_program("
 mproc test_proc { number1 number2} {
-    mset test [add ^number1 ^number2];
+    mset test [add @number1 @number2];
 };").unwrap();
 
     vm.eval_program(&program).unwrap();
@@ -29,7 +29,7 @@ fn proc_execute_new_cmd() {
     let mut vm = basic_vm();
     let mut program = parser::parse_program("
 mproc test_proc { number1 number2} {
-    mset test [add ^number1 ^number2];
+    mset test [add @number1 @number2];
 };").unwrap();
 
     vm.eval_program(&program).unwrap();
@@ -57,8 +57,8 @@ fn proc_return() {
     let mut vm = basic_vm();
     let mut program = parser::parse_program("
 mproc test_proc { number1 number2} {
-    mset test_1 [add ^number1 ^number2];
-    return [mul ^number1 ^number2];
+    mset test_1 [add @number1 @number2];
+    return [mul @number1 @number2];
 };
 
 mset test_2 [test_proc 3 5];
@@ -88,10 +88,10 @@ fn proc_if_return() {
 mproc test_proc { number1 number2} {
     if false {
         mset test_1 -1;
-        return [add ^number1 ^number2];
+        return [add @number1 @number2];
     } else {
         mset test_1 1337;
-        return [mul ^number1 ^number2];
+        return [mul @number1 @number2];
     };
 };
 
@@ -120,9 +120,9 @@ fn proc_empty_return() {
     let mut vm = basic_vm();
     let mut program = parser::parse_program("
 mproc test_proc { number1 number2} {
-    mset test_1 ^number1;
+    mset test_1 @number1;
     return;
-    mset test_1 ^number2;
+    mset test_1 @number2;
 };
 
 test_proc 1337 5;
@@ -150,9 +150,9 @@ fn proc_empty_return_in_reduce() {
     let mut vm = basic_vm();
     let mut program = parser::parse_program("
 mproc test_proc { number1 number2} {
-    mset test_1 ^number1;
+    mset test_1 @number1;
     return;
-    mset test_1 ^number2;
+    mset test_1 @number2;
 };
 
 mset test_2 [test_proc 1337 5];

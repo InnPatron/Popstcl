@@ -23,7 +23,7 @@ pub enum TokenKind {
     Semicolon, //;
     At, //@
     FullStop, //.
-    Caret, //^
+    Pound, //#
     Backslash, // /
     Whitespace(char),
     Something(String),
@@ -55,7 +55,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             '@' => push_token!(maybe_something, result, Token::new(TokenKind::At, location!(i))),
             '$' => push_token!(maybe_something, result, Token::new(TokenKind::Dollar, location!(i))),
             '.' => push_token!(maybe_something, result, Token::new(TokenKind::FullStop,location!(i))),
-            '^' => push_token!(maybe_something, result, Token::new(TokenKind::Caret, location!(i))),
+            '#' => push_token!(maybe_something, result, Token::new(TokenKind::Pound, location!(i))),
             '/' => push_token!(maybe_something, result, Token::new(TokenKind::Backslash, location!(i))),
             c @ _ => {
                 if c.is_whitespace() {
@@ -90,7 +90,7 @@ impl TokenKind {
             &Semicolon => ";".to_owned(),
             &At => "@".to_owned(),
             &FullStop => ".".to_owned(),
-            &Caret => "^".to_owned(),
+            &Pound => "#".to_owned(),
             &Backslash => "/".to_owned(),
             &Whitespace(char) => char.to_string(),
             &Something(ref s) => s.to_string(),
@@ -126,7 +126,8 @@ mod tests {
                         Something("123".to_string()),
                         Whitespace('\n'),
                         Whitespace(' '),
-                        Something("#halp".to_string()),
+                        Pound,
+                        Something("halp".to_string()),
                         RBrace,
                         Semicolon]);
     }
@@ -148,7 +149,7 @@ mod tests {
         }
         use super::TokenKind::*;
         compare!(tokenize("a"), vec![Something("a".to_string())]);
-        compare!(tokenize("^"), vec![Caret]);
+        compare!(tokenize("#"), vec![Pound]);
         compare!(tokenize(" "), vec![Whitespace(' ')]);
         compare!(tokenize("\n "), vec![Whitespace('\n'), Whitespace(' ')]);
         compare!(tokenize("a;"), vec![Something("a".to_string()), Semicolon]);

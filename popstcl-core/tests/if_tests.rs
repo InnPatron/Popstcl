@@ -26,7 +26,7 @@ fn if_executing_true() {
     let program = parser::parse_program("
 mset foo true;
 mset output 0;
-if @foo {
+if $foo {
     mset output 1;
 };
     ").unwrap();
@@ -53,7 +53,7 @@ fn if_executing_false() {
     let program = parser::parse_program("
 mset foo false;
 mset output 1337;
-if @foo {
+if $foo {
     mset output 1;
 };
     ").unwrap();
@@ -83,11 +83,11 @@ mset bar false;
 mset baz false;
 
 mset output 1337;
-if @foo {
+if $foo {
     mset output 1;
-} elif @bar {
+} elif $bar {
     mset output 2;
-} elif @baz {
+} elif $baz {
     mset output 3;
 } else {
     mset output 9000;
@@ -119,11 +119,11 @@ mset bar true;
 mset baz true;
 
 mset output 1337;
-if @foo {
+if $foo {
     mset output 1;
-} elif @bar {
+} elif $bar {
     mset output 2;
-} elif @baz {
+} elif $baz {
     mset output 3;
 } else {
     mset output 9000;
