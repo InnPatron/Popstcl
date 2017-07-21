@@ -1,13 +1,11 @@
 extern crate popstcl_core;
 
-use popstcl_core::vm::internal::*;
-use popstcl_core::parser;
-use popstcl_core::vm::user::basic_vm;
+use popstcl_core::*;
 
 #[test]
 fn while_test() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset index 0;
 mset target 100;
 
@@ -15,7 +13,7 @@ while { return [< $index $target]; } {
     mset index [add $index 1];
 };").unwrap();
 
-    vm.eval_program(&program).unwrap();
+    
 
     let inspecting = vec![
                             ("index", (100.).into_value()),
@@ -32,7 +30,7 @@ while { return [< $index $target]; } {
 #[test]
 fn while_flow_control() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset index 0;
 mset target 100;
 
@@ -47,8 +45,6 @@ while { return [< $index $target]; } {
     };
     mset index [add $index 1];
 };").unwrap();
-
-    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("index", (57.).into_value()),

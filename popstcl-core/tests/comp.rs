@@ -1,13 +1,11 @@
 extern crate popstcl_core;
 
-use popstcl_core::vm::internal::*;
-use popstcl_core::parser;
-use popstcl_core::vm::user::basic_vm;
+use popstcl_core::*;
 
 #[test]
 fn comp_cmds() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset eq_true [== 12 12];
 mset eq_false [== 1337 -1];
 
@@ -28,8 +26,6 @@ mset leeq_true_eq [<= 12 12];
 mset leeq_true_le [<= 123 100000];
 mset leeq_false_gr [<= 1337 -1];"
 ).unwrap();
-
-    vm.eval_program(&program).unwrap();
 
     let inspecting = vec![
                             ("eq_true", true.into_value()),

@@ -1,14 +1,12 @@
 extern crate popstcl_core;
 
-use popstcl_core::vm::internal::*;
-use popstcl_core::parser;
-use popstcl_core::vm::user::basic_vm;
+use popstcl_core::*;
 
 #[test]
 fn sub_in_cmd() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("$mset a [$add 1 2];").unwrap();
-    vm.eval_program(&program).unwrap();
+    vm.eval_str("$mset a [$add 1 2];").unwrap();
+    
     
     match vm.inspect_value("a") {
         Ok(val) => {
@@ -26,15 +24,15 @@ fn sub_in_cmd() {
 #[should_panic]
 fn no_ret() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("mset a [mlet b 21];").unwrap();
-    vm.eval_program(&program).unwrap();
+    vm.eval_str("mset a [mlet b 21];").unwrap();
+    
 }
 
 #[test]
 fn multi_command() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("mset a [add [add 3 1] [add [add 1 2] 3]];").unwrap();
-    vm.eval_program(&program).unwrap();
+    vm.eval_str("mset a [add [add 3 1] [add [add 1 2] 3]];").unwrap();
+    
 
     match vm.inspect_value("a") {
         Ok(val) => {
@@ -51,7 +49,7 @@ fn multi_command() {
 #[test]
 fn let_mset () {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mlet a 21.0 b 1337.0;
 mlet a -3.1459;
 mlet c $a;
@@ -59,7 +57,7 @@ mlet d [add $b -1337 [add 1]];
 mset f [mset e 12481632];
 mlet g true h false eggs 999;").unwrap();
     
-    vm.eval_program(&program).unwrap();
+    
 
     let inspecting = vec![("a", (-3.1459_f64).into_value()),
                             ("b", (1337_f64).into_value()), 
@@ -86,7 +84,7 @@ mlet g true h false eggs 999;").unwrap();
 #[test]
 fn var_sub() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mlet a 21.0 b 1337.0;
 mlet a -3.1459;
 mlet c $a;
@@ -95,7 +93,7 @@ mset f [mset e 12481632];
 mlet g true h false eggs 999;
 mset TEST_STRING \"yoyo: $g$f$h b\";").unwrap();
     
-    vm.eval_program(&program).unwrap();
+    
 
     let inspecting = vec![("a", (-3.1459_f64).into_value()),
                             ("b", (1337_f64).into_value()), 
@@ -123,14 +121,14 @@ mset TEST_STRING \"yoyo: $g$f$h b\";").unwrap();
 #[test]
 fn comments() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
     mset a 21;
     //mset a 100;
     mset b 9000;
     //mset b -1;
     mset c 1000; //mset c 6; if true { print [add 1 4]; };").unwrap();
     
-    vm.eval_program(&program).unwrap();
+    
     let inspecting = vec![("a", (21.0).into_value()),
                           ("b", (9000.0).into_value()),
                           ("c", (1000.0).into_value()),

@@ -1,12 +1,10 @@
 extern crate popstcl_core;
 
-use popstcl_core::vm::internal::*;
-use popstcl_core::parser;
-use popstcl_core::vm::user::basic_vm;
+use popstcl_core::*;
 
 #[test]
 fn if_parsing() {
-    let word = parser::parse_program(
+    let word = popstcl_core::parse_program(
 "
 if true {
 mset a true;
@@ -23,14 +21,14 @@ mset b true;
 #[test]
 fn if_executing_true() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset foo true;
 mset output 0;
 if $foo {
     mset output 1;
 };
     ").unwrap();
-    vm.eval_program(&program).unwrap();
+
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
@@ -50,14 +48,14 @@ if $foo {
 #[test]
 fn if_executing_false() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset foo false;
 mset output 1337;
 if $foo {
     mset output 1;
 };
     ").unwrap();
-    vm.eval_program(&program).unwrap();
+
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
@@ -77,7 +75,7 @@ if $foo {
 #[test]
 fn if_executing_else() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset foo false;
 mset bar false;
 mset baz false;
@@ -93,7 +91,7 @@ if $foo {
     mset output 9000;
 };
     ").unwrap();
-    vm.eval_program(&program).unwrap();
+    
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
@@ -113,7 +111,7 @@ if $foo {
 #[test]
 fn if_executing_elif() {
     let mut vm = basic_vm();
-    let program = parser::parse_program("
+    vm.eval_str("
 mset foo false;
 mset bar true;
 mset baz true;
@@ -129,7 +127,7 @@ if $foo {
     mset output 9000;
 };
     ").unwrap();
-    vm.eval_program(&program).unwrap();
+
     let inspecting = vec!["output"];
     for element in inspecting.iter() {
         match vm.inspect_value(element) {
