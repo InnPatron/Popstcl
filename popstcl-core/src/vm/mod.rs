@@ -73,11 +73,11 @@ impl Vm {
         Vm { main_module: StdModule::new(env) }
     }
 
-    pub fn eval_program(&mut self, program: &Program) -> Result<(), ExecErr> {
+    pub fn eval_program(&mut self, program: &Program) -> Result<Option<RcValue>, ExecErr> {
         eval_program(&mut Stack::new_module(&mut self.main_module), program)
     }
 
-    pub fn eval_str(&mut self, program: &str) -> Result<(), ExecErr> {
+    pub fn eval_str(&mut self, program: &str) -> Result<Option<RcValue>, ExecErr> {
         let program = parse_program(program)?;
         eval_program(&mut Stack::new_module(&mut self.main_module), &program)
     }
