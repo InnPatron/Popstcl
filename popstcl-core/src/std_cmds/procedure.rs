@@ -8,7 +8,7 @@ pub struct Proc(pub Namespace);
 
 impl Cmd for Proc {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
-        exact_args!(&args, 3);
+        max_args!(&args, 3);
 
         let module = match self.0 {
             Namespace::Local => {
@@ -26,21 +26,29 @@ impl Cmd for Proc {
         let maybe_name = &args[0];
         let name = cir_extract!(maybe_name => String, "Name of procedure")?;
         let proc_args = {
-            let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?;
-            let proc_args = parse_arg_list(&proc_args)?
-                                          .ok_or(ExecErr::MissingArg("Argument body".to_string()))?;
-            let mut string_args = Vec::new();
-            for arg in proc_args.all() {
-                if let WordKind::Atom(atom) = arg.kind {
-                    string_args.push(atom);
-                } else {
-                    return Err(ExecErr::Generic(format!("Arg list must consist only of atoms {:?}", arg.clone())));
+            if args.len() == 2 {
+                Vec::new()
+            } else {
+                let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?;
+                let proc_args = parse_arg_list(&proc_args)?
+                                              .ok_or(ExecErr::MissingArg("Argument body".to_string()))?;
+                let mut string_args = Vec::new();
+                for arg in proc_args.all() {
+                    if let WordKind::Atom(atom) = arg.kind {
+                        string_args.push(atom);
+                    } else {
+                        return Err(ExecErr::Generic(format!("Arg list must consist only of atoms {:?}", arg.clone())));
+                    }
                 }
+                string_args
             }
-            string_args
         };
-
-        let proc_body = parse_program(&cir_extract!(args[2] => String, "Body of procedure")?)?;
+    
+        let proc_body = if args.len() == 2 {
+            parse_program(&cir_extract!(args[1] => String, "Body of procedure")?)?
+        } else {
+            parse_program(&cir_extract!(args[2] => String, "Body of procedure")?)?
+        };
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
         module.insert(&name, Value::Cmd(Box::new(new_cmd)).into())
@@ -62,8 +70,6 @@ pub struct ProcCmdObject {
 
 impl ProcCmdObject {
     fn new(name: String, args: Vec<Atom>, body: Program) -> ProcCmdObject {
-        assert!(args.len() > 0);
-        assert!(body.code.len() > 0);
         ProcCmdObject {
             name: name,
             args: args,

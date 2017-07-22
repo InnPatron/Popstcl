@@ -23,7 +23,7 @@ pub enum TokenKind {
     Semicolon, //;
     At, //@
     FullStop, //.
-    Caret, //^
+    Pound, //#
     Backslash, // /
     Whitespace(char),
     Something(String),
@@ -32,7 +32,6 @@ pub enum TokenKind {
 macro_rules! push_token {
     ($maybe_something: ident, $result: ident, $tail: expr) => {{
         if $maybe_something.0.is_empty() == false {
-            assert!($maybe_something.1 != $maybe_something.2);  //TODO: this causes a panic when "\n\0" is encountered. Should this be removed? ['\0'.is_whitespace() == false]
             $result.push(Token::new(TokenKind::Something($maybe_something.0.clone()),
                                     range!($maybe_something.1, $maybe_something.2)));
             $maybe_something.0.clear();
@@ -56,7 +55,7 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             '@' => push_token!(maybe_something, result, Token::new(TokenKind::At, location!(i))),
             '$' => push_token!(maybe_something, result, Token::new(TokenKind::Dollar, location!(i))),
             '.' => push_token!(maybe_something, result, Token::new(TokenKind::FullStop,location!(i))),
-            '^' => push_token!(maybe_something, result, Token::new(TokenKind::Caret, location!(i))),
+            '#' => push_token!(maybe_something, result, Token::new(TokenKind::Pound, location!(i))),
             '/' => push_token!(maybe_something, result, Token::new(TokenKind::Backslash, location!(i))),
             c @ _ => {
                 if c.is_whitespace() {
@@ -73,7 +72,6 @@ pub fn tokenize(input: &str) -> Vec<Token> {
         }
     }
     if maybe_something.0.len() > 0 {
-        assert!(maybe_something.1 != maybe_something.2);
         result.push(Token::new(TokenKind::Something(maybe_something.0.clone()), range!(maybe_something.1, maybe_something.2)));
     }
     result
@@ -92,7 +90,7 @@ impl TokenKind {
             &Semicolon => ";".to_owned(),
             &At => "@".to_owned(),
             &FullStop => ".".to_owned(),
-            &Caret => "^".to_owned(),
+            &Pound => "#".to_owned(),
             &Backslash => "/".to_owned(),
             &Whitespace(char) => char.to_string(),
             &Something(ref s) => s.to_string(),
@@ -128,7 +126,8 @@ mod tests {
                         Something("123".to_string()),
                         Whitespace('\n'),
                         Whitespace(' '),
-                        Something("#halp".to_string()),
+                        Pound,
+                        Something("halp".to_string()),
                         RBrace,
                         Semicolon]);
     }
@@ -138,5 +137,25 @@ mod tests {
         use super::TokenKind::*;
         let result = tokenize("$abc");
         assert_eq!(result.into_iter().map(|token| token.kind).collect::<Vec<_>>(), vec![Dollar, Something("abc".to_string())]);
+    }
+
+    #[test]
+    fn tokenize_single_letter_variants() {
+        use super::TokenKind::*;
+        macro_rules! compare {
+            ($lhs: expr, $rhs: expr) => { 
+                assert_eq!($lhs.into_iter().map(|token| token.kind).collect::<Vec<_>>(), $rhs);
+            }
+        }
+        use super::TokenKind::*;
+        compare!(tokenize("a"), vec![Something("a".to_string())]);
+        compare!(tokenize("#"), vec![Pound]);
+        compare!(tokenize(" "), vec![Whitespace(' ')]);
+        compare!(tokenize("\n "), vec![Whitespace('\n'), Whitespace(' ')]);
+        compare!(tokenize("a;"), vec![Something("a".to_string()), Semicolon]);
+        compare!(tokenize("$a"), vec![Dollar, Something("a".to_string())]);
+        compare!(tokenize("@a;"), vec![At, Something("a".to_string()), Semicolon]);
+        compare!(tokenize("a@;"), vec![Something("a".to_string()), At, Semicolon]);
+        compare!(tokenize("@;a"), vec![At, Semicolon, Something("a".to_string())]);
     }
 }

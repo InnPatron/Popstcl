@@ -3,11 +3,16 @@ use namespace::Namespace;
 use super::internal::{RcValue, Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind, IntoValue};
 use line_info::LineInfo;
 
-pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<(), ExecErr> {
+pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<Option<RcValue>, ExecErr> {
     for stmt in program.iter() {
-        eval_stmt(stack, stmt)?;
+        match eval_stmt(stack, stmt)? {
+            ExecSignal::Return(ret) => return Ok(ret),
+            ExecSignal::Continue => return Err(ExecErr::BadContinue),
+            ExecSignal::Break => return Err(ExecErr::BadBreak),
+            ExecSignal::NextInstruction(_) => (),
+        }
     }
-    Ok(())
+    Ok(None)
 }
 
 pub fn eval_stmt<'a, 'b, 'c:'a>(stack: &'a mut Stack<'c>, stmt: &'b Statement) -> Result<ExecSignal, ExecErr> {
@@ -167,9 +172,11 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                                                                            )
                                                     )
                                            );
-                        }
+                        },
 
-                        _ => return Err(ExecErr::NoRet(word.clone())),
+                        ExecSignal::Continue => return Err(ExecErr::BadContinue),
+                        ExecSignal::Break => return Err(ExecErr::BadBreak),
+                        ExecSignal::NextInstruction(None) => return Err(ExecErr::NoRet(word.clone())),
                     }   
                 }
 

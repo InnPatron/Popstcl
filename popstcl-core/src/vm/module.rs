@@ -2,6 +2,7 @@ use super::internal::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 use ccrc::{Collectable, Tracer};
+use std::fmt;
 
 pub trait Module: Object {}
 
@@ -16,12 +17,6 @@ impl StdModule {
 }
 
 impl Module for StdModule {}
-
-impl ToString for StdModule {
-    fn to_string(&self) -> String {
-        unimplemented!();
-    }
-}
 
 impl Object for StdModule {
 
@@ -56,5 +51,13 @@ impl Collectable for StdModule {
 impl DeepClone for StdModule {
     fn deep_clone(&self) -> Self {
         StdModule::new(self.0.borrow().deep_clone())
+    }
+}
+
+impl fmt::Display for StdModule {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use std::cell::Ref;
+        let r: Ref<Env> = self.0.borrow();
+        write!(f, "Module[{}]", ToString::to_string(&*r))
     }
 }

@@ -1,7 +1,10 @@
-use super::internal::*;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::fmt;
+
 use ccrc::{Tracer, Collectable};
+use super::internal::*;
+use itertools::*;
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Env {
@@ -44,6 +47,13 @@ impl DeepClone for Env {
     }
 }
 
+impl fmt::Display for Env {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let out = self.bindings.iter().map(|(k, v)| format!("({}, {})", k, v)).join(", ");
+        write!(f, "{}", out)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -64,8 +74,8 @@ mod tests {
         env.insert("obj", obj_1.into());
 
         let program = parse_program("
-gset a @obj.foo;
-gset b @obj.bar;")
+gset a $obj.foo;
+gset b $obj.bar;")
                 .unwrap();
         let mut temp_mod = StdModule::new(env);
         eval_program(&mut Stack::new_module(&mut temp_mod), &program).unwrap();
@@ -108,8 +118,8 @@ gset b @obj.bar;")
         env.insert("obj", obj_2.into());
 
         let program = parse_program("
-gset a @obj.nested.foo;
-gset b @obj.nested.bar;")
+gset a $obj.nested.foo;
+gset b $obj.nested.bar;")
                 .unwrap();
 
         let mut temp_mod = StdModule::new(env);

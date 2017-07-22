@@ -28,6 +28,9 @@ pub enum ExecErr {
     ObjectErr(ObjectErr, DebugInfo),
     NoLocalModule,
 
+    BadBreak,
+    BadContinue,
+
     Generic(String),
 }
 
