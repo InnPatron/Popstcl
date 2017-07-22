@@ -4,5 +4,5 @@ version = "0.12.0"
 authors = ["Random_Civvy <vomalexander@gmail.com>"]
 
 [dependencies]
-itertools = "0.5.9"
+itertools = "0.6.1"
 ccrc = { git = "https://gitlab.com/Random_Civvy/cc.git" }
