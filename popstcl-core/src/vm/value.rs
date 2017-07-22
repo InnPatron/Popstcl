@@ -136,21 +136,13 @@ impl PartialEq for Value {
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &Value::Number(ref num) => write!(f, "Number: {}", num),
-            &Value::String(ref s) => write!(f, "String: {}", s),
-            &Value::Bool(ref b) => write!(f, "Bool: {}", b),
-            &Value::Cmd(_) => write!(f, "CMD: "),
-            &Value::List(ref vec) => {
-                                        let vec = vec.inner().iter().fold(String::new(), 
-                                                                  |mut collect, value|  {
-                                                                        collect.push_str(&value.to_string());
-                                                                        collect 
-                                                                    }
-                                                                  );
-                                        write!(f, "List: {}", vec)
-                                     },
-            &Value::Object(_) => write!(f, "OBJ"),      //TODO: better display
-            &Value::Module(_) => write!(f, "MODULE"),   //TODO: better display
+            &Value::Number(ref num) => num.fmt(f), 
+            &Value::String(ref s) => s.fmt(f),
+            &Value::Bool(ref b) => b.fmt(f),
+            &Value::Cmd(_) => write!(f, "CMD"),
+            &Value::List(ref l) => l.fmt(f),
+            &Value::Object(ref o) => o.fmt(f),
+            &Value::Module(ref m) => m.fmt(f),
         }
     }
 }
@@ -341,6 +333,14 @@ impl List {
 
     pub fn pop(&mut self) -> Option<RcValue> {
         self.list.pop()
+    }
+}
+
+impl fmt::Display for List {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use itertools::Itertools;
+        let out = format!("[{}]", self.list.iter().join(", "));
+        write!(f, "{}", out)
     }
 }
 

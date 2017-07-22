@@ -1,7 +1,10 @@
-use super::internal::*;
 use std::collections::HashMap;
-use std::rc::Rc;
+use std::fmt;
+
 use ccrc::{Tracer, Collectable};
+use super::internal::*;
+use itertools::*;
+
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Env {
@@ -41,6 +44,13 @@ impl DeepClone for Env {
             env.insert(k, v.deep_clone());
         }
         env
+    }
+}
+
+impl fmt::Display for Env {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let out = self.bindings.iter().map(|(k, v)| format!("({}, {})", k, v)).join(", ");
+        write!(f, "{}", out)
     }
 }
 

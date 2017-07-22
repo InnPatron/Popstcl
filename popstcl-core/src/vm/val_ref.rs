@@ -3,6 +3,7 @@ use vm::cmd::Cmd;
 use vm::internal::{StdObject, StdModule};
 use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
 use std::cell::{Ref, RefMut};
+use std::fmt;
 
 #[derive(Debug)]
 pub struct ValueRef<'a> {
@@ -74,6 +75,12 @@ impl<'a> ValueRef<'a> {
     }
 }
 
+impl<'a> fmt::Display for ValueRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for ValueRef<'a> {
     type Target = Value;
     fn deref(&self) -> &Value {
@@ -83,6 +90,12 @@ impl<'a> Deref for ValueRef<'a> {
 
 pub struct NumberRef<'a> {
     borrow: Ref<'a, Value>
+}
+
+impl<'a> fmt::Display for NumberRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for NumberRef<'a> {
@@ -132,6 +145,12 @@ pub struct StringRef<'a> {
     borrow: Ref<'a, Value>
 }
 
+impl<'a> fmt::Display for StringRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for StringRef<'a> {
     type Target = PString;
     fn deref(&self) -> &PString {
@@ -145,6 +164,12 @@ impl<'a> Deref for StringRef<'a> {
 
 pub struct BoolRef<'a> {
     borrow: Ref<'a, Value>
+}
+
+impl<'a> fmt::Display for BoolRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for BoolRef<'a> {
@@ -162,6 +187,12 @@ pub struct CmdRef<'a> {
     borrow: Ref<'a, Value>
 }
 
+impl<'a> fmt::Display for CmdRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for CmdRef<'a> {
     type Target = Box<Cmd>;
     fn deref(&self) -> &Box<Cmd> {
@@ -175,6 +206,12 @@ impl<'a> Deref for CmdRef<'a> {
 
 pub struct ListRef<'a> {
     borrow: Ref<'a, Value>
+}
+
+impl<'a> fmt::Display for ListRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for ListRef<'a> {
@@ -192,6 +229,12 @@ pub struct ObjectRef<'a> {
     borrow: Ref<'a, Value>
 }
 
+impl<'a> fmt::Display for ObjectRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for ObjectRef<'a> {
     type Target = StdObject;
     fn deref(&self) -> &StdObject {
@@ -205,6 +248,12 @@ impl<'a> Deref for ObjectRef<'a> {
 
 pub struct ModuleRef<'a> {
     borrow: Ref<'a, Value>
+}
+
+impl<'a> fmt::Display for ModuleRef<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for ModuleRef<'a> {
@@ -288,6 +337,12 @@ impl<'a> ValueRefMut<'a> {
     }
 }
 
+impl<'a> fmt::Display for ValueRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for ValueRefMut<'a> {
     type Target = Value;
     fn deref(&self) -> &Value {
@@ -303,6 +358,12 @@ impl<'a> DerefMut for ValueRefMut<'a> {
 
 pub struct NumberRefMut<'a> {
     borrow: RefMut<'a, Value>
+}
+
+impl<'a> fmt::Display for NumberRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for NumberRefMut<'a> {
@@ -362,6 +423,12 @@ pub struct StringRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
 
+impl<'a> fmt::Display for StringRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for StringRefMut<'a> {
     type Target = PString;
     fn deref(&self) -> &PString {
@@ -385,6 +452,12 @@ impl<'a> DerefMut for StringRefMut<'a> {
 
 pub struct BoolRefMut<'a> {
     borrow: RefMut<'a, Value>
+}
+
+impl<'a> fmt::Display for BoolRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for BoolRefMut<'a> {
@@ -412,6 +485,12 @@ pub struct CmdRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
 
+impl<'a> fmt::Display for CmdRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for CmdRefMut<'a> {
     type Target = Box<Cmd>;
     fn deref(&self) -> &Box<Cmd> {
@@ -435,6 +514,12 @@ impl<'a> DerefMut for CmdRefMut<'a> {
 
 pub struct ListRefMut<'a> {
     borrow: RefMut<'a, Value>
+}
+
+impl<'a> fmt::Display for ListRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for ListRefMut<'a> {
@@ -462,6 +547,12 @@ pub struct ObjectRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
 
+impl<'a> fmt::Display for ObjectRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
+}
+
 impl<'a> Deref for ObjectRefMut<'a> {
     type Target = StdObject;
     fn deref(&self) -> &StdObject {
@@ -485,6 +576,12 @@ impl<'a> DerefMut for ObjectRefMut<'a> {
 
 pub struct ModuleRefMut<'a> {
     borrow: RefMut<'a, Value>
+}
+
+impl<'a> fmt::Display for ModuleRefMut<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        self.borrow.fmt(fmt)
+    }
 }
 
 impl<'a> Deref for ModuleRefMut<'a> {

@@ -1,7 +1,8 @@
 use vm::internal::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::fmt::{Debug, Display};
+use std::fmt::{Debug, Display, Formatter};
+use std::fmt;
 use ccrc::{Collectable, Tracer};
 
 pub trait Object {
@@ -55,12 +56,6 @@ impl IntoValue for StdObject {
     }
 }
 
-impl ToString for StdObject {
-    fn to_string(&self) -> String {
-        unimplemented!();
-    }
-}
-
 impl PartialEq for StdObject {
     fn eq(&self, other: &StdObject) -> bool {
         self.0 == other.0
@@ -74,6 +69,14 @@ impl DeepClone for StdObject {
 }
 
 impl Eq for StdObject {}
+
+impl Display for StdObject {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        use std::cell::Ref;
+        let r: Ref<Env> = self.0.borrow();
+        write!(f, "Object[{}]", ToString::to_string(&*r))
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct ObjectKind<V>
