@@ -16,6 +16,7 @@ macro_rules! location {
 }
 
 #[derive(Clone, Debug, PartialEq)]
+/// Represent an inclusive start, exlusive end range
 pub struct LineInfo {
     pub range: Range<usize>
 }
@@ -45,5 +46,16 @@ impl LineInfo {
         }
 
         info
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn collapse() {
+        let info = vec![range!(0, 10), location!(11), location!(20)];
+        let result = LineInfo::collapse(&info);
+        assert_eq!(range!(0, 21), result);
     }
 }
