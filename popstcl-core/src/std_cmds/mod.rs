@@ -96,6 +96,6 @@ pub use self::module::{MakeModule};
 pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
-pub use self::print::Print;
+pub use self::print::{Print, EPrint};
 pub use self::object::{MakeObject, FSet, FMut, RmField};
 pub use self::misc::{Std, Clone};

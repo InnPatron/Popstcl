@@ -56,6 +56,7 @@ impl EnvBuilder {
         builder.insert_value("list_append", Value::Cmd(Box::new(Append)));
 
         builder.insert_value("print", Value::Cmd(Box::new(Print)));
+        builder.insert_value("eprint", Value::Cmd(Box::new(EPrint)));
 
         builder.insert_value("clone", Value::Cmd(Box::new(Clone)));
 
