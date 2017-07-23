@@ -50,7 +50,7 @@ mset leeq_false_gr [<= 1337 -1];"
     ];
 
     for pair in inspecting.iter() {
-        let value = vm.inspect_value(pair.0).unwrap();
+        let value = vm.get(pair.0).unwrap();
         let borrow = value.borrow();
         assert_eq!((&pair.0, &*borrow), 
                    (&pair.0, &pair.1));

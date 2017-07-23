@@ -8,7 +8,7 @@ fn math_sub() {
     vm.eval_str("$mset a [sub 5 -1];").unwrap();
     
 
-    match vm.inspect_value("a") {
+    match vm.get("a") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(6_f64, n.inner()),
@@ -26,7 +26,7 @@ fn math_add() {
     vm.eval_str("$mset a [add 4 3 2 1];").unwrap();
     
     
-    match vm.inspect_value("a") {
+    match vm.get("a") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(10_f64, n.inner()),
@@ -44,7 +44,7 @@ fn math_mul() {
     vm.eval_str("$mset a [mul 0.5 3];").unwrap();
     
     
-    match vm.inspect_value("a") {
+    match vm.get("a") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(1.5, n.inner()),
@@ -62,7 +62,7 @@ fn math_div() {
     vm.eval_str("$mset a [div 8 2];").unwrap();
     
     
-    match vm.inspect_value("a") {
+    match vm.get("a") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(4_f64, n.inner()),

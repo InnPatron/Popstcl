@@ -82,11 +82,19 @@ impl Vm {
         eval_program(&mut Stack::new_module(&mut self.main_module), &program)
     }
 
-    pub fn inspect_value(&self, name: &str) -> Result<RcValue, ObjectErr> {
+    pub fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
         self.main_module.get(name)
+    }
+
+    pub fn insert(&mut self, name: &str, value: RcValue) {
+        self.main_module.insert(name, value);
     }
 
     pub fn get_value(&self, name: &str) -> Result<Value, ObjectErr> {
         self.main_module.get(name).map(|rcv| rcv.inner_clone())
+    }
+
+    pub fn insert_value(&mut self, name: &str, value: Value) {
+        self.main_module.insert(name, RcValue::new(value));
     }
 }

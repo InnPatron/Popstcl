@@ -35,7 +35,7 @@ test_proc 21 3;
 ").unwrap();
 
         
-    match vm.inspect_value("test") {
+    match vm.get("test") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(24_f64, n.inner()),
@@ -65,7 +65,7 @@ mset test_2 [test_proc 3 5];
                             ("test_2", (15_f64).into_value()), 
                          ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(&pair.1, &*val.borrow());
             },
@@ -98,7 +98,7 @@ mset test_2 [test_proc 3 5];
                             ("test_2", (15_f64).into_value()), 
                          ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(&pair.1, &*val.borrow());
             },
@@ -126,7 +126,7 @@ test_proc 1337 5;
                             ("test_1", (1337_f64).into_value()),
                          ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(pair.1, *val.borrow());
             },
@@ -155,7 +155,7 @@ mset test_2 [test_proc 1337 5];
                             ("test_1", (1337_f64).into_value()),
                          ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(pair.1, *val.borrow());
             },
@@ -186,7 +186,7 @@ mset test_1 [test_proc 1337 5];
                             ("test_1", (-21_f64).into_value()),
                          ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(pair.1, *val.borrow());
             },

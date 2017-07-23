@@ -56,6 +56,7 @@ impl EnvBuilder {
         builder.insert_value("list_append", Value::Cmd(Box::new(Append)));
 
         builder.insert_value("print", Value::Cmd(Box::new(Print)));
+        builder.insert_value("eprint", Value::Cmd(Box::new(EPrint)));
 
         builder.insert_value("clone", Value::Cmd(Box::new(Clone)));
 
@@ -64,6 +65,7 @@ impl EnvBuilder {
         builder.insert_value("fmut", Value::Cmd(Box::new(FMut)));
         builder.insert_value("rmf", Value::Cmd(Box::new(RmField)));
 
+        builder.insert_value("assert", Value::Cmd(Box::new(Assert)));
         builder.insert_value("std", Value::Cmd(Box::new(Std)));
         
         builder

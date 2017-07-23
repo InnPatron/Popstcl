@@ -8,7 +8,7 @@ fn sub_in_cmd() {
     vm.eval_str("$mset a [$add 1 2];").unwrap();
     
     
-    match vm.inspect_value("a") {
+    match vm.get("a") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(3_f64, n.inner()),
@@ -34,7 +34,7 @@ fn multi_command() {
     vm.eval_str("mset a [add [add 3 1] [add [add 1 2] 3]];").unwrap();
     
 
-    match vm.inspect_value("a") {
+    match vm.get("a") {
         Ok(val) => {
             match *val.borrow() {
                 Value::Number(ref n) => assert_eq!(10_f64, n.inner()),
@@ -71,7 +71,7 @@ mlet g true h false eggs 999;").unwrap();
     
                         ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(&pair.1, &*val.borrow());
             },
@@ -108,7 +108,7 @@ mset TEST_STRING \"yoyo: $g$f$h b\";").unwrap();
     
                         ];
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(&pair.1, &*val.borrow());
             },
@@ -135,7 +135,7 @@ fn comments() {
     ];
 
     for pair in inspecting.iter() {
-        match vm.inspect_value(pair.0) {
+        match vm.get(pair.0) {
             Ok(val) => {
                 assert_eq!(&pair.1, &*val.borrow());
             },

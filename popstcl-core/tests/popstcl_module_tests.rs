@@ -10,7 +10,7 @@ fn module_from_string() {
         mset inner_value 1337;
     \";").unwrap();
 
-    let other_mod = vm.inspect_value("other_mod").expect("Could not find foreign module \'other_mod\'");
+    let other_mod = vm.get("other_mod").expect("Could not find foreign module \'other_mod\'");
     let borrow = other_mod.borrow();
     if let Value::Module(ref other_mod) = *borrow {
         let inner_value = other_mod.get("inner_value").expect("Could not find foreign module value \'inner_value\'");
