@@ -65,6 +65,7 @@ impl EnvBuilder {
         builder.insert_value("fmut", Value::Cmd(Box::new(FMut)));
         builder.insert_value("rmf", Value::Cmd(Box::new(RmField)));
 
+        builder.insert_value("assert", Value::Cmd(Box::new(Assert)));
         builder.insert_value("std", Value::Cmd(Box::new(Std)));
         
         builder

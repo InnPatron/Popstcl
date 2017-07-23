@@ -86,6 +86,7 @@ mod flow_control;
 mod print;
 mod misc;
 mod object;
+mod err;
 
 pub use self::var_cmds::{Let, Set, Mutate};
 pub use self::if_cmd::If;
@@ -99,3 +100,4 @@ pub use self::while_cmd::While;
 pub use self::print::{Print, EPrint};
 pub use self::object::{MakeObject, FSet, FMut, RmField};
 pub use self::misc::{Std, Clone};
+pub use self::err::{Assert};
