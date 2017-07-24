@@ -3,7 +3,7 @@ This repository holds the core language library and commands for embedding.
 
 ## What is It?
 
-POPSTCL (stylized as Popstcl because it feels too shouty) stands for *Programmer's Oddly Planned Simple Tool Command Language*. It is a [Tcl](https://www.tcl.tk/) variant and a **hobby language** meant to practice [Rust](https://www.rust-lang.org/en-US/) as well as write my first usable interpreter.
+POPSTCL (stylized as Popstcl because to be less shouty) stands for *Programmer's Oddly Planned Simple Tool Command Language*. It is a [Tcl](https://www.tcl.tk/) variant and a **hobby language** meant to practice [Rust](https://www.rust-lang.org/en-US/) and to use embedded in other applications.
 
 I did **not**:
 * Implement all the standard Tcl commands
@@ -18,8 +18,6 @@ Explicit **non-goals**:
 
 ## The Interpreter
 Currently, [popstcl-i](https://gitlab.com/Random_Civvy/popstcl-i) is an extremely barebones REPL. 
-
-Hint: Type in 'q' and ENTER to quit the REPL.
 
 ## Differences to Tcl (Incomplete)
 
@@ -54,14 +52,14 @@ There are three levels of scoping each with their own substitution sigil:
 3. Procedure-level
 
 ~~~
-print $local_variable;
-print @module_variable;
-print ^proc_arg;
+print $module_variable;
+print #local_variable;
+print @proc_arg;
 ~~~
 
 ## Extensibility
 
-Commands can be implemented through the popstcl::vm::cmd::Cmd trait and passed as Box<Cmd>. Eventually, I want to be able to interact with C data and commands.
+Commands can be implemented through the popstcl::vm::cmd::Cmd trait and passed as Box<Cmd>. Eventually, I want to be able to interact with C data.
 
 ## Cool Things
 
@@ -71,7 +69,7 @@ TODO: Add example
 ...And more!
 
 ## Versioning
-Currently, releases follow semver for the Popstcl library.
+Currently, releases follow semver for popstcl-core.
 
 ## License
 Released under the [MIT License](https://opensource.org/licenses/MIT) (See LICENSE-MIT). Good luck using this for any commercial projects :|
