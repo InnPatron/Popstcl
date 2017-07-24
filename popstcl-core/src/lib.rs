@@ -21,12 +21,12 @@ pub use std_cmds::*;
 pub use line_info::LineInfo;
 
 pub mod internal {
-    use super::ast::{Program, Statement};
-    use super::vm::internal::*;
-    use super::namespace::Namespace;
-    use super::parser::parse_program;
-    use super::std_cmds::*;
-    use super::line_info::LineInfo;
+    pub use super::ast::{Program, Statement};
+    pub use super::vm::internal::*;
+    pub use super::namespace::Namespace;
+    pub use super::parser::parse_program;
+    pub use super::std_cmds::*;
+    pub use super::line_info::LineInfo;
 }
 
 use vm::Vm;
