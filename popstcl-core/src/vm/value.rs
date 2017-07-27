@@ -90,7 +90,6 @@ pub enum Value {
 }
 
 impl Value {
-
     pub fn is_cmd(&self) -> bool {
         match self {
             &Value::Cmd(_) => true,
@@ -98,6 +97,61 @@ impl Value {
         }
     }
 
+    pub fn try_into_number(self) -> Result<Number, Self> {
+        if let Value::Number(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn try_into_string(self) -> Result<PString, Self> {
+        if let Value::String(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn try_into_bool(self) -> Result<Bool, Self> {
+        if let Value::Bool(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn try_into_cmd(self) -> Result<Box<Cmd>, Self> {
+        if let Value::Cmd(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn try_into_list(self) -> Result<List, Self> {
+        if let Value::List(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn try_into_object(self) -> Result<StdObject, Self> {
+        if let Value::Object(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
+
+    pub fn try_into_module(self) -> Result<StdModule, Self> {
+        if let Value::Module(v) = self {
+            Ok(v)
+        } else {
+            Err(self)
+        }
+    }
 }
 
 impl Collectable for Value {
