@@ -29,9 +29,6 @@ pub mod internal {
     pub use super::line_info::LineInfo;
 }
 
-use vm::Vm;
-use vm::internal::EnvBuilder;
-
 #[allow(unused_must_use)]
 pub fn basic_vm() -> Vm {
     Vm::new_with_main_module(EnvBuilder::std_env().consume())
