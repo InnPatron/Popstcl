@@ -72,9 +72,9 @@ impl fmt::Display for RcValue {
     }
 }
 
-impl From<Value> for RcValue {
-    fn from(val: Value) -> RcValue {
-        RcValue(Ccrc::new(RefCell::new(val)))
+impl<T> From<T> for RcValue where T: IntoValue {
+    fn from(v: T) -> RcValue {
+        RcValue(Ccrc::new(RefCell::new(v.into_value())))
     }
 }
 
@@ -201,7 +201,7 @@ impl fmt::Display for Value {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, PartialOrd)]
 pub struct Number {
     num: f64,
 }
@@ -228,6 +228,12 @@ impl fmt::Display for Number {
     }
 }
 
+impl Borrow<f64> for Number {
+    fn borrow(&self) -> &f64 {
+        &self.num
+    }
+}
+
 impl Deref for Number {
     type Target = f64;
     fn deref(&self) -> &f64 {
@@ -241,39 +247,45 @@ impl DerefMut for Number {
     }
 }
 
-impl Add for Number {
-    type Output = Number;
-
-    fn add(self, other: Number) -> Number {
-        Number::new(self.num + self.num)
+impl<T> PartialEq<T> for Number where T: Borrow<f64> {
+    fn eq(&self, other: &T) -> bool {
+        self.num == *other.borrow()
     }
 }
 
-impl Sub for Number {
+impl<T> Add<T> for Number where T: Borrow<f64> {
     type Output = Number;
 
-    fn sub(self, other: Number) -> Number {
-        Number::new(self.num - self.num)
+    fn add(self, other: T) -> Number {
+        Number::new(self.num + other.borrow())
     }
 }
 
-impl Div for Number {
+impl<T> Sub<T> for Number where T: Borrow<f64> {
     type Output = Number;
 
-    fn div(self, other: Number) -> Number {
-        Number::new(self.num / self.num)
+    fn sub(self, other: T) -> Number {
+        Number::new(self.num - other.borrow())
     }
 }
 
-impl Mul for Number {
+impl<T> Div<T> for Number where T: Borrow<f64> {
     type Output = Number;
 
-    fn mul(self, other: Number) -> Number {
-        Number::new(self.num * self.num)
+    fn div(self, other: T) -> Number {
+        Number::new(self.num / other.borrow())
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd)]
+impl<T> Mul<T> for Number where T: Borrow<f64> {
+    type Output = Number;
+
+    fn mul(self, other: T) -> Number {
+        Number::new(self.num * other.borrow())
+    }
+}
+
+#[derive(Clone, Debug, Eq, PartialOrd, Ord)]
 pub struct PString {
     str: String
 }
@@ -304,6 +316,18 @@ impl PString {
     }
 }
 
+impl<T> PartialEq<T> for PString where T: Borrow<str> {
+    fn eq(&self, other: &T) -> bool {
+        &self.str == other.borrow()
+    }
+}
+
+impl Borrow<str> for PString {
+    fn borrow(&self) -> &str {
+        &self.str
+    }
+}
+
 impl Deref for PString {
     type Target = String;
     fn deref(&self) -> &String {
@@ -317,7 +341,7 @@ impl DerefMut for PString {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd)]
+#[derive(Clone, Debug, Eq, PartialOrd, Ord)]
 pub struct Bool {
     boolean: bool 
 }
@@ -344,6 +368,12 @@ impl fmt::Display for Bool {
     }
 }
 
+impl Borrow<bool> for Bool {
+    fn borrow(&self) -> &bool {
+        &self.boolean
+    }
+}
+
 impl Deref for Bool {
     type Target = bool;
     fn deref(&self) -> &bool {
@@ -354,6 +384,12 @@ impl Deref for Bool {
 impl DerefMut for Bool {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.boolean
+    }
+}
+
+impl<T> PartialEq<T> for Bool where T: Borrow<bool> {
+    fn eq(&self, other: &T) -> bool {
+        self.boolean == *other.borrow()
     }
 }
 

@@ -15,7 +15,7 @@ macro_rules! location {
     ($location: expr) => { LineInfo { range: $location..$location+1 } }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 /// Represent an inclusive start, exlusive end range
 pub struct LineInfo {
     pub range: Range<usize>

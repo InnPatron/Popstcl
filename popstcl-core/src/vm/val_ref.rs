@@ -2,6 +2,7 @@ use vm::value::*;
 use vm::cmd::Cmd;
 use vm::internal::{StdObject, StdModule};
 use std::ops::{Add, Sub, Mul, Div, Deref, DerefMut};
+use std::borrow::Borrow;
 use std::cell::{Ref, RefMut};
 use std::fmt;
 
@@ -88,6 +89,19 @@ impl<'a> Deref for ValueRef<'a> {
     }
 }
 
+impl<'a> PartialEq for ValueRef<'a> {
+    fn eq(&self, other: &ValueRef) -> bool {
+        *self.borrow == *other.borrow
+    }
+}
+
+impl<'a> PartialEq<RcValue> for ValueRef<'a> {
+    fn eq(&self, other: &RcValue) -> bool {
+        *self.borrow == *other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct NumberRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -95,6 +109,12 @@ pub struct NumberRef<'a> {
 impl<'a> fmt::Display for NumberRef<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.borrow.fmt(fmt)
+    }
+}
+
+impl<'a> Borrow<f64> for NumberRef<'a> {
+    fn borrow(&self) -> &f64 {
+        &**self
     }
 }
 
@@ -109,38 +129,45 @@ impl<'a> Deref for NumberRef<'a> {
     }
 }
 
-impl<'a> Add for NumberRef<'a> {
-    type Output = f64;
-
-    fn add(self, other: NumberRef) -> Self::Output {
-        &*self + &*other
+impl<'a, T> PartialEq<T> for NumberRef<'a> where T: Borrow<f64> {
+    fn eq(&self, other: &T) -> bool {
+        &**self == other.borrow()
     }
 }
 
-impl<'a> Sub for NumberRef<'a> {
+impl<'a, T> Add<T> for NumberRef<'a> where T: Borrow<f64> {
     type Output = f64;
 
-    fn sub(self, other: NumberRef) -> Self::Output {
-        &*self - &*other
+    fn add(self, other: T) -> Self::Output {
+        *self + *other.borrow()
     }
 }
 
-impl<'a> Div for NumberRef<'a> {
+impl<'a, T> Sub<T> for NumberRef<'a> where T: Borrow<f64>{
     type Output = f64;
 
-    fn div(self, other: NumberRef) -> Self::Output {
-        &*self / &*other
+    fn sub(self, other: T) -> Self::Output {
+        *self - *other.borrow()
     }
 }
 
-impl<'a> Mul for NumberRef<'a> {
+impl<'a, T> Div<T> for NumberRef<'a> where T: Borrow<f64>{
     type Output = f64;
 
-    fn mul(self, other: NumberRef) -> Self::Output {
-        &*self * &*other
+    fn div(self, other: T) -> Self::Output {
+        *self / *other.borrow()
     }
 }
 
+impl<'a, T> Mul<T> for NumberRef<'a> where T: Borrow<f64>{
+    type Output = f64;
+
+    fn mul(self, other: T) -> Self::Output {
+        *self * *other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct StringRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -148,6 +175,12 @@ pub struct StringRef<'a> {
 impl<'a> fmt::Display for StringRef<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.borrow.fmt(fmt)
+    }
+}
+
+impl<'a> Borrow<str> for StringRef<'a> {
+    fn borrow(&self) -> &str {
+        &**self
     }
 }
 
@@ -162,6 +195,14 @@ impl<'a> Deref for StringRef<'a> {
     }
 }
 
+impl<'a, T> PartialEq<T> for StringRef<'a> where T: Borrow<str> {
+    fn eq(&self, other: &T) -> bool {
+        let lhs: &str = self.borrow();
+        lhs == other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct BoolRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -169,6 +210,12 @@ pub struct BoolRef<'a> {
 impl<'a> fmt::Display for BoolRef<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.borrow.fmt(fmt)
+    }
+}
+
+impl<'a> Borrow<bool> for BoolRef<'a> {
+    fn borrow(&self) -> &bool {
+        &**self
     }
 }
 
@@ -183,6 +230,13 @@ impl<'a> Deref for BoolRef<'a> {
     }
 }
 
+impl<'a, T> PartialEq<T> for BoolRef<'a> where T: Borrow<bool> {
+    fn eq(&self, other: &T) -> bool {
+        **self == *other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct CmdRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -204,6 +258,7 @@ impl<'a> Deref for CmdRef<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct ListRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -225,6 +280,19 @@ impl<'a> Deref for ListRef<'a> {
     }
 }
 
+impl<'a> PartialEq for ListRef<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        *self == *other
+    }
+}
+
+impl<'a> PartialEq<List> for ListRef<'a> {
+    fn eq(&self, other: &List) -> bool {
+        *self == *other
+    }
+}
+
+#[derive(Debug)]
 pub struct ObjectRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -246,6 +314,19 @@ impl<'a> Deref for ObjectRef<'a> {
     }
 }
 
+impl<'a> PartialEq for ObjectRef<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        *self == *other
+    }
+}
+
+impl<'a> PartialEq<StdObject> for ObjectRef<'a> {
+    fn eq(&self, other: &StdObject) -> bool {
+        *self == *other
+    }
+}
+
+#[derive(Debug)]
 pub struct ModuleRef<'a> {
     borrow: Ref<'a, Value>
 }
@@ -264,6 +345,18 @@ impl<'a> Deref for ModuleRef<'a> {
         } else {
             panic!("{} is not Value::Module", &*self.borrow);
         }
+    }
+}
+
+impl<'a> PartialEq for ModuleRef<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        *self == *other
+    }
+}
+
+impl<'a> PartialEq<StdModule> for ModuleRef<'a> {
+    fn eq(&self, other: &StdModule) -> bool {
+        *self == *other
     }
 }
 
@@ -356,6 +449,19 @@ impl<'a> DerefMut for ValueRefMut<'a> {
     }
 }
 
+impl<'a> PartialEq for ValueRefMut<'a> {
+    fn eq(&self, other: &ValueRefMut) -> bool {
+        *self.borrow == *other.borrow
+    }
+}
+
+impl<'a> PartialEq<RcValue> for ValueRefMut<'a> {
+    fn eq(&self, other: &RcValue) -> bool {
+        *self.borrow == *other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct NumberRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -363,6 +469,12 @@ pub struct NumberRefMut<'a> {
 impl<'a> fmt::Display for NumberRefMut<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.borrow.fmt(fmt)
+    }
+}
+
+impl<'a> Borrow<f64> for NumberRefMut<'a> {
+    fn borrow(&self) -> &f64 {
+        &**self
     }
 }
 
@@ -387,38 +499,45 @@ impl<'a> DerefMut for NumberRefMut<'a> {
     }
 }
 
-impl<'a> Add for NumberRefMut<'a> {
-    type Output = f64;
-
-    fn add(self, other: NumberRefMut) -> Self::Output {
-        &*self + &*other
+impl<'a, T> PartialEq<T> for NumberRefMut<'a> where T: Borrow<f64> {
+    fn eq(&self, other: &T) -> bool {
+        &**self == other.borrow()
     }
 }
 
-impl<'a> Sub for NumberRefMut<'a> {
+impl<'a, T> Add<T> for NumberRefMut<'a> where T: Borrow<f64> {
     type Output = f64;
 
-    fn sub(self, other: NumberRefMut) -> Self::Output {
-        &*self - &*other
+    fn add(self, other: T) -> Self::Output {
+        *self + *other.borrow()
     }
 }
 
-impl<'a> Div for NumberRefMut<'a> {
+impl<'a, T> Sub<T> for NumberRefMut<'a> where T: Borrow<f64>{
     type Output = f64;
 
-    fn div(self, other: NumberRefMut) -> Self::Output {
-        &*self / &*other
+    fn sub(self, other: T) -> Self::Output {
+        *self - *other.borrow()
     }
 }
 
-impl<'a> Mul for NumberRefMut<'a> {
+impl<'a, T> Div<T> for NumberRefMut<'a> where T: Borrow<f64>{
     type Output = f64;
 
-    fn mul(self, other: NumberRefMut) -> Self::Output {
-        &*self * &*other
+    fn div(self, other: T) -> Self::Output {
+        *self / *other.borrow()
     }
 }
 
+impl<'a, T> Mul<T> for NumberRefMut<'a> where T: Borrow<f64>{
+    type Output = f64;
+
+    fn mul(self, other: T) -> Self::Output {
+        *self * *other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct StringRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -426,6 +545,12 @@ pub struct StringRefMut<'a> {
 impl<'a> fmt::Display for StringRefMut<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.borrow.fmt(fmt)
+    }
+}
+
+impl<'a> Borrow<str> for StringRefMut<'a> {
+    fn borrow(&self) -> &str {
+        &**self
     }
 }
 
@@ -450,6 +575,14 @@ impl<'a> DerefMut for StringRefMut<'a> {
     }
 }
 
+impl<'a, T> PartialEq<T> for StringRefMut<'a> where T: Borrow<str> {
+    fn eq(&self, other: &T) -> bool {
+        let lhs: &str = self.borrow();
+        lhs == other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct BoolRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -457,6 +590,12 @@ pub struct BoolRefMut<'a> {
 impl<'a> fmt::Display for BoolRefMut<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
         self.borrow.fmt(fmt)
+    }
+}
+
+impl<'a> Borrow<bool> for BoolRefMut<'a> {
+    fn borrow(&self) -> &bool {
+        &**self
     }
 }
 
@@ -481,6 +620,13 @@ impl<'a> DerefMut for BoolRefMut<'a> {
     }
 }
 
+impl<'a, T> PartialEq<T> for BoolRefMut<'a> where T: Borrow<bool> {
+    fn eq(&self, other: &T) -> bool {
+        **self == *other.borrow()
+    }
+}
+
+#[derive(Debug)]
 pub struct CmdRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -512,6 +658,7 @@ impl<'a> DerefMut for CmdRefMut<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct ListRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -543,6 +690,19 @@ impl<'a> DerefMut for ListRefMut<'a> {
     }
 }
 
+impl<'a> PartialEq for ListRefMut<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        *self == *other
+    }
+}
+
+impl<'a> PartialEq<List> for ListRefMut<'a> {
+    fn eq(&self, other: &List) -> bool {
+        *self == *other
+    }
+}
+
+#[derive(Debug)]
 pub struct ObjectRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -574,6 +734,19 @@ impl<'a> DerefMut for ObjectRefMut<'a> {
     }
 }
 
+impl<'a> PartialEq for ObjectRefMut<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        *self == *other
+    }
+}
+
+impl<'a> PartialEq<StdObject> for ObjectRefMut<'a> {
+    fn eq(&self, other: &StdObject) -> bool {
+        *self == *other
+    }
+}
+
+#[derive(Debug)]
 pub struct ModuleRefMut<'a> {
     borrow: RefMut<'a, Value>
 }
@@ -602,5 +775,17 @@ impl<'a> DerefMut for ModuleRefMut<'a> {
         } else {
             panic!("Not Value::Module");
         }
+    }
+}
+
+impl<'a> PartialEq for ModuleRefMut<'a> {
+    fn eq(&self, other: &Self) -> bool {
+        *self == *other
+    }
+}
+
+impl<'a> PartialEq<StdModule> for ModuleRefMut<'a> {
+    fn eq(&self, other: &StdModule) -> bool {
+        *self == *other
     }
 }

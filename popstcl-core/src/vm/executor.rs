@@ -359,7 +359,7 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
             &StrData::CmdSub => unimplemented!(),
         }
     }
-    Ok(CIR::new(result.into_value().into(), dstr_sub!(line_info.clone(), 
+    Ok(CIR::new(result.into(), dstr_sub!(line_info.clone(), 
                                                cur_stmt,
                                                root_stmt
                                                )
@@ -370,27 +370,27 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
 
 pub fn try_from_word(word: &Word, cur_stmt: &Statement, root_stmt: &Statement) -> Option<CIR> {
     match &word.kind {
-        &WordKind::Atom(ref s) => Some(CIR::new(s.to_string().into_value().into(), 
+        &WordKind::Atom(ref s) => Some(CIR::new(s.to_string().into(), 
                                                 dliteral!(word.line_info.clone(), 
                                                           cur_stmt, 
                                                           root_stmt)
                                                 )
                                        ),
-        &WordKind::Number(n) => Some(CIR::new(n.into_value().into(),
+        &WordKind::Number(n) => Some(CIR::new(n.into(),
                                               dliteral!(word.line_info.clone(), 
                                                         cur_stmt,
                                                         root_stmt
                                                         )
                                               )
                                      ),
-        &WordKind::Bool(b) => Some(CIR::new(b.into_value().into(),
+        &WordKind::Bool(b) => Some(CIR::new(b.into(),
                                             dliteral!(word.line_info.clone(), 
                                                       cur_stmt,
                                                       root_stmt
                                                       )
                                             )
                                    ),
-        &WordKind::Untouched(ref s) => Some(CIR::new(s.to_string().into_value().into(), 
+        &WordKind::Untouched(ref s) => Some(CIR::new(s.to_string().into(), 
                                                      dliteral!(word.line_info.clone(), 
                                                                cur_stmt,
                                                                root_stmt

@@ -1,5 +1,5 @@
 use super::lexer::Token;
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ParseErr {
     UnexpectedChar(char, String),
     CharNotFound(char),

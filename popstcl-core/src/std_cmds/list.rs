@@ -17,7 +17,7 @@ impl Cmd for List {
             list.push(argument.value.clone());
         }
 
-        Ok(ExecSignal::NextInstruction(Some(list.into_value().into())))
+        Ok(ExecSignal::NextInstruction(Some(list.into())))
     }
 }
 
@@ -31,7 +31,7 @@ impl Cmd for ListLength {
     fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
         exact_args!(&args, 1);
         let list = cir_extract!(args[0] => List)?;
-        Ok(ExecSignal::NextInstruction(Some((list.len() as f64).into_value().into())))
+        Ok(ExecSignal::NextInstruction(Some((list.len() as f64).into())))
     }
 }
 
