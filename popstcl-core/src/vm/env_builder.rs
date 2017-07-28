@@ -48,6 +48,10 @@ impl EnvBuilder {
         builder.insert_value("<=", Value::Cmd(Box::new(LessThanEq)));
         builder.insert_value(">=", Value::Cmd(Box::new(GreaterThanEq)));
 
+        builder.insert_value("&&", Value::Cmd(Box::new(And)));
+        builder.insert_value("||", Value::Cmd(Box::new(Or)));
+        builder.insert_value("!!", Value::Cmd(Box::new(Not)));
+
         builder.insert_value("list", Value::Cmd(Box::new(List)));
         builder.insert_value("list_len", Value::Cmd(Box::new(ListLength)));
         builder.insert_value("list_get", Value::Cmd(Box::new(ListIndex)));
