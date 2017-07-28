@@ -109,6 +109,12 @@ pub struct Word {
     pub line_info: LineInfo,
 }
 
+impl PartialEq for Word {
+    fn eq(&self, other: &Word) -> bool {
+        self.kind == other.kind
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum WordKind {
     Atom(Atom),
@@ -163,7 +169,7 @@ impl fmt::Display for WordKind {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Atom(pub String);
 
 impl Deref for Atom {
@@ -191,7 +197,7 @@ impl fmt::Display for Atom {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Path(pub Vec<PathSegment>);
 
 impl fmt::Display for self::Path {
@@ -213,7 +219,7 @@ impl Path {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq)]
 pub struct PathSegment {
     pub segment: Atom,
     pub line_info: LineInfo

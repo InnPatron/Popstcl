@@ -4,7 +4,7 @@ use ast::*;
 use namespace::Namespace;
 use line_info::LineInfo;
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum ExecErr {
     UnknownBinding(String),
     NotCmd(String),
@@ -34,7 +34,7 @@ pub enum ExecErr {
     Generic(String),
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ArityErr {
     Modulo { modulo: usize, found: usize },
 
@@ -51,7 +51,7 @@ impl From<ArityErr> for ExecErr {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum VarSubErr {
     UnknownBinding(String, Namespace, DebugInfo),
     NonobjectFieldAccess(String, DebugInfo),
@@ -65,7 +65,7 @@ impl From<VarSubErr> for ExecErr {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ObjectErr {
     UnknownField(String),
 //    InsufficientPermissions(Permissions),

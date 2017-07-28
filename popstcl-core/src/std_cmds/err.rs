@@ -14,3 +14,14 @@ impl Cmd for Assert {
         }
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct Error;
+
+impl Cmd for Error {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+        exact_args!(args, 1);
+        let s = cir_extract!(args[0] => String)?;
+        Err(ExecErr::Generic((**s).clone()))
+    }
+}

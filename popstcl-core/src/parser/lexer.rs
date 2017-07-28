@@ -1,6 +1,6 @@
 use line_info::*;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Token {
     pub kind: TokenKind,
     pub line_info: LineInfo,

@@ -13,7 +13,7 @@ pub trait Object {
     fn remove(&self, name: &str) -> Option<RcValue>;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct StdObject(RefCell<Env>);
 
 impl StdObject {
@@ -53,12 +53,6 @@ impl Collectable for StdObject {
 impl IntoValue for StdObject {
     fn into_value(self) -> Value {
         Value::Object(self)
-    }
-}
-
-impl PartialEq for StdObject {
-    fn eq(&self, other: &StdObject) -> bool {
-        self.0 == other.0
     }
 }
 

@@ -14,7 +14,7 @@ impl Cmd for MakeObject {
             obj.insert(&name, value);
         }
 
-        Ok(ExecSignal::NextInstruction(Some(obj.into_value().into())))
+        Ok(ExecSignal::NextInstruction(Some(obj.into())))
     }
 }
 
@@ -45,7 +45,7 @@ impl Cmd for FMut {
         let field = match obj.get(&name) {
             Ok(value) => value,
             Err(_) => {
-                let v: RcValue = (0.0).into_value().into();
+                let v: RcValue = (0.0).into();
                 obj.insert(&name, v.clone());
                 v
             },

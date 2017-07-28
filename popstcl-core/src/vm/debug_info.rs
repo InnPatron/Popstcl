@@ -3,7 +3,7 @@ use namespace::Namespace;
 use line_info::LineInfo;
 use std::rc::Rc;
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DebugInfo {
     pub kind: DebugKind,
     pub root_line: LineInfo,
@@ -12,7 +12,7 @@ pub struct DebugInfo {
     pub original_string: Rc<String>,
 }
 
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DebugKind {
     VarSub(Namespace, Path),
     StrSub,     //TODO: add detailed information for var subs WITHIN string
