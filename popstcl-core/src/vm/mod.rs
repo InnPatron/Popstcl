@@ -6,7 +6,7 @@ pub mod user {
     pub use super::err::ExecErr;
     pub use super::object::{Object, ObjectKind};
     pub use super::env_builder::EnvBuilder;
-    pub use super::debug_info::{DebugInfo, DebugKind};
+    pub use super::debug_info::{DebugInfo, DebugKind, CommonInfo};
 }
 
 pub mod internal {
@@ -22,7 +22,7 @@ pub mod internal {
     pub use super::cir::CIR;
     pub use super::env_builder::EnvBuilder;
     pub use super::executor::{eval_program, eval_stmt};
-    pub use super::debug_info::{DebugInfo, DebugKind};
+    pub use super::debug_info::{DebugInfo, DebugKind, CommonInfo, InfoGenerator};
 
     pub use namespace::Namespace;
     pub use parser::err::ParseErr;

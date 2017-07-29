@@ -1,6 +1,6 @@
 use ast::*;
 use namespace::Namespace;
-use super::internal::{RcValue, Value, Stack, ExecErr, VarSubErr, ExecSignal, CIR, Cmd, Object, DebugInfo, DebugKind, IntoValue};
+use super::internal::*;
 use line_info::LineInfo;
 
 pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<Option<RcValue>, ExecErr> {
@@ -48,7 +48,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
             stack: stack,
             cmd_span: {
                 assert!(cmd.len() > 0);
-                LineInfo::collapse(&cmd.iter().map(|cir| cir.dinfo.line_info.clone())
+                LineInfo::collapse(&cmd.iter().map(|cir| cir.dinfo.segment_span.clone())
                                               .collect::<Vec<_>>())
             },
             cmd: {  
@@ -110,6 +110,16 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
     }
 }
 
+impl<'a, 'b, 'c:'b> InfoGenerator for Executor<'a, 'b, 'c> {
+    fn info(&self) -> CommonInfo {
+        CommonInfo {
+            root_stmt_span: self.root_stmt.line_info.clone(),
+            cmd_span: self.cmd_span.clone(),
+            original_string: self.root_stmt.original_string.clone(),
+        }
+    }
+}
+
 struct Reducer<'a, 'b, 'c, 'd:'b> {
     root_stmt: &'a Statement,
     stack: &'b mut Stack<'d>,
@@ -133,11 +143,12 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
 
     fn reduce(mut self) -> Result<ReduceResult, ExecErr> {
         let mut reduction = Vec::new();
+        let common = self.info();
 
         for word in self.to_reduce.words.iter() {
             match word.kind {
                 WordKind::StrSub(ref string) => {
-                    let input = str_sub(self.stack, string, &word.line_info, self.root_stmt, self.to_reduce)?;
+                    let input = str_sub(self.stack, string, &word.line_info, self.info())?;
                     reduction.push(input);
                 }
 
@@ -167,8 +178,7 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                         ExecSignal::NextInstruction(Some(val)) => {
                             reduction.push(CIR::new(val.clone().into(), dcmd_sub!(debug_info,
                                                                            word.line_info.clone(),
-                                                                           self.to_reduce,
-                                                                           self.root_stmt
+                                                                           common.clone()
                                                                            )
                                                     )
                                            );
@@ -189,12 +199,22 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                     let sub_result = var_subber.var_sub()?;
                     reduction.push(sub_result);
                 },
-                _ => reduction.push(try_from_word(&word, self.to_reduce, &self.root_stmt)
+                _ => reduction.push(try_from_word(&word, self.info())
                                     .expect(&format!("If {:?} is not handled by the match, it NEEDS to be directly convertable to CIR", word.kind))),
             }
         }
 
         Ok(ReduceResult::Continue(reduction))
+    }
+}
+
+impl<'a, 'b, 'c, 'd:'c> InfoGenerator for Reducer<'a, 'b, 'c, 'd> {
+    fn info(&self) -> CommonInfo {
+        CommonInfo {
+            root_stmt_span: self.root_stmt.line_info.clone(),
+            cmd_span: self.reduction_span.clone(),
+            original_string: self.root_stmt.original_string.clone(),
+        }
     }
 }
 
@@ -227,6 +247,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
         let mut path_iter = self.var_sub.0.iter();
         
         let first_name = path_iter.next().unwrap();
+        let common = self.info();
 
         let first_obj: RcValue = if let Namespace::Args = self.namespace {
             let value: Option<RcValue> = self.stack.get_args()
@@ -234,8 +255,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                       self.namespace.clone(), 
                                       self.var_sub.clone(), 
                                       first_name.line_info.clone(),
-                                      self.cur_stmt,
-                                      self.root_stmt
+                                      common.clone()
                                       )
                                   )
                               )
@@ -247,8 +267,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                                       dvar_sub!(self.namespace.clone(),
                                                                 self.var_sub.clone(),
                                                                 first_name.line_info.clone(),
-                                                                self.cur_stmt,
-                                                                self.root_stmt)
+                                                                common.clone())
                                                       ).into()
                              );
             value?
@@ -260,10 +279,9 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                         self.namespace.clone(),
                                         self.var_sub.clone(),
                                         first_name.line_info.clone(),
-                                        self.cur_stmt,
-                                        self.root_stmt)
-                                                             )
-                                    )?
+                                        common.clone())
+                                    )
+                                )?
                 },
 
                 Namespace::Module => self.stack.get_module(),
@@ -274,9 +292,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                              dvar_sub!(self.namespace.clone(), 
                                                        self.var_sub.clone(),
                                                        first_name.line_info.clone(),
-                                                       self.cur_stmt,
-                                                       self.root_stmt
-                                                      )
+                                                       common)
                                                  )
                           )?
         };
@@ -287,6 +303,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
     where I: Iterator<Item = &'f PathSegment>
 {
     let segment = iter.next();
+    let common = self.info();
     match segment {
         Some(segment) => {
             match &*obj.borrow() {
@@ -297,9 +314,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                                                              self.namespace.clone(), 
                                                                              self.var_sub.clone(),
                                                                              segment.line_info.clone(),
-                                                                             self.cur_stmt,
-                                                                             self.root_stmt
-                                                                             )
+                                                                             common)
                                                                          )
                                                )?;
                     self.walk_obj(value, iter)
@@ -309,9 +324,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                                       dvar_sub!(self.namespace.clone(),
                                                                 self.var_sub.clone(),
                                                                 segment.line_info.clone(), 
-                                                                self.cur_stmt,
-                                                                self.root_stmt
-                                                               )
+                                                                common)
                                                         )
                             .into()),
             }
@@ -322,9 +335,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                         dvar_sub!(self.namespace.clone(), 
                                   self.var_sub.clone(),
                                   line_info,
-                                  self.cur_stmt,
-                                  self.root_stmt
-                                 )
+                                  common)
                        )
               )
         }
@@ -332,7 +343,17 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
 }
 }
 
-fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statement, cur_stmt: &Statement) -> Result<CIR, ExecErr> {
+impl<'a, 'b, 'c, 'd:'b, 'e> InfoGenerator for VarSubber<'a, 'b, 'c ,'d, 'e> {
+    fn info(&self) -> CommonInfo {
+        CommonInfo {
+            root_stmt_span: self.root_stmt.line_info.clone(),
+            cmd_span: self.cur_stmt.line_info.clone(),
+            original_string: self.root_stmt.original_string.clone(),
+        }
+    }
+}
+
+fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, common: CommonInfo) -> Result<CIR, ExecErr> {
     let mut result = String::new();
     for data in sub.0.iter() {
         match data {
@@ -360,41 +381,32 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, root_stmt: &Statem
         }
     }
     Ok(CIR::new(result.into(), dstr_sub!(line_info.clone(), 
-                                               cur_stmt,
-                                               root_stmt
-                                               )
+                                         common)
                 )
        )
 }
 
 
-pub fn try_from_word(word: &Word, cur_stmt: &Statement, root_stmt: &Statement) -> Option<CIR> {
+pub fn try_from_word(word: &Word, common: CommonInfo) -> Option<CIR> {
     match &word.kind {
         &WordKind::Atom(ref s) => Some(CIR::new(s.to_string().into(), 
                                                 dliteral!(word.line_info.clone(), 
-                                                          cur_stmt, 
-                                                          root_stmt)
+                                                          common)
                                                 )
                                        ),
         &WordKind::Number(n) => Some(CIR::new(n.into(),
                                               dliteral!(word.line_info.clone(), 
-                                                        cur_stmt,
-                                                        root_stmt
-                                                        )
+                                                        common)
                                               )
                                      ),
         &WordKind::Bool(b) => Some(CIR::new(b.into(),
                                             dliteral!(word.line_info.clone(), 
-                                                      cur_stmt,
-                                                      root_stmt
-                                                      )
+                                                      common)
                                             )
                                    ),
         &WordKind::Untouched(ref s) => Some(CIR::new(s.to_string().into(), 
                                                      dliteral!(word.line_info.clone(), 
-                                                               cur_stmt,
-                                                               root_stmt
-                                                               )
+                                                               common) 
                                                      )
                                             ),
         _ => None,
