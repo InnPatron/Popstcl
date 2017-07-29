@@ -7,13 +7,13 @@ use std::collections::HashMap;
 pub struct Proc(pub Namespace);
 
 impl Cmd for Proc {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         max_args!(&args, 3);
 
         let module = match self.0 {
             Namespace::Local => {
                 stack.get_local_module()
-                .ok_or(ExecErr::NoLocalModule)?
+                .ok_or(CmdErr::NoLocalModule)?
             },
 
             Namespace::Module => {
@@ -31,13 +31,13 @@ impl Cmd for Proc {
             } else {
                 let proc_args = cir_extract!(args[1] => String, "Arguments of procedure")?;
                 let proc_args = parse_arg_list(&proc_args)?
-                                              .ok_or(ExecErr::MissingArg("Argument body".to_string()))?;
+                                              .ok_or(CmdErr::MissingArg("Argument body".to_string()))?;
                 let mut string_args = Vec::new();
                 for arg in proc_args.all() {
                     if let WordKind::Atom(atom) = arg.kind {
                         string_args.push(atom);
                     } else {
-                        return Err(ExecErr::Generic(format!("Arg list must consist only of atoms {:?}", arg.clone())));
+                        return Err(CmdErr::Generic(format!("Arg list must consist only of atoms {:?}", arg.clone())));
                     }
                 }
                 string_args
@@ -52,11 +52,7 @@ impl Cmd for Proc {
         let new_cmd = ProcCmdObject::new(name.to_string(), proc_args, proc_body);
 
         module.insert(&name, Value::Cmd(Box::new(new_cmd)).into())
-              .map_err(|oerr| ExecErr::ObjectErr(oerr, 
-                                                 dinsertion!(maybe_name.dinfo.line_info.clone(),
-                                                             maybe_name.dinfo)
-                                                 )
-                       )?;
+              .map_err(|oerr| CmdErr::ObjectErr(oerr))?;
         Ok(ExecSignal::NextInstruction(None))
     }
 }
@@ -79,7 +75,7 @@ impl ProcCmdObject {
 }
 
 impl Cmd for ProcCmdObject {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, self.args.len());
         
         let mut arg_map = HashMap::new();

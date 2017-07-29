@@ -106,7 +106,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
         };
 
         let args = self.cmd;
-        cmd_obj.execute(self.stack, args)
+        cmd_obj.execute(self.stack, args).map_err(|cmd_e| ExecErr::CmdErr(cmd_e))
     }
 }
 

@@ -8,7 +8,7 @@ impl Cmd for While {
 
     //TODO: add way to inspect inside While command as it executes??
     //Have commands return a closure or an iterator which the Vm calls?
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let conditional_program = cir_extract!(args[0] => String, "While Condition")?;

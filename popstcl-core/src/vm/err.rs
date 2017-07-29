@@ -6,19 +6,10 @@ use line_info::LineInfo;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExecErr {
+    CmdErr(CmdErr),
     UnknownBinding(String),
     NotCmd(String),
-
-    Arity(ArityErr),
     VarSubErr(VarSubErr),
-
-    InvalidArg { expect: String, found: CIR },
-    InvalidNamespace { expect: String, found: Namespace },
-
-    MissingArg(String),
-    UnexpectedArg(CIR),
-
-    InvalidIndex(usize),
     VarSubErrOnCmd(String),
 
     NoRet(Word),
@@ -26,12 +17,35 @@ pub enum ExecErr {
     CmdReturned(Word),
     ParseError(ParseErr),
     ObjectErr(ObjectErr, DebugInfo),
-    NoLocalModule,
 
     BadBreak,
     BadContinue,
 
     Generic(String),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum CmdErr {
+    InvalidArg { expect: String, found: CIR },
+    InvalidNamespace { expect: String, found: Namespace },
+    MissingArg(String),
+    UnexpectedArg(CIR),
+    Arity(ArityErr),
+
+    ParseErr(ParseErr),
+
+    ObjectErr(ObjectErr),
+
+    InvalidIndex(usize),
+    NoLocalModule,
+    ExecErr(Box<ExecErr>),
+    Generic(String)
+}
+
+impl From<ExecErr> for CmdErr {
+    fn from(e: ExecErr) -> CmdErr {
+        CmdErr::ExecErr(Box::new(e))
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -45,9 +59,9 @@ pub enum ArityErr {
     Max { max: usize, found: usize },
 }
 
-impl From<ArityErr> for ExecErr {
-    fn from(a: ArityErr) -> ExecErr {
-        ExecErr::Arity(a)
+impl From<ArityErr> for CmdErr {
+    fn from(a: ArityErr) -> CmdErr {
+        CmdErr::Arity(a)
     }
 }
 
@@ -74,5 +88,11 @@ pub enum ObjectErr {
 impl From<ParseErr> for ExecErr {
     fn from(a: ParseErr) -> ExecErr {
         ExecErr::ParseError(a)
+    }
+}
+
+impl From<ParseErr> for CmdErr {
+    fn from(e: ParseErr) -> CmdErr {
+        CmdErr::ParseErr(e)
     }
 }

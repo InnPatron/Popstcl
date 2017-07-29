@@ -13,7 +13,7 @@ pub mod internal {
     pub use super::Vm;
     pub use super::cmd::Cmd;
     pub use super::exec_signal::ExecSignal;
-    pub use super::err::{ExecErr, ArityErr, VarSubErr, ObjectErr};
+    pub use super::err::{ExecErr, CmdErr, ArityErr, VarSubErr, ObjectErr};
     pub use super::env::Env;
     pub use super::value::{Value, IntoValue, RcValue, DeepClone};
     pub use super::val_ref::*;
