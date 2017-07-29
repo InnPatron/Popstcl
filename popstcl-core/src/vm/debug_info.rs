@@ -14,7 +14,8 @@ pub struct DebugInfo {
 pub enum DebugKind {
     VarSub(Namespace, Path),
     StrSub,     //TODO: add detailed information for var subs WITHIN string
-    CmdSub(Vec<DebugInfo>),
+    CmdSub(Box<DebugInfo>, Vec<DebugInfo>),
+    CmdExec(Box<DebugInfo>, Vec<DebugInfo>),
     Literal,
     VarInsertion,
 }
@@ -67,9 +68,20 @@ macro_rules! dvar_sub {
 
 #[macro_use]
 macro_rules! dcmd_sub {
-    ($debug_info: expr, $segment_span: expr, $common: expr) => {
+    ($cmd: expr, $debug_info: expr, $segment_span: expr, $common: expr) => {
         DebugInfo {
-            kind: DebugKind::CmdSub($debug_info),
+            kind: DebugKind::CmdSub($cmd, $debug_info),
+            segment_span: $segment_span,
+            common: $common,
+        }
+    }
+}
+
+#[macro_use]
+macro_rules! dcmd_exec {
+    ($cmd: expr, $debug_info: expr, $segment_span: expr, $common: expr) => {
+        DebugInfo {
+            kind: DebugKind::CmdExec($cmd, $debug_info),
             segment_span: $segment_span,
             common: $common,
         }

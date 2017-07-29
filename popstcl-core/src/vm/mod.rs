@@ -3,7 +3,7 @@ pub mod user {
     pub use super::cmd::Cmd;
     pub use super::value::{RcValue, Value, IntoValue, DeepClone};
     pub use super::val_ref::*;
-    pub use super::err::ExecErr;
+    pub use super::err::{ExecErr};
     pub use super::object::{Object, ObjectKind};
     pub use super::env_builder::EnvBuilder;
     pub use super::debug_info::{DebugInfo, DebugKind, CommonInfo};

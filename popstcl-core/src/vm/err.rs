@@ -6,20 +6,16 @@ use line_info::LineInfo;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExecErr {
-    CmdErr(CmdErr),
-    UnknownBinding(String),
-    NotCmd(String),
-    VarSubErr(VarSubErr),
-    VarSubErrOnCmd(String),
+    CmdErr(CmdErr, DebugInfo),
+    NotCmd(String, DebugInfo),
+    VarSubErr(VarSubErr, DebugInfo),
 
-    NoRet(Word),
+    NoRet(String, DebugInfo),
     
-    CmdReturned(Word),
-    ParseError(ParseErr),
     ObjectErr(ObjectErr, DebugInfo),
 
-    BadBreak,
-    BadContinue,
+    BadBreak(DebugInfo),
+    BadContinue(DebugInfo),
 
     Generic(String),
 }
@@ -67,28 +63,16 @@ impl From<ArityErr> for CmdErr {
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum VarSubErr {
-    UnknownBinding(String, Namespace, DebugInfo),
-    NonobjectFieldAccess(String, DebugInfo),
-    NoArgs(DebugInfo),
-    NoLocalModule(DebugInfo),
-}
-
-impl From<VarSubErr> for ExecErr {
-    fn from(e: VarSubErr) -> ExecErr {
-        ExecErr::VarSubErr(e)
-    }
+    UnknownBinding(String, Namespace),
+    NonobjectFieldAccess(String),
+    NoArgs,
+    NoLocalModule,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ObjectErr {
     UnknownField(String),
 //    InsufficientPermissions(Permissions),
-}
-
-impl From<ParseErr> for ExecErr {
-    fn from(a: ParseErr) -> ExecErr {
-        ExecErr::ParseError(a)
-    }
 }
 
 impl From<ParseErr> for CmdErr {

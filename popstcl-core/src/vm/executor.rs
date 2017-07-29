@@ -7,8 +7,8 @@ pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<Option<R
     for stmt in program.iter() {
         match eval_stmt(stack, stmt)? {
             ExecSignal::Return(ret) => return Ok(ret),
-            ExecSignal::Continue => return Err(ExecErr::BadContinue),
-            ExecSignal::Break => return Err(ExecErr::BadBreak),
+            ExecSignal::Continue => panic!("Bad continue in eval_program. Should return error"),
+            ExecSignal::Break => panic!("Bad break in eval_program. Should return error"),
             ExecSignal::NextInstruction(_) => (),
         }
     }
@@ -60,12 +60,13 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
  
     fn run(mut self) -> Result<ExecSignal, ExecErr> {
         assert!(self.cmd.len() > 0);
-        let value = self.cmd.remove(0).value;
+        let cir = self.cmd.remove(0);
+        let value = cir.value;
         let borrow = value.borrow();
         let cmd_obj: Box<Cmd> = match &*borrow {
             &Value::String(ref cmd_name) => {
                 let cmd: RcValue = {
-                    let mut rcmd = Err(ExecErr::NotCmd(cmd_name.to_string()));
+                    let mut rcmd = Err(ExecErr::NotCmd(cmd_name.to_string(), cir.dinfo.clone()));
                     if let Some(module) = self.stack.get_local_module() {
                         match module.get(&cmd_name.inner()) {
                             Ok(rc)  => {
@@ -94,7 +95,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                 if let &Value::Cmd(ref boxed) = &*borrow {
                     boxed.clone()
                 } else {
-                    return Err(ExecErr::NotCmd(cmd_name.to_string()));
+                    return Err(ExecErr::NotCmd(cmd_name.to_string(), cir.dinfo.clone()));
                 }
             },
 
@@ -102,11 +103,17 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                 cmd.clone()
             },
 
-            _ => return Err(ExecErr::NotCmd(self.cmd[0].to_string())),
+            _ => return Err(ExecErr::NotCmd(self.cmd[0].to_string(), cir.dinfo.clone())),
         };
 
+        let common = self.info();
         let args = self.cmd;
-        cmd_obj.execute(self.stack, args).map_err(|cmd_e| ExecErr::CmdErr(cmd_e))
+        let debug_info = args.iter().map(|cir| cir.dinfo.clone()).collect::<Vec<DebugInfo>>();
+        let debug_info = dcmd_exec!(Box::new(cir.dinfo.clone()),
+                debug_info, 
+                cir.dinfo.segment_span.clone(),
+                common);
+        cmd_obj.execute(self.stack, args).map_err(|cmd_e| ExecErr::CmdErr(cmd_e, debug_info))
     }
 }
 
@@ -153,7 +160,8 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                 }
 
                 WordKind::CmdSub(ref cmd) => {
-                    let debug_info;
+                    let cmd_dinfo;
+                    let arg_dinfo;
 
                     let reduced_cmd = {
                         let mut reducer = Reducer::new(self.root_stmt, self.stack, cmd);
@@ -164,7 +172,12 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                         }
                     };
 
-                    debug_info = reduced_cmd.iter().map(|cir| cir.dinfo.clone()).collect::<Vec<DebugInfo>>();
+                    {
+                        let mut info = reduced_cmd.iter().map(|cir| cir.dinfo.clone()).collect::<Vec<DebugInfo>>();
+                        cmd_dinfo = Box::new(info.remove(0));
+                        arg_dinfo = info;
+                    }
+
                     let executor = Executor::new(self.root_stmt, self.stack, reduced_cmd);
                     match executor.run()? {
                         ExecSignal::Return(val) => {
@@ -176,17 +189,32 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                         },
 
                         ExecSignal::NextInstruction(Some(val)) => {
-                            reduction.push(CIR::new(val.clone().into(), dcmd_sub!(debug_info,
-                                                                           word.line_info.clone(),
-                                                                           common.clone()
+                            reduction.push(CIR::new(val.clone().into(), dcmd_sub!(cmd_dinfo,
+                                                                                  arg_dinfo,
+                                                                                  word.line_info.clone(),
+                                                                                  common.clone()
                                                                            )
                                                     )
                                            );
                         },
 
-                        ExecSignal::Continue => return Err(ExecErr::BadContinue),
-                        ExecSignal::Break => return Err(ExecErr::BadBreak),
-                        ExecSignal::NextInstruction(None) => return Err(ExecErr::NoRet(word.clone())),
+                        ExecSignal::Continue => return Err(ExecErr::BadContinue(dcmd_sub!(cmd_dinfo,
+                                                                                arg_dinfo,
+                                                                                word.line_info.clone(),
+                                                                                common.clone()
+                                                                                ))),
+                        ExecSignal::Break => return Err(ExecErr::BadBreak(dcmd_sub!(cmd_dinfo,
+                                                                                arg_dinfo,
+                                                                                word.line_info.clone(),
+                                                                                common.clone()
+                                                                                ))),
+                        ExecSignal::NextInstruction(None) => return Err(ExecErr::NoRet(word.kind.to_string(),
+                                                                            dcmd_sub!(cmd_dinfo,
+                                                                                arg_dinfo,
+                                                                                word.line_info.clone(),
+                                                                                common.clone()
+                                                                                )
+                                                                        )),
                     }   
                 }
 
@@ -251,35 +279,37 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
 
         let first_obj: RcValue = if let Namespace::Args = self.namespace {
             let value: Option<RcValue> = self.stack.get_args()
-                      .ok_or(ExecErr::from(VarSubErr::NoArgs(dvar_sub!(
-                                      self.namespace.clone(), 
-                                      self.var_sub.clone(), 
-                                      first_name.line_info.clone(),
-                                      common.clone()
-                                      )
+                      .ok_or(ExecErr::VarSubErr(VarSubErr::NoArgs,
+                                                dvar_sub!(
+                                                    self.namespace.clone(), 
+                                                    self.var_sub.clone(), 
+                                                    first_name.line_info.clone(),
+                                                    common.clone()
+                                                )
                                   )
-                              )
-                          )?
+                              )?
                       .get(&***first_name)
                       .map(|cir| cir.value.clone());
-            let value: Result<RcValue, ExecErr> = value.ok_or(VarSubErr::UnknownBinding(first_name.to_string(), 
-                                                      Namespace::Args, 
-                                                      dvar_sub!(self.namespace.clone(),
-                                                                self.var_sub.clone(),
-                                                                first_name.line_info.clone(),
-                                                                common.clone())
-                                                      ).into()
+            let value: Result<RcValue, ExecErr> = value.ok_or(ExecErr::VarSubErr(VarSubErr::UnknownBinding(
+                                                        first_name.to_string(), 
+                                                        Namespace::Args),
+                                                        dvar_sub!(self.namespace.clone(),
+                                                                    self.var_sub.clone(),
+                                                                    first_name.line_info.clone(),
+                                                                    common.clone())
+                                                      )
                              );
             value?
         } else {
             let module = match self.namespace {
                 Namespace::Local => { 
                     self.stack.get_local_module()
-                              .ok_or(VarSubErr::NoLocalModule(dvar_sub!(
-                                        self.namespace.clone(),
-                                        self.var_sub.clone(),
-                                        first_name.line_info.clone(),
-                                        common.clone())
+                              .ok_or(ExecErr::VarSubErr(VarSubErr::NoLocalModule,
+                                                        dvar_sub!(
+                                                            self.namespace.clone(),
+                                                            self.var_sub.clone(),
+                                                            first_name.line_info.clone(),
+                                                            common.clone())
                                     )
                                 )?
                 },
@@ -320,13 +350,16 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                     self.walk_obj(value, iter)
                 }
 
-                _ => Err(VarSubErr::NonobjectFieldAccess(segment.segment.to_string(),
-                                                      dvar_sub!(self.namespace.clone(),
-                                                                self.var_sub.clone(),
-                                                                segment.line_info.clone(), 
-                                                                common)
-                                                        )
-                            .into()),
+                _ => Err(ExecErr::VarSubErr(VarSubErr::NonobjectFieldAccess(
+                                segment.segment.to_string()
+                            ),
+                            dvar_sub!(self.namespace.clone(),
+                                    self.var_sub.clone(),
+                                    segment.line_info.clone(), 
+                                    common)
+                                )
+                    )?,
+                            
             }
         }
         None => { 
@@ -360,7 +393,12 @@ fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, common: CommonInfo
             &StrData::String(ref s) => result.push_str(s),
             &StrData::VarSub(ref name, ref namespace, _) => {
                 let module = match namespace {
-                    &Namespace::Local => stack.get_local_module().ok_or(VarSubErr::NoLocalModule(unimplemented!()))?,
+                    &Namespace::Local => stack.get_local_module()
+                        .ok_or(ExecErr::VarSubErr(
+                                VarSubErr::NoLocalModule,
+                                unimplemented!()
+                                )
+                            )?,
                     &Namespace::Module => stack.get_module(),
                     &Namespace::Args => unimplemented!(),
                 };
