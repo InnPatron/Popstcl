@@ -6,14 +6,14 @@ pub mod macros {
             match $namespace {
                 Namespace::Local => {
                     $stack.get_local_module()
-                    .ok_or(ExecErr::NoLocalModule)?
+                    .ok_or(CmdErr::NoLocalModule)?
                 },
 
                 Namespace::Module => {
                     $stack.get_module()
                 }
 
-                Namespace::Args => return Err(ExecErr::InvalidNamespace {
+                Namespace::Args => return Err(CmdErr::InvalidNamespace {
                     expect: "Module or local".to_owned(),
                     found: Namespace::Args
                 }),

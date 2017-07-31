@@ -6,32 +6,42 @@ use line_info::LineInfo;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExecErr {
-    UnknownBinding(String),
-    NotCmd(String),
+    CmdErr(CmdErr, DebugInfo),
+    NotCmd(String, DebugInfo),
+    VarSubErr(VarSubErr, DebugInfo),
 
-    Arity(ArityErr),
-    VarSubErr(VarSubErr),
-
-    InvalidArg { expect: String, found: CIR },
-    InvalidNamespace { expect: String, found: Namespace },
-
-    MissingArg(String),
-    UnexpectedArg(CIR),
-
-    InvalidIndex(usize),
-    VarSubErrOnCmd(String),
-
-    NoRet(Word),
+    NoRet(String, DebugInfo),
     
-    CmdReturned(Word),
-    ParseError(ParseErr),
     ObjectErr(ObjectErr, DebugInfo),
-    NoLocalModule,
 
-    BadBreak,
-    BadContinue,
+    BadBreak(DebugInfo),
+    BadContinue(DebugInfo),
 
     Generic(String),
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum CmdErr {
+    InvalidArg { expect: String, found: CIR },
+    InvalidNamespace { expect: String, found: Namespace },
+    MissingArg(String),
+    UnexpectedArg(CIR),
+    Arity(ArityErr),
+
+    ParseErr(ParseErr),
+
+    ObjectErr(ObjectErr),
+
+    InvalidIndex(usize),
+    NoLocalModule,
+    ExecErr(Box<ExecErr>),
+    Generic(String)
+}
+
+impl From<ExecErr> for CmdErr {
+    fn from(e: ExecErr) -> CmdErr {
+        CmdErr::ExecErr(Box::new(e))
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -45,24 +55,18 @@ pub enum ArityErr {
     Max { max: usize, found: usize },
 }
 
-impl From<ArityErr> for ExecErr {
-    fn from(a: ArityErr) -> ExecErr {
-        ExecErr::Arity(a)
+impl From<ArityErr> for CmdErr {
+    fn from(a: ArityErr) -> CmdErr {
+        CmdErr::Arity(a)
     }
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum VarSubErr {
-    UnknownBinding(String, Namespace, DebugInfo),
-    NonobjectFieldAccess(String, DebugInfo),
-    NoArgs(DebugInfo),
-    NoLocalModule(DebugInfo),
-}
-
-impl From<VarSubErr> for ExecErr {
-    fn from(e: VarSubErr) -> ExecErr {
-        ExecErr::VarSubErr(e)
-    }
+    UnknownBinding(String, Namespace),
+    NonobjectFieldAccess(String),
+    NoArgs,
+    NoLocalModule,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -71,8 +75,8 @@ pub enum ObjectErr {
 //    InsufficientPermissions(Permissions),
 }
 
-impl From<ParseErr> for ExecErr {
-    fn from(a: ParseErr) -> ExecErr {
-        ExecErr::ParseError(a)
+impl From<ParseErr> for CmdErr {
+    fn from(e: ParseErr) -> CmdErr {
+        CmdErr::ParseErr(e)
     }
 }

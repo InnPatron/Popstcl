@@ -5,7 +5,7 @@ use vm::internal::*;
 pub struct Eq;
 
 impl Cmd for Eq {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let lhs = &args[0];
@@ -19,7 +19,7 @@ impl Cmd for Eq {
 pub struct InEq;
 
 impl Cmd for InEq {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let lhs = &args[0];
@@ -33,7 +33,7 @@ impl Cmd for InEq {
 pub struct GreaterThan;
 
 impl Cmd for GreaterThan {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let lhs = *cir_extract!(args[0] => Number)?;
@@ -47,7 +47,7 @@ impl Cmd for GreaterThan {
 pub struct GreaterThanEq;
 
 impl Cmd for GreaterThanEq {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let lhs = *cir_extract!(args[0] => Number)?;
@@ -61,7 +61,7 @@ impl Cmd for GreaterThanEq {
 pub struct LessThan;
 
 impl Cmd for LessThan {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let lhs = *cir_extract!(args[0] => Number)?;
@@ -75,7 +75,7 @@ impl Cmd for LessThan {
 pub struct LessThanEq;
 
 impl Cmd for LessThanEq {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let lhs = *cir_extract!(args[0] => Number)?;

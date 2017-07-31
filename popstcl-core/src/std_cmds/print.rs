@@ -4,7 +4,7 @@ use vm::internal::*;
 pub struct Print;
 
 impl Cmd for Print {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 1);
         println!("{}", args[0]);
 
@@ -16,7 +16,7 @@ impl Cmd for Print {
 pub struct EPrint;
 
 impl Cmd for EPrint {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 1);
         eprintln!("{}", args[0]);
 

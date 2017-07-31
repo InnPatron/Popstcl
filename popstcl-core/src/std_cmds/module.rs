@@ -5,7 +5,7 @@ use parser::parse_program;
 pub struct MakeModule;
 
 impl MakeModule {
-    pub fn make_module(stack: &mut Stack, parent_module: StdModule, binding: &str, module_code: &str, binding_info: &DebugInfo) -> Result<ExecSignal, ExecErr> {
+    pub fn make_module(stack: &mut Stack, parent_module: StdModule, binding: &str, module_code: &str, binding_info: &DebugInfo) -> Result<ExecSignal, CmdErr> {
         //parse loaded module
         let program = parse_program(&module_code).unwrap();
         let mut temp_module = parent_module;
@@ -17,9 +17,9 @@ impl MakeModule {
         //Set new binding
         stack.get_module()
              .insert(binding, Value::Module(temp_module).into())
-             .map_err(|oerr| ExecErr::ObjectErr(oerr, 
-                                                dinsertion!(binding_info.line_info.clone(),
-                                                            binding_info)
+             .map_err(|oerr| CmdErr::ObjectErr(oerr 
+                                                //dinsertion!(binding_info.line_info.clone(),
+                                                //            binding_info)
                                                 )
                       )?;
         Ok(ExecSignal::NextInstruction(None))
@@ -27,7 +27,7 @@ impl MakeModule {
 }
 
 impl Cmd for MakeModule {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         max_args!(&args, 3);
 
         let parent_module;
@@ -60,7 +60,7 @@ impl Cmd for MakeModule {
 struct MoveMod;
 
 impl Cmd for MoveMod {
-	fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+	fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
 		exact_args!(&args, 2);
 
 		let mut pmod = cir_extract!(args[0] => Module)?.clone();

@@ -8,7 +8,7 @@ pub struct List;
 
 impl Cmd for List {
     
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         let mut list = Vec::new();
         
         //Convert ALL CIR args into Values
@@ -28,7 +28,7 @@ pub struct ListLength;
 
 impl Cmd for ListLength {
     
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 1);
         let list = cir_extract!(args[0] => List)?;
         Ok(ExecSignal::NextInstruction(Some((list.len() as f64).into())))
@@ -42,7 +42,7 @@ impl Cmd for ListLength {
 pub struct ListIndex;
 
 impl Cmd for ListIndex {
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let list = cir_extract!(args[0] => List)?;
@@ -52,7 +52,7 @@ impl Cmd for ListIndex {
         let usize_index = float_index.floor() as i64 as usize;
 
         Ok(ExecSignal::NextInstruction(Some(list.inner().get(usize_index)
-                              .ok_or(ExecErr::InvalidIndex(usize_index))?
+                              .ok_or(CmdErr::InvalidIndex(usize_index))?
                               .clone().into())
            ))
     }
@@ -67,7 +67,7 @@ impl Cmd for ListIndex {
 pub struct Remove;
 
 impl Cmd for Remove {
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
 
         let mut list = cir_extract!(args[0] => mut List)?;
@@ -77,7 +77,7 @@ impl Cmd for Remove {
         let usize_index = float_index.floor() as i64 as usize;
         
         if usize_index >= list.len() {
-            return Err(ExecErr::InvalidIndex(usize_index));
+            return Err(CmdErr::InvalidIndex(usize_index));
         } else {
             list.remove(usize_index);
         }
@@ -92,7 +92,7 @@ impl Cmd for Remove {
 pub struct Append;
 
 impl Cmd for Append {
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
 
         let mut list = cir_extract!(args[0] => mut List)?;
@@ -112,7 +112,7 @@ impl Cmd for Append {
 pub struct Pop;
 
 impl Cmd for Pop {
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 1);
 
         let mut list = cir_extract!(args[0] => mut List)?;

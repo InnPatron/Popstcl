@@ -12,7 +12,7 @@ use itertools::Itertools;
 pub struct Let(pub Namespace);
 
 impl Cmd for Let {
-    fn execute<'a, 'b, 'c>(&'a self, stack: &'b mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute<'a, 'b, 'c>(&'a self, stack: &'b mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         mod_args!(&args, 2);
         let module = get_module!(self.0, stack);
 
@@ -23,11 +23,7 @@ impl Cmd for Let {
 
             module.insert(&name,
 						  value)
-                  .map_err(|oerr| ExecErr::ObjectErr(oerr, 
-                                                     dinsertion!(maybe_name.dinfo.line_info.clone(),
-                                                                 maybe_name.dinfo)
-                                                     )
-                           )?;
+                  .map_err(|oerr| CmdErr::ObjectErr(oerr))?;
         }
         Ok(ExecSignal::NextInstruction(None))
     }
@@ -37,7 +33,7 @@ impl Cmd for Let {
 pub struct Set(pub Namespace);
 
 impl Cmd for Set {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
         let module = get_module!(self.0, stack);
 
@@ -48,10 +44,7 @@ impl Cmd for Set {
 
         module.insert(&name, 
                       value.clone())
-              .map_err(|oerr| ExecErr::ObjectErr(oerr, 
-                                                 dinsertion!(maybe_name.dinfo.line_info.clone(),
-                                                             maybe_name.dinfo)
-                                                )
+              .map_err(|oerr| CmdErr::ObjectErr(oerr)
                       )?;
         Ok(ExecSignal::NextInstruction(Some(value.into())))
     }
@@ -61,7 +54,7 @@ impl Cmd for Set {
 pub struct Mutate(pub Namespace);
 
 impl Cmd for Mutate {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 2);
         let module = get_module!(self.0, stack);
 
@@ -78,11 +71,7 @@ impl Cmd for Mutate {
             Err(_) => {
                 module.insert(&name, 
                               value.into())
-                .map_err(|oerr| ExecErr::ObjectErr(oerr, 
-                                             dinsertion!(maybe_name.dinfo.line_info.clone(),
-                                                         maybe_name.dinfo)
-                                            )
-                )?;
+                .map_err(|oerr| CmdErr::ObjectErr(oerr))?;
             }
         }
 
