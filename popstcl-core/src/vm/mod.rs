@@ -1,5 +1,5 @@
 pub mod user {
-    pub use super::Vm;
+    pub use super::{Vm, VmErr};
     pub use super::cmd::Cmd;
     pub use super::value::{RcValue, Value, IntoValue, DeepClone};
     pub use super::val_ref::*;
@@ -10,7 +10,7 @@ pub mod user {
 }
 
 pub mod internal {
-    pub use super::Vm;
+    pub use super::{Vm, VmErr};
     pub use super::cmd::Cmd;
     pub use super::exec_signal::ExecSignal;
     pub use super::err::{ExecErr, CmdErr, ArityErr, VarSubErr, ObjectErr};
@@ -49,6 +49,7 @@ mod module;
 mod val_ref;
 
 use ast::Program;
+use parser::err::*;
 use self::err::*;
 use self::value::{Value, RcValue};
 use self::env::Env;
@@ -59,6 +60,24 @@ use self::env_builder::EnvBuilder;
 use self::module::StdModule;
 use self::object::Object;
 use parser::parse_program;
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum VmErr {
+    ParseErr(ParseErr),
+    ExecErr(ExecErr),
+}
+
+impl From<ParseErr> for VmErr {
+    fn from(e: ParseErr) -> Self {
+        VmErr::ParseErr(e)
+    }
+}
+
+impl From<ExecErr> for VmErr {
+    fn from(e: ExecErr) -> Self {
+        VmErr::ExecErr(e)
+    }
+}
 
 pub struct Vm {
     main_module: StdModule,
@@ -73,13 +92,15 @@ impl Vm {
         Vm { main_module: StdModule::new(env) }
     }
 
-    pub fn eval_program(&mut self, program: &Program) -> Result<Option<RcValue>, ExecErr> {
+    pub fn eval_program(&mut self, program: &Program) -> Result<Option<RcValue>, VmErr> {
         eval_program(&mut Stack::new_module(&mut self.main_module), program)
+            .map_err(|e| e.into())
     }
 
-    pub fn eval_str(&mut self, program: &str) -> Result<Option<RcValue>, ExecErr> {
+    pub fn eval_str(&mut self, program: &str) -> Result<Option<RcValue>, VmErr> {
         let program = parse_program(program)?;
         eval_program(&mut Stack::new_module(&mut self.main_module), &program)
+            .map_err(|e| e.into())
     }
 
     pub fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
