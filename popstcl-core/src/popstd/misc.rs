@@ -19,7 +19,7 @@ impl Cmd for Std {
         Ok(ExecSignal::NextInstruction(Some(
                     Value::Module(
                         StdModule::new(
-                            EnvBuilder::std_env().consume()
+                            super::std_env().consume()
                             )
                         ).into()
                     )
