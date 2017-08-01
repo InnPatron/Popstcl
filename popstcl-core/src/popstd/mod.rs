@@ -96,7 +96,7 @@ pub use self::procedure::Proc;
 pub use self::flow_control::{Return, Continue, Break};
 pub use self::module::{MakeModule};
 pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
-pub use self::comp::{Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
+pub use self::comp::{RefEq, RefInEq, Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
 pub use self::print::{Print, EPrint};
 pub use self::object::{MakeObject, FSet, FMut, RmField};
@@ -139,6 +139,8 @@ pub fn std_env() -> EnvBuilder {
 
         builder.insert_value("make", Value::Cmd(Box::new(MakeModule)));
 
+        builder.insert_value("===", Value::Cmd(Box::new(RefEq)));
+        builder.insert_value("!===", Value::Cmd(Box::new(RefInEq)));
         builder.insert_value("==", Value::Cmd(Box::new(Eq)));
         builder.insert_value("!=", Value::Cmd(Box::new(InEq)));
         builder.insert_value(">", Value::Cmd(Box::new(GreaterThan)));

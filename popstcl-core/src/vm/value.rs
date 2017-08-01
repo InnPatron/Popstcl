@@ -58,6 +58,10 @@ impl RcValue {
         let borrow = (*self.0).borrow();
         borrow.clone()
     }
+
+    pub fn ptr_eq(this: &RcValue, other: &RcValue) -> bool {
+        Ccrc::ptr_eq(&this.0, &other.0)
+    }
 }
 
 impl Collectable for RcValue {
