@@ -2,6 +2,34 @@
 use vm::internal::*;
 
 #[derive(Clone, Debug)]
+pub struct RefEq;
+
+impl Cmd for RefEq {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 2);
+
+        let lhs = &args[0].value;
+        let rhs = &args[1].value;
+
+        Ok(ExecSignal::NextInstruction(Some(RcValue::ptr_eq(lhs, rhs).into())))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct RefInEq;
+
+impl Cmd for RefInEq {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 2);
+
+        let lhs = &args[0].value;
+        let rhs = &args[1].value;
+
+        Ok(ExecSignal::NextInstruction(Some((!RcValue::ptr_eq(lhs, rhs)).into())))
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Eq;
 
 impl Cmd for Eq {
