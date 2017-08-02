@@ -73,3 +73,22 @@ fn math_div() {
         Err(e) => panic!("{:?}", e),
     }
 }
+
+#[test]
+fn dec_inc() {
+    let mut vm = basic_vm();
+    vm.eval_str(
+"
+assert [== [inc 1336] 1337];
+assert [== [dec 1338] 1337];
+
+set a 100;
+set b [inc $a];
+set c [dec[dec $b]];
+
+assert [== $b 101];
+assert [== $a 100];
+assert [== $c 99];
+
+").unwrap();
+}
