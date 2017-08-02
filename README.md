@@ -19,6 +19,9 @@ Explicit **non-goals**:
 ## The Interpreter
 Currently, [popstcl-i](https://gitlab.com/Random_Civvy/popstcl-i) is an extremely barebones REPL. 
 
+### Other Projects
+* A choose your own adventure engine / game using Popstcl as a scripting language: [CYOA] (https://gitlab.com/Random_Civvy/cyoa)
+
 ## Differences to Tcl (Incomplete)
 
 ### Command Invocation
