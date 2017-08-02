@@ -88,3 +88,42 @@ impl Cmd for Div {
         Ok(ExecSignal::NextInstruction(Some(accu.into())))
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct Inc;
+
+impl Cmd for Inc {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 1);
+        let number = cir_extract!(args[0] => Number)?;
+        let new_number = *number + 1.0;
+
+        Ok(ExecSignal::NextInstruction(Some(new_number.into())))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Dec;
+
+impl Cmd for Dec {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 1);
+        let number = cir_extract!(args[0] => Number)?;
+        let new_number = *number - 1.0;
+
+        Ok(ExecSignal::NextInstruction(Some(new_number.into())))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Negate;
+
+impl Cmd for Negate {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 1);
+        let number = cir_extract!(args[0] => Number)?;
+        let new_number = *number * -1.0;
+
+        Ok(ExecSignal::NextInstruction(Some(new_number.into())))
+    }
+}

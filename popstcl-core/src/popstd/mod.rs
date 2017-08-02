@@ -91,7 +91,7 @@ mod logic;
 
 pub use self::var_cmds::{Let, Set, Mutate};
 pub use self::if_cmd::If;
-pub use self::basic_math::{Add, Sub, Mul, Div};
+pub use self::basic_math::{Add, Sub, Mul, Div, Inc, Dec, Negate};
 pub use self::procedure::Proc;
 pub use self::flow_control::{Return, Continue, Break};
 pub use self::module::{MakeModule};
@@ -129,6 +129,9 @@ pub fn std_env() -> EnvBuilder {
         builder.insert_value("sub", Value::Cmd(Box::new(Sub)));
         builder.insert_value("mul", Value::Cmd(Box::new(Mul)));
         builder.insert_value("div", Value::Cmd(Box::new(Div)));
+        builder.insert_value("inc", Value::Cmd(Box::new(Inc)));
+        builder.insert_value("dec", Value::Cmd(Box::new(Dec)));
+        builder.insert_value("neg", Value::Cmd(Box::new(Negate)));
        
         builder.insert_value("if", Value::Cmd(Box::new(If)));
         builder.insert_value("while", Value::Cmd(Box::new(While)));
@@ -147,6 +150,7 @@ pub fn std_env() -> EnvBuilder {
         builder.insert_value("<", Value::Cmd(Box::new(LessThan)));
         builder.insert_value("<=", Value::Cmd(Box::new(LessThanEq)));
         builder.insert_value(">=", Value::Cmd(Box::new(GreaterThanEq)));
+        builder.insert_value("inv", Value::Cmd(Box::new(Not)));
 
         builder.insert_value("&&", Value::Cmd(Box::new(And)));
         builder.insert_value("||", Value::Cmd(Box::new(Or)));
