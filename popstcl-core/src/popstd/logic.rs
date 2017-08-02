@@ -4,7 +4,7 @@ use vm::internal::*;
 pub struct And;
 
 impl Cmd for And {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(args, 2);
       
         let mut args = args.into_iter();
@@ -24,7 +24,7 @@ impl Cmd for And {
 pub struct Or;
 
 impl Cmd for Or {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(args, 2);
       
         let mut args = args.into_iter();
@@ -44,7 +44,7 @@ impl Cmd for Or {
 pub struct Not;
 
 impl Cmd for Not {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 1);
       
         let result: bool = !**cir_extract!(args[0] => Bool)?;

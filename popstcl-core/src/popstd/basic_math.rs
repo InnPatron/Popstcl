@@ -5,7 +5,7 @@ use vm::internal::*;
 pub struct Add;
 
 impl Cmd for Add {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 1);
         let mut accu = 0.;
 
@@ -21,7 +21,7 @@ impl Cmd for Add {
 pub struct Sub;
 
 impl Cmd for Sub {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
         let mut accu = 0.;
 
@@ -43,7 +43,7 @@ impl Cmd for Sub {
 pub struct Mul;
 
 impl Cmd for Mul {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
         let mut accu = 0.;
 
@@ -65,7 +65,7 @@ impl Cmd for Mul {
 pub struct Div;
 
 impl Cmd for Div {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
         let mut accu = 0.;
 
@@ -86,5 +86,44 @@ impl Cmd for Div {
         }
         
         Ok(ExecSignal::NextInstruction(Some(accu.into())))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Inc;
+
+impl Cmd for Inc {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 1);
+        let number = cir_extract!(args[0] => Number)?;
+        let new_number = *number + 1.0;
+
+        Ok(ExecSignal::NextInstruction(Some(new_number.into())))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Dec;
+
+impl Cmd for Dec {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 1);
+        let number = cir_extract!(args[0] => Number)?;
+        let new_number = *number - 1.0;
+
+        Ok(ExecSignal::NextInstruction(Some(new_number.into())))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct Negate;
+
+impl Cmd for Negate {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 1);
+        let number = cir_extract!(args[0] => Number)?;
+        let new_number = *number * -1.0;
+
+        Ok(ExecSignal::NextInstruction(Some(new_number.into())))
     }
 }

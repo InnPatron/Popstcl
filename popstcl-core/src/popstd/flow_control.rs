@@ -5,7 +5,7 @@ use vm::internal::*;
 pub struct Return;
 
 impl Cmd for Return {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         max_args!(&args, 1);
 
         if args.len() == 0 {
@@ -20,7 +20,7 @@ impl Cmd for Return {
 pub struct Continue;
 
 impl Cmd for Continue {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 0);
         Ok(ExecSignal::Continue)
     }
@@ -31,7 +31,7 @@ impl Cmd for Continue {
 pub struct Break;
 
 impl Cmd for Break {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(&args, 0);
         Ok(ExecSignal::Break)
     }

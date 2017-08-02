@@ -6,30 +6,38 @@ use std::rc::Rc;
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct DebugInfo {
     pub kind: DebugKind,
-    pub root_line: LineInfo,
-    pub cmd_info: LineInfo,
-    pub line_info: LineInfo,
-    pub original_string: Rc<String>,
+    pub segment_span: LineInfo,
+    pub common: CommonInfo,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DebugKind {
     VarSub(Namespace, Path),
     StrSub,     //TODO: add detailed information for var subs WITHIN string
-    CmdSub(Vec<DebugInfo>),
+    CmdSub(Box<DebugInfo>, Vec<DebugInfo>),
+    CmdExec(Box<DebugInfo>, Vec<DebugInfo>),
     Literal,
     VarInsertion,
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CommonInfo {
+    pub root_stmt_span: LineInfo,
+    pub cmd_span: LineInfo,
+    pub original_string: Rc<String>,
+}
+
+pub trait InfoGenerator {
+    fn info(&self) -> CommonInfo;
+}
+
 #[macro_use]
 macro_rules! dliteral {
-    ($line_info: expr, $cur_stmt: expr, $root_stmt: expr) => {
+    ($segment_span: expr, $common: expr) => {
         DebugInfo {
             kind: DebugKind::Literal,
-            line_info: $line_info,
-            cmd_info: $cur_stmt.line_info.clone(),
-            root_line: $root_stmt.line_info.clone(),
-            original_string: $root_stmt.original_string.clone(),
+            segment_span: $segment_span,
+            common: $common
         }
     }
 }
@@ -49,39 +57,44 @@ macro_rules! dinsertion {
 
 #[macro_use]
 macro_rules! dvar_sub {
-    ($namespace: expr, $path: expr, $line_info: expr, $cur_stmt: expr, $root_stmt: expr) => {
+    ($namespace: expr, $path: expr, $segment_span: expr, $common: expr) => {
         DebugInfo {
             kind: DebugKind::VarSub($namespace, $path),
-            line_info: $line_info,
-            cmd_info: $cur_stmt.line_info.clone(),
-            root_line: $root_stmt.line_info.clone(),
-            original_string: $root_stmt.original_string.clone(),
+            segment_span: $segment_span,
+            common: $common
         }
     }
 }
 
 #[macro_use]
 macro_rules! dcmd_sub {
-    ($debug_info: expr, $line_info: expr, $cur_stmt: expr, $root_stmt: expr) => {
+    ($cmd: expr, $debug_info: expr, $segment_span: expr, $common: expr) => {
         DebugInfo {
-            kind: DebugKind::CmdSub($debug_info),
-            line_info: $line_info,
-            root_line: $root_stmt.line_info.clone(),
-            cmd_info: $cur_stmt.line_info.clone(),
-            original_string: $root_stmt.original_string.clone(),
+            kind: DebugKind::CmdSub($cmd, $debug_info),
+            segment_span: $segment_span,
+            common: $common,
+        }
+    }
+}
+
+#[macro_use]
+macro_rules! dcmd_exec {
+    ($cmd: expr, $debug_info: expr, $segment_span: expr, $common: expr) => {
+        DebugInfo {
+            kind: DebugKind::CmdExec($cmd, $debug_info),
+            segment_span: $segment_span,
+            common: $common,
         }
     }
 }
 
 #[macro_use]
 macro_rules! dstr_sub {
-    ($line_info: expr, $cur_stmt: expr, $root_stmt: expr) => {
+    ($segment_span: expr, $common: expr) => {
         DebugInfo {
             kind: DebugKind::StrSub,
-            line_info: $line_info,
-            root_line: $root_stmt.line_info.clone(),
-            cmd_info: $cur_stmt.line_info.clone(),
-            original_string: $root_stmt.original_string.clone(),
+            segment_span: $segment_span,
+            common: $common,
         }
     }
 }

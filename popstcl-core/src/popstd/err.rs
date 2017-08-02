@@ -4,13 +4,13 @@ use vm::internal::*;
 pub struct Assert;
 
 impl Cmd for Assert {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 1);
         let b = cir_extract!(args[0] => Bool)?;
         if **b {
             Ok(ExecSignal::NextInstruction(None))
         } else {
-            Err(ExecErr::Generic("Assertion failed".to_string()))
+            Err(CmdErr::Generic("Assertion failed".to_string()))
         }
     }
 }
@@ -19,9 +19,9 @@ impl Cmd for Assert {
 pub struct Error;
 
 impl Cmd for Error {
-    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr> {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 1);
         let s = cir_extract!(args[0] => String)?;
-        Err(ExecErr::Generic((**s).clone()))
+        Err(CmdErr::Generic((**s).clone()))
     }
 }

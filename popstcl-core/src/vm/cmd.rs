@@ -1,9 +1,9 @@
 use std::fmt;
 
-use super::internal::{ExecSignal, ExecErr, Stack, CIR};
+use super::internal::{ExecSignal, CmdErr, Stack, CIR};
 
 pub trait Cmd: CmdClone + fmt::Debug {
-    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, ExecErr>;
+    fn execute(&self, env: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr>;
 }
 
 pub trait CmdClone {

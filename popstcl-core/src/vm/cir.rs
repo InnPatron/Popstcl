@@ -40,7 +40,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Number, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_number().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_number().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -53,7 +53,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut Number, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_number().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_number().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -66,7 +66,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => String, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_string().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_string().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -79,7 +79,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut String, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_string().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_string().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -92,7 +92,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Bool, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_bool().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_bool().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -105,7 +105,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut Bool, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_bool().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_bool().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -118,7 +118,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Cmd, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_cmd().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_cmd().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -131,7 +131,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut Cmd, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_cmd().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_cmd().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -144,7 +144,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => List, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_list().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_list().map_err(|_|CmdErr::InvalidArg {
                                         expect: $expect.to_string(),
                                         found: $cir.clone(),
             })
@@ -157,7 +157,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut List, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_list().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_list().map_err(|_|CmdErr::InvalidArg {
                                         expect: $expect.to_string(),
                                         found: $cir.clone(),
             })
@@ -170,7 +170,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Object, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_object().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_object().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -183,7 +183,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut Object, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_object().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_object().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -196,7 +196,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => Module, $expect: expr) => {
         {
-            $cir.value.borrow().try_into_module().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow().try_into_module().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })
@@ -209,7 +209,7 @@ macro_rules! cir_extract {
 
     ($cir: expr => mut Module, $expect: expr) => {
         {
-            $cir.value.borrow_mut().try_into_module().map_err(|_|ExecErr::InvalidArg {
+            $cir.value.borrow_mut().try_into_module().map_err(|_|CmdErr::InvalidArg {
                            expect: $expect.to_string(),
                            found: $cir.clone(),
             })

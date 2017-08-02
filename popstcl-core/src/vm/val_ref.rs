@@ -282,13 +282,13 @@ impl<'a> Deref for ListRef<'a> {
 
 impl<'a> PartialEq for ListRef<'a> {
     fn eq(&self, other: &Self) -> bool {
-        *self == *other
+        self == other.borrow()
     }
 }
 
 impl<'a> PartialEq<List> for ListRef<'a> {
     fn eq(&self, other: &List) -> bool {
-        *self == *other
+        self == other.borrow()
     }
 }
 
@@ -316,13 +316,13 @@ impl<'a> Deref for ObjectRef<'a> {
 
 impl<'a> PartialEq for ObjectRef<'a> {
     fn eq(&self, other: &Self) -> bool {
-        *self == *other
+        self == other.borrow()
     }
 }
 
 impl<'a> PartialEq<StdObject> for ObjectRef<'a> {
     fn eq(&self, other: &StdObject) -> bool {
-        *self == *other
+        self == other.borrow()
     }
 }
 
@@ -350,13 +350,13 @@ impl<'a> Deref for ModuleRef<'a> {
 
 impl<'a> PartialEq for ModuleRef<'a> {
     fn eq(&self, other: &Self) -> bool {
-        *self == *other
+        self == other.borrow()
     }
 }
 
 impl<'a> PartialEq<StdModule> for ModuleRef<'a> {
     fn eq(&self, other: &StdModule) -> bool {
-        *self == *other
+        self == other.borrow()
     }
 }
 
@@ -622,7 +622,7 @@ impl<'a> DerefMut for BoolRefMut<'a> {
 
 impl<'a, T> PartialEq<T> for BoolRefMut<'a> where T: Borrow<bool> {
     fn eq(&self, other: &T) -> bool {
-        **self == *other.borrow()
+        **self == other.borrow()
     }
 }
 
@@ -692,13 +692,13 @@ impl<'a> DerefMut for ListRefMut<'a> {
 
 impl<'a> PartialEq for ListRefMut<'a> {
     fn eq(&self, other: &Self) -> bool {
-        *self == *other
+        self.borrow() == other.borrow()
     }
 }
 
 impl<'a> PartialEq<List> for ListRefMut<'a> {
     fn eq(&self, other: &List) -> bool {
-        *self == *other
+        self.borrow() == other.borrow()
     }
 }
 
@@ -736,13 +736,13 @@ impl<'a> DerefMut for ObjectRefMut<'a> {
 
 impl<'a> PartialEq for ObjectRefMut<'a> {
     fn eq(&self, other: &Self) -> bool {
-        *self == *other
+        self.borrow() == other.borrow()
     }
 }
 
 impl<'a> PartialEq<StdObject> for ObjectRefMut<'a> {
     fn eq(&self, other: &StdObject) -> bool {
-        *self == *other
+        self.borrow() == other.borrow()
     }
 }
 
@@ -780,12 +780,12 @@ impl<'a> DerefMut for ModuleRefMut<'a> {
 
 impl<'a> PartialEq for ModuleRefMut<'a> {
     fn eq(&self, other: &Self) -> bool {
-        *self == *other
+        self.borrow() == other.borrow()
     }
 }
 
 impl<'a> PartialEq<StdModule> for ModuleRefMut<'a> {
     fn eq(&self, other: &StdModule) -> bool {
-        *self == *other
+        self.borrow() == other.borrow()
     }
 }
