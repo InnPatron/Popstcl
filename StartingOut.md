@@ -28,7 +28,7 @@ use popstcl_core::*;
 let mut vm = basic_vm();		//Vm with only std commands loaded
 let program = parse_program("bla"); 	//returns a Program struct
 vm.eval_program(&program);
-vm.eval_strign("bla");
+vm.eval_str("bla");
 ~~~
 
 See popstcl-core/src/vm/mod.rs for VM definition
@@ -85,10 +85,15 @@ mut a 3;			//Dereferences "a" variable and sets it to 3. DOES NOT CHANGE ANY POI
 Use math symbols and return bools.
 Example:
 ~~~
-mset truth [== 1 1];
-mset another_truth [<= 0 9000];
-mset false [> -5 100];
-mset another_false[!= 2 2];
+assert [== 1 1];
+assert [<= 0 9000];
+assert [== false [> -5 100]];
+assert [== false [!= 2 2];
+assert [== false [== hello 3]];
+assert [== false [== false [object]]];
+
+assert [== 5 5];
+assert [== false [=== 5 5]]; //=== returns false. left '5' and right '5' are behind two different pointers
 ~~~
 
 ### Math
@@ -98,6 +103,7 @@ add 15 3; 		// Returns 18
 sub 10 10 2; 		// Returns -2
 div 100 2 5; 		// Returns 10
 mul 3 6 2; 		// Returns 36
+//add hello world	// Error
 ~~~
 
 ### Procedure
@@ -106,7 +112,7 @@ mul 3 6 2; 		// Returns 36
 //proc is merely a **command** which creates a command
 proc proc_name { arg_1 arg_2 } {
 	//procedure_body
-};
+}; //Do not forget semicolon
 
 proc no_args { 
 	//procedure_body
@@ -156,5 +162,6 @@ print [object]; 	//Object[]
 eprint "HALP ME";	//print to StdErr
 
 assert true;
-assert false;		//Popstcl program aborts and returns error message
+assert false;		//Popstcl program aborts and returns error
+err "test err";		//Popstcl program aborts and returns error message
 ~~~
