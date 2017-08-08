@@ -72,14 +72,16 @@ fn handle_struct(fields: Vec<syn::Field>) -> quote::Tokens {
 }
 
 fn handle_tuple(fields: Vec<syn::Field>) -> quote::Tokens {
-    let names = fields.into_iter().map(|f| f.ident.unwrap()).collect::<Vec<_>>();
-    let str_names = names.iter()
-        .enumerate()
-        .map(|(index, _)| { let index: usize = index; index.to_string() })
-        .collect::<Vec<String>>();
+    let values = (0..fields.len())
+        .map(syn::Ident::from)
+        .map(|index| quote! {self.#index.into_value().into()})
+        .collect::<Vec<_>>();
+    let str_names = (0..fields.len())
+        .map(|index| index.to_string())
+        .collect::<Vec<_>>();
     quote! {
         let mut obj = StdObject::empty();
-        #(obj.insert(&#str_names, self.#names.into_value().into());)*
+        #(obj.insert(&#str_names, #values);)*
         obj.into_value()
     }
 }
