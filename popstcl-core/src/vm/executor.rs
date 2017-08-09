@@ -348,7 +348,22 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                                                                          )
                                                )?;
                     self.walk_obj(value, iter)
-                }
+                },
+
+                &Value::Module(ref module) => {
+                    let value = module.get(&segment.segment.to_string())
+                        .map_err(|oerr| ExecErr::ObjectErr(oerr,
+                                                           dvar_sub!(
+                                                                self.namespace.clone(),
+                                                                self.var_sub.clone(),
+                                                                segment.line_info.clone(),
+                                                                common
+                                                               )
+                                                           )
+                                 )?;
+                    self.walk_obj(value, iter)
+                        
+                },
 
                 _ => Err(ExecErr::VarSubErr(VarSubErr::NonobjectFieldAccess(
                                 segment.segment.to_string()
