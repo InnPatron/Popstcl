@@ -1,6 +1,7 @@
 use vm::internal::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::cell::Ref;
 use std::fmt::{Debug, Display, Formatter};
 use std::fmt;
 use ccrc::{Collectable, Tracer};
@@ -11,6 +12,12 @@ pub trait Object {
 	fn get(&self, name: &str) -> Result<RcValue, ObjectErr>;
 
     fn remove(&self, name: &str) -> Option<RcValue>;
+
+    fn len(&self) -> usize;
+
+    fn env(&self) -> Ref<Env>;
+
+    fn env_mut(&mut self) -> &mut Env;
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -41,6 +48,18 @@ impl Object for StdObject {
     fn remove(&self, name: &str) -> Option<RcValue> {
         let env = &mut self.0.borrow_mut();
         env.remove(name)
+    }
+
+    fn len(&self) -> usize {
+        self.0.borrow().len()
+    }
+
+    fn env(&self) -> Ref<Env> {
+        self.0.borrow()
+    }
+
+    fn env_mut(&mut self) -> &mut Env {
+        &mut self.0
     }
 }
 

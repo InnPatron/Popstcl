@@ -1,6 +1,6 @@
 use super::internal::*;
 use std::rc::Rc;
-use std::cell::RefCell;
+use std::cell::{RefCell, Ref};
 use ccrc::{Collectable, Tracer};
 use std::fmt;
 
@@ -39,6 +39,18 @@ impl Object for StdModule {
     fn remove(&self, name: &str) -> Option<RcValue> {
         let env = &mut self.0.borrow_mut();
         env.remove(name)
+    }
+
+    fn len(&self) -> usize {
+        self.0.borrow().len()
+    }
+
+    fn env(&self) -> Ref<Env> {
+        self.0.borrow()
+    }
+
+    fn env_mut(&mut self) -> &mut Env {
+        &mut self.0
     }
 }
 
