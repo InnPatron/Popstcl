@@ -7,13 +7,22 @@ use std::fmt;
 use ccrc::{Collectable, Tracer};
 
 pub trait Object {
-	fn insert(&mut self, name: &str, value: RcValue) -> Result<(), ObjectErr>;
+	fn insert(&mut self, name: &str, value: RcValue) -> Result<(), ObjectErr> {
+        self.env_mut().insert(name, value);
+        Ok(())
+    }
 
-	fn get(&self, name: &str) -> Result<RcValue, ObjectErr>;
+	fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
+        Ok(self.env().get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?.clone())
+    }
 
-    fn remove(&mut self, name: &str) -> Option<RcValue>;
+    fn remove(&mut self, name: &str) -> Option<RcValue> {
+        self.env_mut().remove(name)
+    }
 
-    fn len(&self) -> usize;
+    fn len(&self) -> usize {
+        self.env().len()
+    }
 
     fn env(&self) -> &Env;
 
@@ -34,24 +43,7 @@ impl StdObject {
 }
 
 impl Object for StdObject {
-	fn insert(&mut self, name: &str, value: RcValue) -> Result<(), ObjectErr> {
-        self.0.insert(name, value);
-		Ok(())
-	}
-
-	fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
-		Ok(self.0.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?.clone())
-	}
-
-    fn remove(&mut self, name: &str) -> Option<RcValue> {
-        self.0.remove(name)
-    }
-
-    fn len(&self) -> usize {
-        self.0.len()
-    }
-
-    fn env(&self) -> &Env {
+   fn env(&self) -> &Env {
         &self.0
     }
 
