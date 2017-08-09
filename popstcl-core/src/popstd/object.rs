@@ -24,7 +24,7 @@ pub struct FSet;
 impl Cmd for FSet {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 3);
-        let obj = cir_extract!(args[0] => Object)?;
+        let mut obj = cir_extract!(args[0] => mut Object)?;
         let name = cir_extract!(args[1] => String)?;
         obj.insert(&name, args[2].value.clone());
 
@@ -38,7 +38,7 @@ pub struct FMut;
 impl Cmd for FMut {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 3);
-        let obj = cir_extract!(args[0] => Object)?;
+        let mut obj = cir_extract!(args[0] => mut Object)?;
         let name = cir_extract!(args[1] => String)?;
         let value = args[2].value.inner_clone();
         
@@ -63,7 +63,7 @@ pub struct RmField;
 impl Cmd for RmField {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 2);
-        let obj = cir_extract!(args[0] => Object)?;
+        let mut obj = cir_extract!(args[0] => mut Object)?;
         let name = cir_extract!(args[1] => String)?;
         match obj.remove(&name) {
             Some(val) => Ok(ExecSignal::NextInstruction(Some(val))),
