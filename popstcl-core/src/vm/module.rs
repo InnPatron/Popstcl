@@ -61,3 +61,9 @@ impl fmt::Display for StdModule {
         write!(f, "Module[{}]", ToString::to_string(&*r))
     }
 }
+
+impl IntoValue for StdModule {
+    fn into_value(self) -> Value {
+        Value::Module(self)
+    }
+}
