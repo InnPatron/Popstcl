@@ -103,7 +103,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                 cmd.clone()
             },
 
-            _ => return Err(ExecErr::NotCmd(self.cmd[0].to_string(), cir.dinfo.clone())),
+            val @ _ => return Err(ExecErr::NotCmd(val.to_string(), cir.dinfo.clone())),
         };
 
         let common = self.info();
