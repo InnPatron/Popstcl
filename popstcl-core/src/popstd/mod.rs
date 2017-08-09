@@ -88,7 +88,9 @@ mod misc;
 mod object;
 mod err;
 mod logic;
+mod eval;
 
+// Using
 pub use self::var_cmds::{Let, Set, Mutate};
 pub use self::if_cmd::If;
 pub use self::basic_math::{Add, Sub, Mul, Div, Inc, Dec, Negate};
@@ -103,10 +105,12 @@ pub use self::object::{MakeObject, FSet, FMut, RmField};
 pub use self::misc::{Std, Clone};
 pub use self::err::{Assert, Error};
 pub use self::logic::{And, Or, Not};
+pub use self::eval::{Eval, EvalInPlace};
 
 use vm::user::*;
 use super::namespace::Namespace;
 
+// StdBuilding
 pub fn std_env() -> EnvBuilder {
         let mut builder = EnvBuilder::new();
 
@@ -135,6 +139,9 @@ pub fn std_env() -> EnvBuilder {
        
         builder.insert_value("if", Value::Cmd(Box::new(If)));
         builder.insert_value("while", Value::Cmd(Box::new(While)));
+
+        builder.insert_value("eval", Value::Cmd(Box::new(Eval)));
+        builder.insert_value("inplace", Value::Cmd(Box::new(EvalInPlace)));
 
         builder.insert_value("return", Value::Cmd(Box::new(Return)));
         builder.insert_value("continue", Value::Cmd(Box::new(Continue)));
