@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::collections::hash_map;
 use std::fmt;
 
 use ccrc::{Tracer, Collectable};
@@ -26,6 +27,26 @@ impl Env {
 
     pub fn remove(&mut self, name: &str) -> Option<RcValue> {
         self.bindings.remove(name)
+    }
+
+    pub fn len(&self) -> usize {
+        self.bindings.len()
+    }
+
+    pub fn into_iter(self) -> hash_map::IntoIter<String, RcValue> {
+        self.bindings.into_iter()
+    }
+
+    pub fn iter(&self) -> hash_map::Iter<String, RcValue> {
+        self.bindings.iter()
+    }
+
+    pub fn keys(&self) -> hash_map::Keys<String, RcValue> {
+        self.bindings.keys()
+    }
+
+    pub fn values(&self) -> hash_map::Values<String, RcValue> {
+        self.bindings.values()
     }
 }
 
