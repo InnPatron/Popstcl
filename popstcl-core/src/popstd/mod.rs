@@ -96,16 +96,16 @@ pub use self::if_cmd::If;
 pub use self::basic_math::{Add, Sub, Mul, Div, Inc, Dec, Negate};
 pub use self::procedure::Proc;
 pub use self::flow_control::{Return, Continue, Break};
-pub use self::module::{MakeModule};
+pub use self::module::{MakeModule, InMod};
 pub use self::list::{List, ListLength, ListIndex, Remove, Append, Pop};
 pub use self::comp::{RefEq, RefInEq, Eq, InEq, GreaterThan, GreaterThanEq, LessThan, LessThanEq};
 pub use self::while_cmd::While;
 pub use self::print::{Print, EPrint};
 pub use self::object::{MakeObject, FSet, FMut, RmField};
-pub use self::misc::{Std, Clone};
 pub use self::err::{Assert, Error};
 pub use self::logic::{And, Or, Not};
 pub use self::eval::{Eval, EvalInPlace};
+pub use self::misc::{Std, Clone, Exists};
 
 use vm::user::*;
 use super::namespace::Namespace;
@@ -148,6 +148,7 @@ pub fn std_env() -> EnvBuilder {
         builder.insert_value("break", Value::Cmd(Box::new(Break)));
 
         builder.insert_value("make", Value::Cmd(Box::new(MakeModule)));
+        builder.insert_value("inmod", Value::Cmd(Box::new(InMod)));
 
         builder.insert_value("===", Value::Cmd(Box::new(RefEq)));
         builder.insert_value("!===", Value::Cmd(Box::new(RefInEq)));
@@ -182,6 +183,10 @@ pub fn std_env() -> EnvBuilder {
 
         builder.insert_value("assert", Value::Cmd(Box::new(Assert)));
         builder.insert_value("err", Value::Cmd(Box::new(Error)));
+        builder.insert_value("exists", Value::Cmd(Box::new(Exists(Namespace::Module))));
+        builder.insert_value("mexists", Value::Cmd(Box::new(Exists(Namespace::Module))));
+        builder.insert_value("lexists", Value::Cmd(Box::new(Exists(Namespace::Local))));
+        builder.insert_value("aexists", Value::Cmd(Box::new(Exists(Namespace::Args))));
 
         builder.insert_value("std", Value::Cmd(Box::new(Std)));
         
