@@ -15,3 +15,14 @@ pub fn parse_arg_list(input: &str) -> Result<Option<Statement>, ParseErr> {
     let parser = Parser::new(input);
     parser.parse_arg_list(input)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn empty_quote_braces_brackets() {
+        parse_program("{};").unwrap();
+        parse_program("\"\";").unwrap();
+        parse_program("[];").unwrap();
+    }
+}
