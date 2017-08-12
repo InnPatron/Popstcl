@@ -103,7 +103,7 @@ impl<'a, 'b, 'c:'b> Executor<'a, 'b, 'c> {
                 cmd.clone()
             },
 
-            _ => return Err(ExecErr::NotCmd(self.cmd[0].to_string(), cir.dinfo.clone())),
+            val @ _ => return Err(ExecErr::NotCmd(val.to_string(), cir.dinfo.clone())),
         };
 
         let common = self.info();
@@ -155,7 +155,7 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
         for word in self.to_reduce.words.iter() {
             match word.kind {
                 WordKind::StrSub(ref string) => {
-                    let input = str_sub(self.stack, string, &word.line_info, self.info())?;
+                    let input = str_sub(self.stack, string, &word.line_info, common.clone())?;
                     reduction.push(input);
                 }
 
@@ -301,13 +301,16 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
                              );
             value?
         } else {
+            let namespace = self.namespace.clone();
+            let var_sub = self.var_sub.clone();
             let module = match self.namespace {
-                Namespace::Local => { 
-                    self.stack.get_local_module()
+                Namespace::Local => {
+                    let local = self.stack.get_local_module();
+                    local
                               .ok_or(ExecErr::VarSubErr(VarSubErr::NoLocalModule,
                                                         dvar_sub!(
-                                                            self.namespace.clone(),
-                                                            self.var_sub.clone(),
+                                                            namespace.clone(),
+                                                            var_sub.clone(),
                                                             first_name.line_info.clone(),
                                                             common.clone())
                                     )
@@ -319,8 +322,8 @@ impl<'a, 'b, 'c, 'd:'b, 'e> VarSubber<'a, 'b, 'c ,'d, 'e> {
             };
             module.get(&***first_name)
                   .map_err(|oerr| ExecErr::ObjectErr(oerr, 
-                                             dvar_sub!(self.namespace.clone(), 
-                                                       self.var_sub.clone(),
+                                             dvar_sub!(namespace,
+                                                       var_sub,
                                                        first_name.line_info.clone(),
                                                        common)
                                                  )
@@ -401,7 +404,7 @@ impl<'a, 'b, 'c, 'd:'b, 'e> InfoGenerator for VarSubber<'a, 'b, 'c ,'d, 'e> {
     }
 }
 
-fn str_sub(stack: &Stack, sub: &StrSub, line_info: &LineInfo, common: CommonInfo) -> Result<CIR, ExecErr> {
+fn str_sub(stack: &mut Stack, sub: &StrSub, line_info: &LineInfo, common: CommonInfo) -> Result<CIR, ExecErr> {
     let mut result = String::new();
     for data in sub.0.iter() {
         match data {

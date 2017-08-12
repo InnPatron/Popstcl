@@ -1,52 +1,60 @@
 use vm::internal::*;
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::cell::Ref;
 use std::fmt::{Debug, Display, Formatter};
 use std::fmt;
 use ccrc::{Collectable, Tracer};
 
 pub trait Object {
-	fn insert(&self, name: &str, value: RcValue) -> Result<(), ObjectErr>;
+	fn insert(&mut self, name: &str, value: RcValue) -> Result<(), ObjectErr> {
+        self.env_mut().insert(name, value);
+        Ok(())
+    }
 
-	fn get(&self, name: &str) -> Result<RcValue, ObjectErr>;
+	fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
+        Ok(self.env().get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?.clone())
+    }
 
-    fn remove(&self, name: &str) -> Option<RcValue>;
+    fn remove(&mut self, name: &str) -> Option<RcValue> {
+        self.env_mut().remove(name)
+    }
+
+    fn len(&self) -> usize {
+        self.env().len()
+    }
+
+    fn env(&self) -> &Env;
+
+    fn env_mut(&mut self) -> &mut Env;
 }
 
 #[derive(Clone, Debug, PartialEq)]
-pub struct StdObject(RefCell<Env>);
+pub struct StdObject(Env);
 
 impl StdObject {
 	pub fn with_env(env: Env) -> StdObject {
-	    StdObject(RefCell::new(env))
+	    StdObject(env)
 	}
 
     pub fn empty() -> StdObject {
-        StdObject(RefCell::new(Env::new()))
+        StdObject(Env::new())
     }
 }
 
 impl Object for StdObject {
-	fn insert(&self, name: &str, value: RcValue) -> Result<(), ObjectErr> {
-		let env = &mut self.0.borrow_mut();       
-        env.insert(name, value);
-		Ok(())
-	}
+   fn env(&self) -> &Env {
+        &self.0
+    }
 
-	fn get(&self, name: &str) -> Result<RcValue, ObjectErr> {
-        let env = self.0.borrow();
-		Ok(env.get(name).ok_or(ObjectErr::UnknownField(name.to_string()))?.clone())
-	}
-
-    fn remove(&self, name: &str) -> Option<RcValue> {
-        let env = &mut self.0.borrow_mut();
-        env.remove(name)
+    fn env_mut(&mut self) -> &mut Env {
+        &mut self.0
     }
 }
 
 impl Collectable for StdObject {
     fn trace(&self, tracer: &Tracer) {
-        Collectable::trace(&*self.0.borrow(), tracer);
+        Collectable::trace(&self.0, tracer);
     }
 }
 
@@ -58,7 +66,7 @@ impl IntoValue for StdObject {
 
 impl DeepClone for StdObject {
     fn deep_clone(&self) -> Self {
-        StdObject::with_env(self.0.borrow().deep_clone())
+        StdObject::with_env(self.0.deep_clone())
     }
 }
 
@@ -66,9 +74,7 @@ impl Eq for StdObject {}
 
 impl Display for StdObject {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        use std::cell::Ref;
-        let r: Ref<Env> = self.0.borrow();
-        write!(f, "Object[{}]", ToString::to_string(&*r))
+        write!(f, "Object[{}]", ToString::to_string(&self.0))
     }
 }
 

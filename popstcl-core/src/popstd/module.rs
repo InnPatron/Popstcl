@@ -56,26 +56,20 @@ impl Cmd for MakeModule {
 }
 
 #[derive(Clone, Debug)]
-/// move_mode $mod <untouched>
-struct MoveMod;
+pub struct InMod;
 
-impl Cmd for MoveMod {
-	fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
-		exact_args!(&args, 2);
+impl Cmd for InMod {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 2);
+        let mut module = cir_extract!(args[0] => mut Module)?;
+        let program = {
+            let program = cir_extract!(args[1] => String)?;
+            parse_program(&**program)?
+        };
 
-		let mut pmod = cir_extract!(args[0] => Module)?.clone();
-		let program = cir_extract!(args[1] => String)?;
-		let mut temp_stack = Stack::new_module(&mut pmod);
-		let program_seq = parse_program(program.trim())?;
-		for stmt in program_seq.iter() {
-			let signal = eval_stmt(&mut temp_stack, &stmt)?;
-			if let ExecSignal::NextInstruction(_) = signal {
-				continue;
-			} else {
-				return Ok(signal);
-			}
-		}
-
-		Ok(ExecSignal::NextInstruction(None))
-	}
+        let mut stack = Stack::new_module(&mut *module);
+        eval_program(&mut stack, &program)
+            .map(|val| ExecSignal::NextInstruction(val))
+            .map_err(|err| CmdErr::ExecErr(Box::new(err)))
+    }
 }

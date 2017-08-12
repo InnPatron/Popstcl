@@ -10,4 +10,5 @@ pub enum ParseErr {
     NoMoreTokens,
     MissingSemicolon,
     IncompleteComment,
+    EmptyCmdSub
 }

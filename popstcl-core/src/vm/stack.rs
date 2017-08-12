@@ -2,13 +2,13 @@ use super::internal::{Module, Env, CIR, StdModule };
 use std::collections::HashMap;
 
 pub struct Stack<'a> {
-    module: &'a StdModule,
+    module: &'a mut StdModule,
     local_module: Option<StdModule>,
     args: Option<HashMap<String, CIR>>,
 }
 
 impl<'a> Stack<'a> {
-    pub fn new_module(module: &'a StdModule) -> Stack<'a> {
+    pub fn new_module(module: &'a mut StdModule) -> Stack<'a> {
         Stack {
             module: module,
             local_module: None,
@@ -38,15 +38,15 @@ impl<'a> Stack<'a> {
         }
     }
 
-    pub fn get_local_module<'b>(&'b self) -> Option<&StdModule> {
-        if let Some(ref module) = self.local_module {
+    pub fn get_local_module<'b>(&'b mut self) -> Option<&mut StdModule> {
+        if let Some(ref mut module) = self.local_module {
 			Some(module)
 		} else {
 			None
 		}
     }
 
-    pub fn get_module<'b>(&'b self) -> &StdModule {
+    pub fn get_module<'b>(&'b mut self) -> &mut StdModule {
         self.module
     }
 
