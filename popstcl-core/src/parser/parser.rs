@@ -188,22 +188,26 @@ impl Parser {
     fn parse_quoted<'a, 'b, I>(&self, stream: &'b mut I) -> Result<Word, ParseErr>
         where I: Iterator<Item = &'a Token>
     {
-        range_get(None, TokenKind::Quote, stream).and_then(|tok_vec| self.str_sub(&tok_vec))
+        range_get(None, TokenKind::Quote, stream).and_then(|(tok_vec, end_info)| self.str_sub(&tok_vec, end_info))
     }
 
     /// untouched -> {.*}
     fn parse_untouched<'a, 'b, I>(&self, stream: &'b mut I) -> Result<Word, ParseErr>
         where I: Iterator<Item = &'a Token>
     {
-        range_get(Some(TokenKind::LBrace), TokenKind::RBrace, stream).map(|tok_vec| {
+        range_get(Some(TokenKind::LBrace), TokenKind::RBrace, stream).map(|(tok_vec, end_info)| {
                                     let kind = WordKind::Untouched(tok_vec.iter().fold(String::new(), 
                                         |mut result, token| {
                                             result.push_str(&token.kind.to_string());
                                             result
                                         }));
-                                    let info = LineInfo::collapse(&tok_vec.iter()
+                                    let info = if tok_vec.len() == 0 {
+                                        end_info
+                                    } else {
+                                        LineInfo::collapse(&tok_vec.iter()
                                                                          .map(|tok| tok.line_info.clone())
-                                                                         .collect::<Vec<_>>());
+                                                                         .collect::<Vec<_>>())
+                                    };
                                     word!(kind, info)
                                 })
 
@@ -213,20 +217,22 @@ impl Parser {
     fn parse_cmd<'a, 'b, I>(&self, stream: &'b mut I) -> Result<Word, ParseErr>
         where I: Iterator<Item = &'a Token>
     {
-        range_get(Some(TokenKind::LBracket), TokenKind::RBracket, stream)
-                    .and_then(|cmd_body| self.parse_word_seq(&mut cmd_body.iter().peekable()))
-                    .map(|stmt| {
-                        let stmt = stmt.expect("Only None if all whitespace");
-                        let info = LineInfo::collapse(&stmt.words
-                                                           .iter()
-                                                           .map(|word| word.line_info.clone())
-                                                           .collect::<Vec<_>>());
-                        word!(WordKind::CmdSub(Box::new(stmt)), info.clone())
-                    })
+        let stmt = range_get(Some(TokenKind::LBracket), TokenKind::RBracket, stream)
+                    .and_then(|(cmd_body, _)| self.parse_word_seq(&mut cmd_body.iter().peekable()))?;
+        {
+            let stmt = stmt.ok_or(ParseErr::EmptyCmdSub)?;
+                    
+            let info = LineInfo::collapse(&stmt.words
+                                               .iter()
+                                               .map(|word| word.line_info.clone())
+                                               .collect::<Vec<_>>());
+            Ok(word!(WordKind::CmdSub(Box::new(stmt)), info.clone()))
+        }
+                    
     }
 
     /// Searches through the tokesn of a quoted and looks for var_sub
-    fn str_sub(&self, base: &[Token]) -> Result<Word, ParseErr> {
+    fn str_sub(&self, base: &[Token], end_info: LineInfo) -> Result<Word, ParseErr> {
         let mut result = Vec::new();
         let mut line_info = Vec::new();
         let mut current = String::new();
@@ -304,7 +310,13 @@ impl Parser {
             current.clear();
         }
 
-        Ok(word!(WordKind::str_sub_from(result), LineInfo::collapse(&line_info)))
+        let info = if line_info.len() == 0 {
+            end_info
+        } else {
+            LineInfo::collapse(&line_info)
+        };
+
+        Ok(word!(WordKind::str_sub_from(result), info))
     }
 
     /// parse_bool_then_atom -> bool | atom
@@ -439,7 +451,7 @@ impl Parser {
     fn range_get<'a, 'b, I>(repeat_token: Option<TokenKind>,
                             end_token: TokenKind,
                             stream: &'b mut I)
-                            -> Result<Vec<Token>, ParseErr>
+                            -> Result<(Vec<Token>, LineInfo), ParseErr>
         where I: Iterator<Item = &'a Token>
     {
         use super::lexer::TokenKind::*;
@@ -452,7 +464,9 @@ impl Parser {
 
         let mut result = Vec::new();
         let mut found_end = false;
+        let mut end_info = location!(0);
         let mut repeats: usize = 0;
+        
         {
             for token in stream {
                 if let Some(ref repeat) = repeat_token {
@@ -462,6 +476,7 @@ impl Parser {
                 }
                 if token.kind == end_token {
                     if repeats == 0 {
+                        end_info = token.line_info.clone();
                         found_end = true;
                         break;
                     } else {
@@ -473,7 +488,7 @@ impl Parser {
         }
 
         if found_end {
-            Ok(result)
+            Ok((result, end_info))
         } else {
             Err(ParseErr::CharNotFound(end_char))
         }

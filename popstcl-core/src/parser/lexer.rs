@@ -194,6 +194,12 @@ mod tests {
                    range!(5, 8)
         ],
         "012# abc");
+    }
 
+    #[test]
+    fn empty_quote_braces_brackets() {
+        tokenize("{}");
+        tokenize("\"\"");
+        tokenize("[]");
     }
 }
