@@ -406,22 +406,45 @@ impl<'a, 'b, 'c, 'd:'b, 'e> InfoGenerator for VarSubber<'a, 'b, 'c ,'d, 'e> {
 
 fn str_sub(stack: &mut Stack, sub: &StrSub, line_info: &LineInfo, common: CommonInfo) -> Result<CIR, ExecErr> {
     let mut result = String::new();
+
     for data in sub.0.iter() {
         match data {
             &StrData::String(ref s) => result.push_str(s),
             &StrData::VarSub(ref name, ref namespace, _) => {
-                let module = match namespace {
-                    &Namespace::Local => stack.get_local_module()
+                let value = match namespace {
+                    &Namespace::Local => {
+                        let module = stack.get_local_module()
                         .ok_or(ExecErr::VarSubErr(
                                 VarSubErr::NoLocalModule,
-                                unimplemented!()
+                                dstr_sub!(line_info.clone(), common.clone()),
                                 )
-                            )?,
-                    &Namespace::Module => stack.get_module(),
-                    &Namespace::Args => unimplemented!(),
+                            )?;
+
+                        module.get(name)
+                            .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                                               dstr_sub!(line_info.clone(), common.clone())))?
+                    },
+                    &Namespace::Module => {
+                        let module = stack.get_module();
+                        module.get(name)
+                            .map_err(|oerr| ExecErr::ObjectErr(oerr, 
+                                                               dstr_sub!(line_info.clone(), common.clone())))?
+                    },
+                    &Namespace::Args => {
+                        let args = stack.get_args()
+                            .ok_or(ExecErr::VarSubErr(
+                                VarSubErr::NoArgs,
+                                dstr_sub!(line_info.clone(), common.clone()),
+                                )
+                            )?;
+                        args.get(name)
+                            .ok_or(ExecErr::VarSubErr(
+                                    VarSubErr::UnknownBinding(name.to_string(), namespace.clone()),
+                                    dstr_sub!(line_info.clone(), common.clone()),
+                                    )
+                                )?.value.clone()
+                    },
                 };
-                let value = module.get(name)
-                                  .map_err(|oerr| ExecErr::ObjectErr(oerr, unimplemented!()))?;
                 let borrow = value.borrow();
                 match *borrow {
                     Value::Number(ref num) => result.push_str(&num.to_string()),
@@ -441,7 +464,6 @@ fn str_sub(stack: &mut Stack, sub: &StrSub, line_info: &LineInfo, common: Common
                 )
        )
 }
-
 
 pub fn try_from_word(word: &Word, common: CommonInfo) -> Option<CIR> {
     match &word.kind {
