@@ -202,20 +202,12 @@ pub struct Path(pub Vec<PathSegment>);
 
 impl fmt::Display for self::Path {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", &self.to_string())
-    }
-}
-
-impl Path {
-    pub fn to_string(&self) -> String {
-        assert!(self.0.len() > 0);
         let mut iter = self.0.iter();
-        let first = iter.next().unwrap();
-        let mut result = first.segment.to_string();
+        let mut result = String::new();
         for segment in iter {
             result.push_str(&*segment.segment);
         }
-        result
+        write!(f, "{}", result)
     }
 }
 
