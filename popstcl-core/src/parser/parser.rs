@@ -240,6 +240,11 @@ impl Parser {
         while let Some(t) = iter.next() {
             match t.kind {
                 TokenKind::Dollar => {
+                    if current.is_empty() == false {
+                        result.push(StrData::String(current.clone()));
+                        current.clear();
+                    }
+
                     let namespace = Namespace::Module;
                     if let WordKind::Path(path) = self.parse_path(&mut iter)?.kind {
                         result.push(StrData::VarSub(path, namespace));
@@ -249,6 +254,10 @@ impl Parser {
                 }
 
                 TokenKind::Pound => {
+                    if current.is_empty() == false {
+                        result.push(StrData::String(current.clone()));
+                        current.clear();
+                    }
                     let namespace = Namespace::Local;
                     if let WordKind::Path(path) = self.parse_path(&mut iter)?.kind {
                         result.push(StrData::VarSub(path, namespace));
@@ -258,6 +267,10 @@ impl Parser {
                 }
 
                 TokenKind::At => {
+                    if current.is_empty() == false {
+                        result.push(StrData::String(current.clone()));
+                        current.clear();
+                    }
                     let namespace = Namespace::Args;
                     if let WordKind::Path(path) = self.parse_path(&mut iter)?.kind {
                         result.push(StrData::VarSub(path, namespace));
