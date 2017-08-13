@@ -16,6 +16,21 @@ impl Cmd for Assert {
 }
 
 #[derive(Clone, Debug)]
+pub struct AssertEq;
+
+impl Cmd for AssertEq {
+    fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
+        exact_args!(args, 2);
+
+        if args[0].value == args[1].value {
+            Ok(ExecSignal::NextInstruction(None))
+        } else {
+            Err(CmdErr::Generic(format!("Assertion failed. {} != {}", args[0].value, args[1].value)))
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct Error;
 
 impl Cmd for Error {
