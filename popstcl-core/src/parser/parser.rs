@@ -589,10 +589,10 @@ mod tests {
 
         assert_eq!(quick_stmt!(WordKind::StrSub(StrSub(vec![
                                         StrData::String(" ".to_string()),
-                                        StrData::VarSub(From::from("var".to_string()), Namespace::Local, dummy!()),
+                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var".to_string()), line_info: dummy!()}]), Namespace::Local),
                                         StrData::String(" 123 2".to_string()),
-                                        StrData::VarSub(From::from("var2".to_string()), Namespace::Local, dummy!()),
-                                        StrData::VarSub(From::from("var3".to_string()), Namespace::Module, dummy!()),
+                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var2".to_string()), line_info: dummy!()}]), Namespace::Local),
+                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var3".to_string()), line_info: dummy!()}]), Namespace::Module),
                                         ]))),
                     result[0]);
     }
@@ -636,7 +636,7 @@ mod tests {
                                                     WordKind::Untouched("123".to_string()),
                                                     WordKind::StrSub(StrSub(
                                                         vec![
-                                                        StrData::VarSub(From::from("var".to_string()), Namespace::Local, dummy!()),
+                                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var".to_string()), line_info: dummy!()}]), Namespace::Local),
                                                         StrData::String(" _123".to_string()),
                                                         ]
                                                     )),
