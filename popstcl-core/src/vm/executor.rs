@@ -410,7 +410,7 @@ fn str_sub(stack: &mut Stack, sub: &StrSub, line_info: &LineInfo, common: Common
     for data in sub.0.iter() {
         match data {
             &StrData::String(ref s) => result.push_str(s),
-            &StrData::VarSub(ref name, ref namespace, _) => {
+            &StrData::VarSub(ref name, ref namespace) => {
                 let value = match namespace {
                     &Namespace::Local => {
                         let module = stack.get_local_module()
