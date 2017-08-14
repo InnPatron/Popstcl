@@ -38,7 +38,7 @@ impl StdObject {
 	}
 
     pub fn empty() -> StdObject {
-        StdObject(Env::new())
+        StdObject(Env::empty())
     }
 }
 

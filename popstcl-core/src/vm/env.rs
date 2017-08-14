@@ -13,7 +13,11 @@ pub struct Env {
 }
 
 impl Env {
-    pub fn new() -> Env {
+    pub fn new(bindings: HashMap<String, RcValue>) -> Env {
+        Env { bindings: bindings }
+    }
+
+    pub fn empty() -> Env {
         Env { bindings: HashMap::new() }
     }
 
@@ -60,7 +64,7 @@ impl Collectable for Env {
 
 impl DeepClone for Env {
     fn deep_clone(&self) -> Self {
-        let mut env = Env::new();
+        let mut env = Env::empty();
         for (k, v) in self.bindings.iter() {
             env.insert(k, v.deep_clone());
         }
@@ -82,7 +86,7 @@ mod tests {
         use parser::parse_program;
         use vm::internal::*;
         use popstd::*;
-        let mut env = Env::new();
+        let mut env = Env::empty();
         env.insert("gset", 
                    Value::Cmd(Box::new(Set(Namespace::Module))).into(),
                    );
@@ -121,7 +125,7 @@ gset b $obj.bar;")
         use parser::parse_program;
         use popstd::*;
 
-        let mut env = Env::new();
+        let mut env = Env::empty();
         env.insert("gset", 
                    Value::Cmd(Box::new(Set(Namespace::Module))).into(),
                    );

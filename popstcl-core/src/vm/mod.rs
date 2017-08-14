@@ -86,7 +86,7 @@ pub struct Vm {
 
 impl Vm {
     pub fn new() -> Vm {
-        Vm { main_module: StdModule::new(Env::new()) }
+        Vm { main_module: StdModule::new(Env::empty()) }
     }
 
     pub fn new_with_main_module(env: Env) -> Vm {

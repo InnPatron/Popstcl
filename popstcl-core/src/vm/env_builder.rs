@@ -19,7 +19,7 @@ impl EnvBuilder {
     }
 
     pub fn build(&self) -> Env {
-        let mut env = Env::new();
+        let mut env = Env::empty();
         for (name, entry) in self.values.iter() {
             env.insert(name, entry.clone().into());
         }
@@ -27,7 +27,7 @@ impl EnvBuilder {
     }
 
     pub fn consume(self) -> Env {
-        let mut env = Env::new();
+        let mut env = Env::empty();
         for (name, entry) in self.values.into_iter() {
             env.insert(&name, entry.into());
         }

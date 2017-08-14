@@ -83,7 +83,7 @@ impl Cmd for ProcCmdObject {
         for (name, cir) in self.args.iter().zip(args.iter()) {
             arg_map.insert(name.to_string(), cir.clone());
         }
-        let mut stack = Stack::local_with_args(stack, Env::new(), arg_map);
+        let mut stack = Stack::local_with_args(stack, Env::empty(), arg_map);
         
         for stmt in self.body.iter() {
             match eval_stmt(&mut stack, &stmt)? {
