@@ -16,7 +16,6 @@ pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<Option<R
 }
 
 pub fn eval_stmt<'a, 'b, 'c:'a>(stack: &'a mut Stack<'c>, stmt: &'b Statement) -> Result<ExecSignal, ExecErr> {
-    let cmd = stmt.all();
     let reduced_cmd = {
         let mut reducer = Reducer::new(stmt, stack, stmt);
         match reducer.reduce()? {
