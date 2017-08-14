@@ -141,7 +141,7 @@ impl WordKind {
             }
             &Number(n) => n.to_string(),
             &Bool(b) => b.to_string(),
-            &VarSub(ref path, ref namespace) => path.to_string(),
+            &VarSub(ref path, _) => path.to_string(),
             &Untouched(ref str) => str.clone(),
             &CmdSub(ref entry) => {
                 let mut result = "[".to_string();
@@ -159,7 +159,7 @@ impl fmt::Display for WordKind {
         match self {
             &WordKind::Atom(ref s) => write!(f, "Single: {}", s),
             &WordKind::StrSub(ref s) => write!(f, "String: {}", s),
-            &WordKind::VarSub(ref path, ref namespace) => write!(f, "Path: {}", &path.to_string()),
+            &WordKind::VarSub(ref path, _) => write!(f, "Path: {}", &path.to_string()),
             &WordKind::Number(num) => write!(f, "Number: {}", num),
             &WordKind::Bool(b) => write!(f, "Bool: {}", b),
             &WordKind::CmdSub(ref e) => write!(f, "CmdSub: {}", e.first().kind),
