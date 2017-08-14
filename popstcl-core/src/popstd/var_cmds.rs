@@ -2,12 +2,14 @@
 use vm::internal::*;
 use itertools::Itertools;
 
-/// popstcl VM command in Rust
+/// args -> [string value]+
 ///
-/// # VM
-/// Takes variable tuples of form (Word::String, Value)
-/// Does NOT return any value
+/// **REFERENCE ASSIGNMENT**
 ///
+/// Override variables whose names are the given strings with the provided ref-counted
+/// pointers in the internal Namespace.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Let(pub Namespace);
 
@@ -29,6 +31,16 @@ impl Cmd for Let {
     }
 }
 
+/// args -> string value
+///
+/// **REFERENCE ASSIGNMENT**
+///
+/// Override a variable whose name is the given string with the provided ref-counted
+/// pointer in the internal Namespace.
+///
+/// Returns a ref-counted pointer to the value.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Set(pub Namespace);
 
@@ -50,6 +62,16 @@ impl Cmd for Set {
     }
 }
 
+/// args -> string value
+///
+/// **VALUE ASSIGNMENT**
+///
+/// Retrieve a mutable reference to a variable in the internal Namespace with the given string.
+/// Dereference the variable and set it to the derefenced value.
+///
+/// If that value does not exist in the internal Namespace, insert it.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Mutate(pub Namespace);
 

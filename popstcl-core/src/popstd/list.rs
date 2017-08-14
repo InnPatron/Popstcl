@@ -1,8 +1,12 @@
 #![allow(unused_variables)]
 use vm::internal::*;
 
-/// Create a list object and return it
-/// Args: <Value>+
+/// args -> value*
+///
+/// Takes the list of arguments, increments the ref count, and inserts them into a list. Return
+/// that list.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct List;
 
@@ -21,8 +25,11 @@ impl Cmd for List {
     }
 }
 
-/// Return length of list
-/// Args: <Value::List>
+/// args -> list
+///
+/// Takes a list and returns its count
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct ListLength;
 
@@ -35,9 +42,12 @@ impl Cmd for ListLength {
     }
 }
 
-/// Get a list index value and return it.
-/// Floors the index.
-/// Args: <List> <Value::Number>
+/// args -> list number
+///
+/// Floors the number and uses it to index into the list. If the index is valid, it increments the
+/// ref count and return the value. Otherwise, return a CmdErr::InvalidIndex.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct ListIndex;
 
@@ -58,11 +68,12 @@ impl Cmd for ListIndex {
     }
 }
 
-/// Removes a value at an index.
-/// Floors the index.
-/// Because references do not exist (yet?), Append returns the list. TODO: references?
-/// TODO: Return object with fields for list and removed item?
-/// Args: <List> <Value::Number>
+/// args -> list number
+///
+/// Floors the number and uses it to index into the list. If the index is valid, remove the value
+/// at the index and returns it. Otherwise, return a CmdErr::InvalidIndex.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Remove;
 
@@ -85,9 +96,11 @@ impl Cmd for Remove {
     }
 }
 
-/// Append a value to the end of a list.
-/// Because references do not exist (yet?), Append returns the list. TODO: references?
-/// Args: <List> <Value>+
+/// args -> list value+
+///
+/// Takes a list and appends values to it.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Append;
 
@@ -104,10 +117,11 @@ impl Cmd for Append {
     }
 }
 
-/// Removes the value at the end of a list.
-/// Because references do not exist (yet?), Append returns the list. TODO: references?
-/// TODO: Return object with fields for list and removed item?
-/// Args: <List>
+/// args -> list
+///
+/// Removes the last item from a list. Does **NOT** return the popped value.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Pop;
 

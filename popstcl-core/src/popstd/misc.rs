@@ -1,5 +1,10 @@
 use vm::internal::*;
 
+/// args -> value
+///
+/// Performs a deep clone on the value
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Clone;
 
@@ -11,6 +16,11 @@ impl Cmd for Clone {
     }
 }
 
+/// args -> NONE
+///
+/// Returns a new module with ONLY std commands
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Std;
 
@@ -30,6 +40,12 @@ impl Cmd for Std {
     }
 }
 
+/// args -> string
+///
+/// Checks a given namespace to check if a binding with the provided string exists. Does NOT
+/// support field paths.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Exists(pub Namespace);
 

@@ -1,5 +1,11 @@
 use vm::internal::*;
 
+/// args -> bool
+///
+/// If the given argument is true, continue program execution. Otherwise, return a CmdErr::Generic
+/// and halt program execution.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Assert;
 
@@ -16,6 +22,11 @@ impl Cmd for Assert {
     }
 }
 
+/// args -> value value 
+///
+/// Performs a value equality check. If true, continue program execution. Otherwise, return a CmdErr::Generic and halt program execution.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct AssertEq;
 
@@ -32,6 +43,9 @@ impl Cmd for AssertEq {
     }
 }
 
+/// args -> string
+///
+/// Returns a CmdErr::Generic with the given string as a message. Halt program execution.
 #[derive(Clone, Debug)]
 pub struct Error;
 

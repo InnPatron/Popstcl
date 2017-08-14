@@ -1,6 +1,12 @@
 #![allow(unused_variables)]
 use vm::internal::*;
 
+/// args -> number+
+///
+/// Accumulator deep clones first argument. The rest of the args are added to the accumulator in sequential
+/// order.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Add;
 
@@ -17,6 +23,12 @@ impl Cmd for Add {
     }
 }
 
+/// args -> number number+
+///
+/// Accumulator deep clones the first argument. Subtract the rest of the arguments from the accumulator
+/// in sequential order.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Sub;
 
@@ -39,6 +51,12 @@ impl Cmd for Sub {
     }
 }
 
+/// args -> number number+
+///
+/// Accumulator deep clones the first argument. Multiply the rest of the arguments with the accumulator
+/// in sequential order.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Mul;
 
@@ -61,6 +79,12 @@ impl Cmd for Mul {
     }
 }
 
+/// args -> number number+
+///
+/// Accumulator deep clones the first argument. Divide the accumulator by each of the arguments in
+/// sequential order.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Div;
 
@@ -89,6 +113,11 @@ impl Cmd for Div {
     }
 }
 
+/// args -> number
+///
+/// Deep clone the argument, add one to it, and return it.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Inc;
 
@@ -102,6 +131,11 @@ impl Cmd for Inc {
     }
 }
 
+/// args -> number
+///
+/// Deep clone the argument, subtract one to it, and return it.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Dec;
 
@@ -115,6 +149,11 @@ impl Cmd for Dec {
     }
 }
 
+/// args -> number
+///
+/// Deep clone the argument, negate it, and return it.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Negate;
 

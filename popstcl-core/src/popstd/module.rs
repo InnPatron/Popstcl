@@ -1,6 +1,12 @@
 use vm::internal::*;
 use parser::parse_program;
 
+/// args -> module? string string
+///
+/// (context, name, program) = args.
+///
+/// If context was not provided, default to standard module. Execute the program string within the
+/// context and set it with the name in the **MODULE** namespace.
 #[derive(Clone, Debug)]
 pub struct MakeModule;
 
@@ -55,6 +61,11 @@ impl Cmd for MakeModule {
     }
 }
 
+/// args -> module string
+/// 
+/// Evaluates the given string as a program within a given module.
+///
+/// **MAY MUTATE**
 #[derive(Clone, Debug)]
 pub struct InMod;
 

@@ -1,5 +1,10 @@
 use vm::internal::*;
 
+/// args -> string
+///
+/// Print a string to stdout.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Print;
 
@@ -13,6 +18,11 @@ impl Cmd for Print {
     }
 }
 
+/// args -> string
+///
+/// Print a string to stderr.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct EPrint;
 

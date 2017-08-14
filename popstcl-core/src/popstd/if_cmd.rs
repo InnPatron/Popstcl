@@ -181,13 +181,15 @@ impl IfParser for ElifBody {
             .map_err(|err| CmdErr::ParseErr(err))
     }
 }
+
+/// args -> bool string tail
 ///
-/// # Form
-/// if bool {}...;
+/// tail -> "elif" bool string tail | "else" string
 ///
-/// ... -> else {} ...
-/// ... -> elif bool {} ...
+/// Behaves exactly like any other if statement. If a condition is true, the following string is
+/// interpreted as a program within the current scope.
 ///
+/// **MAY-MUTATE**
 #[derive(Debug, Clone)]
 pub struct If;
 

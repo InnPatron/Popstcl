@@ -1,6 +1,11 @@
 #![allow(unused_variables)]
 use vm::internal::*;
 
+/// args -> value value
+///
+/// Does a pointer equality check with the given arguments.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct RefEq;
 
@@ -15,6 +20,11 @@ impl Cmd for RefEq {
     }
 }
 
+/// args -> value value
+///
+/// Does a pointer **IN**equality check with the given arguments.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct RefInEq;
 
@@ -29,6 +39,11 @@ impl Cmd for RefInEq {
     }
 }
 
+/// args -> value value
+///
+/// Does a value equality check with the given arguments.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Eq;
 
@@ -43,6 +58,11 @@ impl Cmd for Eq {
     }
 }
 
+/// args -> value value
+///
+/// Does a value **IN**equality check with the given arguments.
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct InEq;
 
@@ -57,6 +77,13 @@ impl Cmd for InEq {
     }
 }
 
+/// args -> value value
+///
+/// (lhs, rhs) = args
+///
+/// Checks **lhs > rhs**
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct GreaterThan;
 
@@ -71,6 +98,13 @@ impl Cmd for GreaterThan {
     }
 }
 
+/// args -> value value
+///
+/// (lhs, rhs) = args
+///
+/// Checks **lhs >= rhs**
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct GreaterThanEq;
 
@@ -85,6 +119,13 @@ impl Cmd for GreaterThanEq {
     }
 }
 
+/// args -> value value
+///
+/// (lhs, rhs) = args
+///
+/// Checks **lhs < rhs**
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct LessThan;
 
@@ -99,6 +140,13 @@ impl Cmd for LessThan {
     }
 }
 
+/// args -> value value
+///
+/// (lhs, rhs) = args
+///
+/// Checks **lhs <= rhs**
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct LessThanEq;
 
