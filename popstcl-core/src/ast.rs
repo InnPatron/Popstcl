@@ -202,7 +202,7 @@ pub struct Path(pub Vec<PathSegment>);
 
 impl fmt::Display for self::Path {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut iter = self.0.iter();
+        let iter = self.0.iter();
         let mut result = String::new();
         for segment in iter {
             result.push_str(&*segment.segment);
