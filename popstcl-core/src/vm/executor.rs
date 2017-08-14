@@ -16,16 +16,15 @@ pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<Option<R
 }
 
 pub fn eval_stmt<'a, 'b, 'c:'a>(stack: &'a mut Stack<'c>, stmt: &'b Statement) -> Result<ExecSignal, ExecErr> {
-    let cmd = stmt.all();
     let reduced_cmd = {
-        let mut reducer = Reducer::new(stmt, stack, stmt);
+        let reducer = Reducer::new(stmt, stack, stmt);
         match reducer.reduce()? {
             ReduceResult::Return(value) => return Ok(ExecSignal::Return(value)),
             ReduceResult::Continue(vec) => vec,
         }
     };
 
-    let mut executor = Executor::new(stmt, stack, reduced_cmd);
+    let executor = Executor::new(stmt, stack, reduced_cmd);
     executor.run()
 }
 
@@ -155,7 +154,7 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
         for word in self.to_reduce.words.iter() {
             match word.kind {
                 WordKind::StrSub(ref sub) => {
-                    let mut str_subber = StrSubber::new(self.root_stmt,
+                    let str_subber = StrSubber::new(self.root_stmt,
                                                         self.stack,
                                                         self.to_reduce,
                                                         sub,
@@ -170,7 +169,7 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                     let arg_dinfo;
 
                     let reduced_cmd = {
-                        let mut reducer = Reducer::new(self.root_stmt, self.stack, cmd);
+                        let reducer = Reducer::new(self.root_stmt, self.stack, cmd);
 
                         match reducer.reduce()? {
                             signal @ ReduceResult::Return(_) => return Ok(signal),

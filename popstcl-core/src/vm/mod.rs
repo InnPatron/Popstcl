@@ -109,7 +109,7 @@ impl Vm {
     }
 
     pub fn insert(&mut self, name: &str, value: RcValue) {
-        self.main_module.insert(name, value);
+        self.main_module.insert(name, value).unwrap();
     }
 
     pub fn get_value(&self, name: &str) -> Result<Value, ObjectErr> {
@@ -117,6 +117,6 @@ impl Vm {
     }
 
     pub fn insert_value(&mut self, name: &str, value: Value) {
-        self.main_module.insert(name, RcValue::new(value));
+        self.main_module.insert(name, RcValue::new(value)).unwrap();
     }
 }

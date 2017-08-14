@@ -23,7 +23,7 @@ pub struct Sub;
 impl Cmd for Sub {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
-        let mut accu = 0.;
+        let mut accu;
 
         let mut iter = args.iter(); 
         {
@@ -45,7 +45,7 @@ pub struct Mul;
 impl Cmd for Mul {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
-        let mut accu = 0.;
+        let mut accu;
 
         let mut iter = args.iter(); 
         {
@@ -67,7 +67,7 @@ pub struct Div;
 impl Cmd for Div {
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(&args, 2);
-        let mut accu = 0.;
+        let mut accu;
 
         let mut iter = args.iter(); 
         {

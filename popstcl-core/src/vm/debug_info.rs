@@ -43,19 +43,6 @@ macro_rules! dliteral {
 }
 
 #[macro_use]
-macro_rules! dinsertion {
-    ($line_info: expr, $base_dinfo: expr) => {
-        DebugInfo {
-            kind: DebugKind::VarInsertion,
-            line_info: $line_info,
-            cmd_info: $base_dinfo.cmd_info.clone(),
-            root_line: $base_dinfo.root_line.clone(),
-            original_string: $base_dinfo.original_string.clone(),
-        }
-    }
-}
-
-#[macro_use]
 macro_rules! dvar_sub {
     ($namespace: expr, $path: expr, $segment_span: expr, $common: expr) => {
         DebugInfo {

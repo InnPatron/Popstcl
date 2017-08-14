@@ -4,6 +4,7 @@ use vm::internal::*;
 pub struct Assert;
 
 impl Cmd for Assert {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 1);
         let b = cir_extract!(args[0] => Bool)?;
@@ -19,6 +20,7 @@ impl Cmd for Assert {
 pub struct AssertEq;
 
 impl Cmd for AssertEq {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 2);
 
@@ -34,6 +36,7 @@ impl Cmd for AssertEq {
 pub struct Error;
 
 impl Cmd for Error {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 1);
         let s = cir_extract!(args[0] => String)?;
