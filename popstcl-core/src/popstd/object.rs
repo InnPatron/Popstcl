@@ -5,6 +5,7 @@ use itertools::Itertools;
 pub struct MakeObject;
 
 impl Cmd for MakeObject {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         mod_args!(args, 2);
         let mut obj = StdObject::empty();
@@ -22,6 +23,7 @@ impl Cmd for MakeObject {
 pub struct FSet;
 
 impl Cmd for FSet {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 3);
         let mut obj = cir_extract!(args[0] => mut Object)?;
@@ -36,6 +38,7 @@ impl Cmd for FSet {
 pub struct FMut;
 
 impl Cmd for FMut {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 3);
         let mut obj = cir_extract!(args[0] => mut Object)?;
@@ -61,6 +64,7 @@ impl Cmd for FMut {
 pub struct RmField;
 
 impl Cmd for RmField {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 2);
         let mut obj = cir_extract!(args[0] => mut Object)?;

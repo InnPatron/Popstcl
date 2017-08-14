@@ -59,6 +59,7 @@ impl Cmd for MakeModule {
 pub struct InMod;
 
 impl Cmd for InMod {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 2);
         let mut module = cir_extract!(args[0] => mut Module)?;
