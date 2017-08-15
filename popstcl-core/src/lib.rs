@@ -10,14 +10,13 @@ mod ast;
 mod parser;
 #[macro_use]
 mod vm;
-mod popstd;
+pub mod popstd;
 
 mod namespace;
 
 pub use vm::user::*;
 pub use ast::Program;
 pub use parser::parse_program;
-pub use popstd::*;
 pub use line_info::LineInfo;
 
 pub mod internal {
