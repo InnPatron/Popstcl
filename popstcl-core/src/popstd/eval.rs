@@ -1,6 +1,11 @@
 use vm::internal::*;
 use parser;
 
+/// args -> string
+///
+/// Evaluates the given string as a new program with the current scope.
+///
+/// **MAY-MUTATE**
 #[derive(Debug, Clone)]
 pub struct Eval;
 
@@ -16,6 +21,13 @@ impl Cmd for Eval {
     }
 }
 
+/// args -> string
+///
+/// Evaluates the given string as a new program with the current scope as if it were pasted. The
+/// closes analogy would be to Rust macros, in the sense they are text expansions and can affect
+/// control flow.
+///
+/// **MAY-MUTATE**
 #[derive(Debug, Clone)]
 pub struct EvalInPlace;
 

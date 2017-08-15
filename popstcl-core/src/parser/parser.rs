@@ -236,66 +236,46 @@ impl Parser {
         let mut result = Vec::new();
         let mut line_info = Vec::new();
         let mut current = String::new();
-        let mut iter = base.iter();
-
+        let mut iter = base.iter().peekable();
         while let Some(t) = iter.next() {
             match t.kind {
                 TokenKind::Dollar => {
                     if current.is_empty() == false {
-                        line_info.push(t.line_info.clone());
                         result.push(StrData::String(current.clone()));
                         current.clear();
                     }
-                    if let Some(something @ &Token { kind: TokenKind::Something(_), line_info: _}) = iter.next() {
-                        let word = self.parse_atom(something)?;
-                        if let WordKind::Atom(atom) = word.kind {
-                            line_info.push(word.line_info.clone());
-                            result.push(StrData::VarSub(atom.to_string(), Namespace::Module, something.line_info.clone()))
-                        } else {
-                            panic!("parse_atom should only return atom, not {}", word.kind);
-                        }
-                        
+
+                    let namespace = Namespace::Module;
+                    if let WordKind::Path(path) = self.parse_path(&mut iter)?.kind {
+                        result.push(StrData::VarSub(path, namespace));
                     } else {
-                        return Err(ParseErr::NoVarName);
+                        panic!("parse_path should only return a Path");
                     }
                 }
 
                 TokenKind::Pound => {
                     if current.is_empty() == false {
-                        line_info.push(t.line_info.clone());
                         result.push(StrData::String(current.clone()));
                         current.clear();
                     }
-                    if let Some(something @ &Token { kind: TokenKind::Something(_), line_info: _}) = iter.next() {
-                        let word = self.parse_atom(something)?;
-                        if let WordKind::Atom(atom) = word.kind {
-                            line_info.push(word.line_info.clone());
-                            result.push(StrData::VarSub(atom.to_string(), Namespace::Local, something.line_info.clone()))
-                        } else {
-                            panic!("parse_atom should only return atom, not {}", word.kind);
-                        }
-                        
+                    let namespace = Namespace::Local;
+                    if let WordKind::Path(path) = self.parse_path(&mut iter)?.kind {
+                        result.push(StrData::VarSub(path, namespace));
                     } else {
-                        return Err(ParseErr::NoVarName);
+                        panic!("parse_path should only return a Path");
                     }
                 }
 
                 TokenKind::At => {
                     if current.is_empty() == false {
-                        line_info.push(t.line_info.clone());
                         result.push(StrData::String(current.clone()));
                         current.clear();
                     }
-                    if let Some(something @ &Token { kind: TokenKind::Something(_), line_info: _}) = iter.next() {
-                        let word = self.parse_atom(something)?;
-                        if let WordKind::Atom(atom) = word.kind {
-                            line_info.push(word.line_info.clone());
-                            result.push(StrData::VarSub(atom.to_string(), Namespace::Args, something.line_info.clone()))
-                        } else {
-                            panic!("parse_atom should only return atom, not {}", word.kind);
-                        }       
+                    let namespace = Namespace::Args;
+                    if let WordKind::Path(path) = self.parse_path(&mut iter)?.kind {
+                        result.push(StrData::VarSub(path, namespace));
                     } else {
-                        return Err(ParseErr::NoVarName);
+                        panic!("parse_path should only return a Path");
                     }
                 }
 
@@ -609,10 +589,10 @@ mod tests {
 
         assert_eq!(quick_stmt!(WordKind::StrSub(StrSub(vec![
                                         StrData::String(" ".to_string()),
-                                        StrData::VarSub(From::from("var".to_string()), Namespace::Local, dummy!()),
+                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var".to_string()), line_info: dummy!()}]), Namespace::Local),
                                         StrData::String(" 123 2".to_string()),
-                                        StrData::VarSub(From::from("var2".to_string()), Namespace::Local, dummy!()),
-                                        StrData::VarSub(From::from("var3".to_string()), Namespace::Module, dummy!()),
+                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var2".to_string()), line_info: dummy!()}]), Namespace::Local),
+                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var3".to_string()), line_info: dummy!()}]), Namespace::Module),
                                         ]))),
                     result[0]);
     }
@@ -656,7 +636,7 @@ mod tests {
                                                     WordKind::Untouched("123".to_string()),
                                                     WordKind::StrSub(StrSub(
                                                         vec![
-                                                        StrData::VarSub(From::from("var".to_string()), Namespace::Local, dummy!()),
+                                                        StrData::VarSub(Path(vec![PathSegment { segment: Atom("var".to_string()), line_info: dummy!()}]), Namespace::Local),
                                                         StrData::String(" _123".to_string()),
                                                         ]
                                                     )),

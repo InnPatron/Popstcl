@@ -141,7 +141,7 @@ impl WordKind {
             }
             &Number(n) => n.to_string(),
             &Bool(b) => b.to_string(),
-            &VarSub(ref path, ref namespace) => path.to_string(),
+            &VarSub(ref path, _) => path.to_string(),
             &Untouched(ref str) => str.clone(),
             &CmdSub(ref entry) => {
                 let mut result = "[".to_string();
@@ -159,7 +159,7 @@ impl fmt::Display for WordKind {
         match self {
             &WordKind::Atom(ref s) => write!(f, "Single: {}", s),
             &WordKind::StrSub(ref s) => write!(f, "String: {}", s),
-            &WordKind::VarSub(ref path, ref namespace) => write!(f, "Path: {}", &path.to_string()),
+            &WordKind::VarSub(ref path, _) => write!(f, "Path: {}", &path.to_string()),
             &WordKind::Number(num) => write!(f, "Number: {}", num),
             &WordKind::Bool(b) => write!(f, "Bool: {}", b),
             &WordKind::CmdSub(ref e) => write!(f, "CmdSub: {}", e.first().kind),
@@ -202,20 +202,12 @@ pub struct Path(pub Vec<PathSegment>);
 
 impl fmt::Display for self::Path {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", &self.to_string())
-    }
-}
-
-impl Path {
-    pub fn to_string(&self) -> String {
-        assert!(self.0.len() > 0);
-        let mut iter = self.0.iter();
-        let first = iter.next().unwrap();
-        let mut result = first.segment.to_string();
+        let iter = self.0.iter();
+        let mut result = String::new();
         for segment in iter {
             result.push_str(&*segment.segment);
         }
-        result
+        write!(f, "{}", result)
     }
 }
 
@@ -266,7 +258,7 @@ impl fmt::Display for StrSub {
 #[derive(Clone, Debug)]
 pub enum StrData {
     String(String),
-    VarSub(String, Namespace, LineInfo),
+    VarSub(Path, Namespace),
     CmdSub,
 }
 
@@ -275,7 +267,7 @@ impl PartialEq for StrData {
         use self::StrData::*;
         match (self, other) {
             (&String(ref lhs), &String(ref rhs)) => lhs == rhs,
-            (&VarSub(ref lhstr, ref lhnamespace, _), &VarSub(ref rhstr, ref rhnamespace, _)) => lhstr == rhstr && lhnamespace == rhnamespace,
+            (&VarSub(ref lhstr, ref lhnamespace), &VarSub(ref rhstr, ref rhnamespace)) => lhstr == rhstr && lhnamespace == rhnamespace,
             (&CmdSub, &CmdSub) => unimplemented!(),
             _ => false,
         }
@@ -286,14 +278,14 @@ impl ToString for StrData {
     fn to_string(&self) -> String {
         match self {
             &StrData::String(ref s) => s.clone(),
-            &StrData::VarSub(ref s, ref namespace, _) => {
+            &StrData::VarSub(ref path, ref namespace) => {
                 let mut r = String::new();
                 match namespace {
                     &Namespace::Local => r.push('#'),
                     &Namespace::Module => r.push('$'),
                     &Namespace::Args => r.push('@'),
                 }
-                r.push_str(s);
+                r.push_str(&path.to_string());
                 r
             }
 

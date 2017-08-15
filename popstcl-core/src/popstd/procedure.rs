@@ -3,6 +3,14 @@ use ast::*;
 use parser::{parse_program, parse_arg_list };
 use std::collections::HashMap;
 
+/// args -> string string? string
+///
+/// (name, args?, program) = args
+///
+/// Create a procedure and set a binding to it at the given namespace. With only 2 arguments in
+/// Popstcl code, the generated procedure takes NO arguments.
+///
+/// **MUTATING**
 #[derive(Clone, Debug)]
 pub struct Proc(pub Namespace);
 
@@ -57,6 +65,10 @@ impl Cmd for Proc {
     }
 }
 
+/// Not an actual callable command. This is an object to represent procedures created by the Proc
+/// command.
+///
+/// **MAY MUTATE**
 #[derive(Clone, Debug)]
 pub struct ProcCmdObject {
     name: String,
@@ -83,7 +95,7 @@ impl Cmd for ProcCmdObject {
         for (name, cir) in self.args.iter().zip(args.iter()) {
             arg_map.insert(name.to_string(), cir.clone());
         }
-        let mut stack = Stack::local_with_args(stack, Env::new(), arg_map);
+        let mut stack = Stack::local_with_args(stack, Env::empty(), arg_map);
         
         for stmt in self.body.iter() {
             match eval_stmt(&mut stack, &stmt)? {

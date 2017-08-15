@@ -1,9 +1,15 @@
 use vm::internal::*;
 
+/// args -> bool bool
+///
+/// Returns logical **AND** of arguments
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct And;
 
 impl Cmd for And {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(args, 2);
       
@@ -20,10 +26,16 @@ impl Cmd for And {
     }
 }
 
+/// args -> bool bool
+///
+/// Returns logical **OR** of arguments
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Or;
 
 impl Cmd for Or {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         min_args!(args, 2);
       
@@ -40,10 +52,16 @@ impl Cmd for Or {
     }
 }
 
+/// args -> bool
+///
+/// Returns logical **NOT** of argument
+///
+/// **NON-MUTATING**
 #[derive(Clone, Debug)]
 pub struct Not;
 
 impl Cmd for Not {
+    #[allow(unused_variables)]
     fn execute(&self, stack: &mut Stack, args: Vec<CIR>) -> Result<ExecSignal, CmdErr> {
         exact_args!(args, 1);
       

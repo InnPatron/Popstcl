@@ -557,6 +557,50 @@ impl DeepClone for List {
     }
 }
 
+impl IntoValue for u8 {
+    fn into_value(self) -> Value {
+        Value::Number(Number::new(self as f64))
+    }
+}
+
+impl IntoValue for u16 {
+    fn into_value(self) -> Value {
+        Value::Number(Number::new(self as f64))
+    }
+}
+
+impl IntoValue for u32 {
+    fn into_value(self) -> Value {
+        Value::Number(Number::new(self as f64))
+    }
+}
+
+impl IntoValue for i8 {
+    fn into_value(self) -> Value {
+        Value::Number(Number::new(self as f64))
+    }
+}
+
+impl IntoValue for i16 {
+    fn into_value(self) -> Value {
+        Value::Number(Number::new(self as f64))
+    }
+}
+
+impl IntoValue for i32 {
+    fn into_value(self) -> Value {
+        Value::Number(Number::new(self as f64))
+    }
+}
+
+impl<V> IntoValue for ::std::collections::HashMap<String, V> where V: IntoValue {
+    fn into_value(self) -> Value {
+        let map = self.into_iter().map(|(k, v)| (k, v.into())).collect::<::std::collections::HashMap<String, RcValue>>();
+        let env = Env::new(map);
+        StdModule::new(env).into_value()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

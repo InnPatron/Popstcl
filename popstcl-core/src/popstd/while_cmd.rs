@@ -1,6 +1,16 @@
 use vm::internal::*;
 use parser::parse_program;
 
+/// args -> string string
+///
+/// (condition, body) = args
+///
+/// Evaluates the condition string as a program within the current scope. The condition program
+/// **MUST RETURN** a boolean to the While command. 
+///
+/// If the condition program evaluates to true, execute the given body within the current scope.
+///
+/// **MAY MUTATE**
 #[derive(Clone, Debug)]
 pub struct While;
 

@@ -102,7 +102,7 @@ pub use self::comp::{RefEq, RefInEq, Eq, InEq, GreaterThan, GreaterThanEq, LessT
 pub use self::while_cmd::While;
 pub use self::print::{Print, EPrint};
 pub use self::object::{MakeObject, FSet, FMut, RmField};
-pub use self::err::{Assert, Error};
+pub use self::err::{Assert, AssertEq, Error};
 pub use self::logic::{And, Or, Not};
 pub use self::eval::{Eval, EvalInPlace};
 pub use self::misc::{Std, Clone, Exists};
@@ -182,6 +182,7 @@ pub fn std_env() -> EnvBuilder {
         builder.insert_value("rmf", Value::Cmd(Box::new(RmField)));
 
         builder.insert_value("assert", Value::Cmd(Box::new(Assert)));
+        builder.insert_value("assert_eq", Value::Cmd(Box::new(AssertEq)));
         builder.insert_value("err", Value::Cmd(Box::new(Error)));
         builder.insert_value("exists", Value::Cmd(Box::new(Exists(Namespace::Module))));
         builder.insert_value("mexists", Value::Cmd(Box::new(Exists(Namespace::Module))));

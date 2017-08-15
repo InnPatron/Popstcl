@@ -1,6 +1,7 @@
 use std::ops::Range;
 
 #[macro_use]
+#[cfg(test)]
 macro_rules! dummy {
     () => { LineInfo {range: 0..0}}
 }

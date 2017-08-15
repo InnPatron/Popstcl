@@ -16,16 +16,15 @@ pub fn eval_program<'a>(stack: &mut Stack, program: &Program) -> Result<Option<R
 }
 
 pub fn eval_stmt<'a, 'b, 'c:'a>(stack: &'a mut Stack<'c>, stmt: &'b Statement) -> Result<ExecSignal, ExecErr> {
-    let cmd = stmt.all();
     let reduced_cmd = {
-        let mut reducer = Reducer::new(stmt, stack, stmt);
+        let reducer = Reducer::new(stmt, stack, stmt);
         match reducer.reduce()? {
             ReduceResult::Return(value) => return Ok(ExecSignal::Return(value)),
             ReduceResult::Continue(vec) => vec,
         }
     };
 
-    let mut executor = Executor::new(stmt, stack, reduced_cmd);
+    let executor = Executor::new(stmt, stack, reduced_cmd);
     executor.run()
 }
 
@@ -154,9 +153,15 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
 
         for word in self.to_reduce.words.iter() {
             match word.kind {
-                WordKind::StrSub(ref string) => {
-                    let input = str_sub(self.stack, string, &word.line_info, common.clone())?;
-                    reduction.push(input);
+                WordKind::StrSub(ref sub) => {
+                    let str_subber = StrSubber::new(self.root_stmt,
+                                                        self.stack,
+                                                        self.to_reduce,
+                                                        sub,
+                                                        word.line_info.clone(),
+                                                        );
+                    let sub_result = str_subber.str_sub()?;
+                    reduction.push(sub_result);
                 }
 
                 WordKind::CmdSub(ref cmd) => {
@@ -164,7 +169,7 @@ impl<'a, 'b, 'c, 'd:'c> Reducer<'a, 'b, 'c, 'd> {
                     let arg_dinfo;
 
                     let reduced_cmd = {
-                        let mut reducer = Reducer::new(self.root_stmt, self.stack, cmd);
+                        let reducer = Reducer::new(self.root_stmt, self.stack, cmd);
 
                         match reducer.reduce()? {
                             signal @ ReduceResult::Return(_) => return Ok(signal),
@@ -404,44 +409,69 @@ impl<'a, 'b, 'c, 'd:'b, 'e> InfoGenerator for VarSubber<'a, 'b, 'c ,'d, 'e> {
     }
 }
 
-fn str_sub(stack: &mut Stack, sub: &StrSub, line_info: &LineInfo, common: CommonInfo) -> Result<CIR, ExecErr> {
-    let mut result = String::new();
-    for data in sub.0.iter() {
-        match data {
-            &StrData::String(ref s) => result.push_str(s),
-            &StrData::VarSub(ref name, ref namespace, _) => {
-                let module = match namespace {
-                    &Namespace::Local => stack.get_local_module()
-                        .ok_or(ExecErr::VarSubErr(
-                                VarSubErr::NoLocalModule,
-                                unimplemented!()
-                                )
-                            )?,
-                    &Namespace::Module => stack.get_module(),
-                    &Namespace::Args => unimplemented!(),
-                };
-                let value = module.get(name)
-                                  .map_err(|oerr| ExecErr::ObjectErr(oerr, unimplemented!()))?;
-                let borrow = value.borrow();
-                match *borrow {
-                    Value::Number(ref num) => result.push_str(&num.to_string()),
-                    Value::String(ref s) => result.push_str(&s.inner()),
-                    Value::Bool(ref b) => result.push_str(&b.to_string()),
-                    Value::Cmd(_) => result.push_str(name),
-                    Value::List(_) => unimplemented!(),
-                    Value::Object(ref obj) => result.push_str(&obj.to_string()),
-                    Value::Module(_) => unimplemented!(),
-                }
-            }
-            &StrData::CmdSub => unimplemented!(),
-        }
-    }
-    Ok(CIR::new(result.into(), dstr_sub!(line_info.clone(), 
-                                         common)
-                )
-       )
+pub struct StrSubber<'a, 'b, 'c, 'd:'b, 'e> {
+    root_stmt: &'a Statement,
+    stack: &'b mut Stack<'d>,
+    cur_stmt: &'e Statement,
+    str_sub: &'c StrSub,
+    sub_span: LineInfo,
 }
 
+impl<'a, 'b, 'c, 'd:'b, 'e> StrSubber<'a, 'b, 'c ,'d, 'e> {
+    fn new(root_stmt: &'a Statement, stack: &'b mut Stack<'d>, cur_stmt: &'e Statement, to_reduce: &'c StrSub, sub_span: LineInfo) -> StrSubber<'a, 'b, 'c, 'd, 'e> {
+        StrSubber  {
+            root_stmt: root_stmt,
+            stack: stack,
+            cur_stmt: cur_stmt,
+            str_sub: to_reduce,
+            sub_span: sub_span
+        }
+    }
+
+    fn str_sub(self) -> Result<CIR, ExecErr> {
+        let mut result = String::new();
+
+        for data in self.str_sub.0.iter() {
+            match data {
+                &StrData::String(ref s) => result.push_str(s),
+                &StrData::VarSub(ref path, ref namespace) => {
+                    let mut var_subber = VarSubber::new(self.root_stmt,
+                                                        self.stack,
+                                                        self.cur_stmt,
+                                                        path,
+                                                        namespace.clone());
+                    let sub_result = var_subber.var_sub()?;
+                    
+                    let borrow = sub_result.value.borrow();
+                    match *borrow {
+                        Value::Number(ref num) => result.push_str(&num.to_string()),
+                        Value::String(ref s) => result.push_str(&s.inner()),
+                        Value::Bool(ref b) => result.push_str(&b.to_string()),
+                        Value::Cmd(_) => result.push_str(&path.to_string()),
+                        Value::List(_) => unimplemented!(),
+                        Value::Object(ref obj) => result.push_str(&obj.to_string()),
+                        Value::Module(_) => unimplemented!(),
+                    }
+                }
+                &StrData::CmdSub => unimplemented!(),
+            }
+        }
+        Ok(CIR::new(result.into(), dstr_sub!(self.sub_span.clone(), 
+                                             self.info())
+                    )
+           )
+    }
+}
+
+impl<'a, 'b, 'c, 'd:'b, 'e> InfoGenerator for StrSubber<'a, 'b, 'c ,'d, 'e> {
+    fn info(&self) -> CommonInfo {
+        CommonInfo {
+            root_stmt_span: self.root_stmt.line_info.clone(),
+            cmd_span: self.cur_stmt.line_info.clone(),
+            original_string: self.root_stmt.original_string.clone(),
+        }
+    }
+}
 
 pub fn try_from_word(word: &Word, common: CommonInfo) -> Option<CIR> {
     match &word.kind {
